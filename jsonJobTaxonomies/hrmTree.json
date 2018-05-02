@@ -1,0 +1,666 @@
+{
+  "1___LEGISLATORS SENIOR OFFICIALS AND MANAGERS": {
+    "11___Legislators and senior officials": {
+      "114___Senior officials of specialinterest organisations": {
+        "1142___Senior officials of employers workers and other economicinterest organisations": [],
+        "1143___Senior officials of humanitarian and other specialinterest organisations": [],
+        "1141___Senior officials of political party organisations": []
+      },
+      "111___Legislators and senior government officials": {
+        "1110___Legislators and senior government officials": []
+      }
+    },
+    "12___Corporate managers": {
+      "121___Directors and chief executives": {
+        "1210___Directors and chief executives": []
+      },
+      "122___Production and operations managers": {
+        "1225___Production and operations managers in restaurants and hotels": [],
+        "1224___Production and operations managers in wholesale and retail trade": [],
+        "1221___Production and operations managers in agriculture hunting forestry and fishing": [],
+        "1228___Production and operations managers in personal care cleaning and related services": [],
+        "1222___Production and operations managers in manufacturing": [],
+        "1227___Production and operations managers in business services enterprises": [],
+        "1229___Production and operations managers not elsewhere classified": [],
+        "1223___Production and operations managers in construction": [],
+        "1226___Production and operations managers in transport storage and communications": []
+      },
+      "123___Other specialist managers": {
+        "1236___Computing services managers": [],
+        "1235___Supply and distribution managers": [],
+        "1233___Sales and marketing managers": [],
+        "1232___Personnel and industrial relations managers": [],
+        "1234___Advertising and public relations managers": [],
+        "1237___Research and development managers": [],
+        "1239___Other specialist managers not elsewhere classified": [],
+        "1231___Finance and administration managers": []
+      }
+    },
+    "13___Managers of small enterprises": {
+      "131___Managers of small enterprises": {
+        "1315___Managers of small enterprises of restaurants and hotels": [],
+        "1311___Managers of small enterprises in agriculture hunting": [],
+        "1312___Managers of small enterprises in manufacturing": [],
+        "1313___Managers of small enterprises in construction": [],
+        "1317___Managers of small enterprises in business services enterprises": [],
+        "1318___Managers of small enterprises in personal care cleaning and related services": [],
+        "1316___Managers of small enterprises in transport storage and communications": [],
+        "1319___Managers of small enterprises not elsewhere classifie": [],
+        "1314___Managers of small enterprises in wholesale and retail trade": []
+      }
+    }
+  },
+  "5___SERVICE WORKERS AND SHOP AND MARKET SALES WORKERS": {
+    "52___Models salespersons and demonstrators": {
+      "521___Fashion and other models": {
+        "5210___Fashion and other models": []
+      },
+      "522___Shop stall and market salespersons and demonstrators": {
+        "5220___Shop stall and market salespersons and demonstrators": []
+      }
+    },
+    "51___Personal and protective services workers": {
+      "516___Protective services workers": {
+        "5162___Police officers": [],
+        "5163___Prison guards": [],
+        "5161___Firefighters": [],
+        "5169___Protective services workers not elsewhere classified": []
+      },
+      "513___Personal care and related workers": {
+        "5139___Personal care and related workers not elsewhere classified": [],
+        "5131___Childcare workers": [],
+        "5132___Institutionbased personal care workers": [],
+        "5133___Homebased personal care workers": []
+      },
+      "512___Housekeeping and restaurant services workers": {
+        "5122___Cooks": [],
+        "5123___Waiters waitresses and bartenders": [],
+        "5121___Housekeepers and related workers": []
+      },
+      "511___Travel attendants and related workers": {
+        "5111___Travel attendants and travel stewards": [],
+        "5113___Travel guides": [],
+        "5112___Transport conductors": []
+      },
+      "514___Other personal services workers": {
+        "5149___Other personal services workers not elsewhere classified": [],
+        "5143___Undertakers and embalmers": [],
+        "5142___Companions and valets": [],
+        "5141___Hairdressers barbers beauticians and related workers": []
+      }
+    }
+  },
+  "9___ELEMENTARY OCCUPATIONS": {
+    "92___Agricultural fishery and related labourers": {
+      "921___Agricultural fishery and related labourers": {
+        "9212___Forestry labourers": [],
+        "9211___Farmhands and labourers": [],
+        "9213___Fishery hunting and trapping labourers": []
+      }
+    },
+    "93___Labourers in mining construction manufacturing and transport": {
+      "931___Mining and construction labourers": {
+        "9311___Mining and quarrying labourers": [],
+        "9313___Building construction labourers": [],
+        "9312___Construction and maintenance labourers roads dams and similar constructions": []
+      },
+      "932___Manufacturing labourers": {
+        "9320___Manufacturing labourers": []
+      },
+      "933___Transport labourers and freight handlers": {
+        "9330___Transport labourers and freight handlers": []
+      }
+    },
+    "91___Sales and services elementary occupations": {
+      "912___Shoe cleaning and other street services elementary occupations": {
+        "9120___Shoe cleaning and other street services elementary occupations": []
+      },
+      "913___Domestic and related helpers cleaners and launderers": {
+        "9131___Domestic helpers and cleaners": [],
+        "9133___Handlaunderers and pressers": [],
+        "9132___Helpers and cleaners in offices hotels and other establishments": []
+      },
+      "911___Street vendors and related workers": {
+        "9111___Street vendors": [],
+        "9113___Doortodoor and telephone salespersons": []
+      },
+      "915___Messengers porters doorkeepers and related workers": {
+        "9152___Doorkeepers watchpersons and related workers": [],
+        "9151___Messengers package and luggage porters and deliverers": [],
+        "9153___Vendingmachine money collectors meter readers and related workers": []
+      },
+      "916___Garbage collectors and related labourers": {
+        "9161___Garbage collectors": [],
+        "9162___Sweepers and related labourers": []
+      },
+      "914___Building caretakers window and related cleaners": {
+        "9142___Vehicle window and related cleaners": [],
+        "9141___Building caretakers": []
+      }
+    }
+  },
+  "7___CRAFT AND RELATED TRADES WORKERS": {
+    "72___Metal machinery and related trades workers": {
+      "722___Blacksmiths toolmakers and related trades workers": {
+        "7223___Machinetool setters and setteroperators": [],
+        "7224___Metal wheelgrinders polishers and tool sharpeners": [],
+        "7221___Blacksmiths hammersmiths and forgingpress workers": [],
+        "7222___Toolmakers and related workers": []
+      },
+      "724___Electrical and electronic equipment mechanics and fitters": {
+        " 7245___Electrical line installers repairers and cable jointers": [],
+        "7241___Electrical mechanics fitters and services": [],
+        "7242___Electronics mechanics fitters and servicers": [],
+        "7244___Telegraph and telephone installers and servicers": []
+      },
+      "721___Metal moulders welders sheetmetal workers structuralmetal preparers and related trades workers": {
+        "7214___Structuralmetal preparers and erectors": [],
+        "7216___Underwater workers": [],
+        "7212___Welders and flame cutters": [],
+        "7211___Metal moulders and coremakers": [],
+        "7213___Sheetmetal workers": [],
+        "7215___Riggers and cable splicers": []
+      },
+      "723___Machinery mechanics and fitters": {
+        "7232___Aircraft engine mechanics and fitters": [],
+        "7233___Agricultural or industrialmachinery mechanics and fitters": [],
+        "7231___Motor vehicle mechanics and fitters": []
+      }
+    },
+    "73___Precision handicraft craft printing and related trades workers": {
+      "732___Potters glassmakers and related trades workers": {
+        "7323___Glass engravers and etchers": [],
+        "7324___Glass ceramics and related decorative painters": [],
+        "7322___Glassmakers cutters grinders and finishers": [],
+        "7321___Abrasive wheel formers potters and related workers": []
+      },
+      "734___Craft printing and related trades workers": {
+        "7346___Silkscreen block and craft textile printers": [],
+        "7345___Bookbinders and related workers": [],
+        "7341___Compositors typesetters and related workers": [],
+        "7343___Printing engravers and etchers": [],
+        "7344___Photographic and related workers": [],
+        "7342___Stereotypers and electrotypers": []
+      },
+      "731___Precision workers in metal and related materials": {
+        "7312___Musicalinstrument makers and tuners": [],
+        "7313___Jewellery and preciousmetal workers": [],
+        "7311___Precisioninstrument makers and repairers": []
+      },
+      "733___Handicraft workers in wood textile leather and related materials": {
+        "7331___Handicraft workers in wood and related materials": [],
+        "7332___Handicraft workers in textile leather and related materials": []
+      }
+    },
+    "71___Extraction and building trades workers": {
+      "712___Building frame and related trades workers": {
+        "7129___Building frame and related trades workers not elsewhere classified": [],
+        "7124___Carpenters and joiners": [],
+        "7121___Builders": [],
+        "7122___Bricklayers and stonemasons": [],
+        "7123___Concrete placers concrete finishers and related workers": []
+      },
+      "713___Building finishers and related trades workers": {
+        "7137___Building and related electricians": [],
+        "7131___Roofers": [],
+        "7139___Building finishers and related trade workers not elsewhere classified": [],
+        "7132___Floor layers and tile setters": [],
+        "7136___Plumbers and pipe fitters": [],
+        "7133___Plasterers": [],
+        "7134___Insulation workers": [],
+        "7135___Glaziers": []
+      },
+      "711___Miners shotfirers stone cutters and carvers": {
+        "7113___Stone splitters cutters and carvers": [],
+        "7112___Shotfirers and blasters": [],
+        "7111___Miners and quarry workers": []
+      },
+      "714___Painters building structure cleaners and related trades workers": {
+        "7143___Building structure cleaners": [],
+        "7141___Painters and related workers": []
+      }
+    },
+    "74___Other craft and related trades workers": {
+      "743___Textile garment and related trades workers": {
+        "7436___Sewers embroiderers and related workers": [],
+        "7431___Fibre preparers": [],
+        "7433___Tailors dressmakers and hatters": [],
+        "7434___Furriers and related workers": [],
+        "7432___Weavers knitters and related workers": [],
+        "7437___Upholsterers and related workers": [],
+        "7435___Textile leather and related patternmakers and cutters": []
+      },
+      "744___Pelt leather and shoemaking trades workers": {
+        "7442___Shoemakers and related workers": [],
+        "7441___Pelt dressers tanners and fellmongers": []
+      },
+      "741___Food processing and related trades workers": {
+        "7416___Tobacco preparers and tobacco products makers": [],
+        "7412___Bakers pastrycooks and confectionery makers": [],
+        "7415___Food and beverage tasters and graders": [],
+        "7414___Fruit vegetable and related preservers": [],
+        "7411___Butchers fishmongers and related food preparers": [],
+        "7413___Dairyproducts workers": []
+      },
+      "742___Wood treaters cabinetmakers and related trades workers": {
+        "7423___Woodworking machine setters and setteroperators": [],
+        "7421___Wood treaters": [],
+        "7424___Basketry weavers brush makers and related workers": [],
+        "7422___Cabinetmakers and related workers": []
+      }
+    }
+  },
+  "3___TECHNICIANS AND ASSOCIATE PROFESSIONALS": {
+    "31___Physical and engineering science associate professionals": {
+      "312___Computer associate professionals": {
+        "3123___Industrial robot controllers": [],
+        "3121___Computer assistants": [],
+        "3122___Computer equipment operators": []
+      },
+      "313___Optical and electronic equipment operators": {
+        "3133___Medical equipment operators": [],
+        "3139___Optical and electronic equipment operators not elsewhere classified": [],
+        "3132___Broadcasting and telecommunications equipment operators": [],
+        "3131___Photographers and image and sound recording equipment operators": []
+      },
+      "311___Physical and engineering science technicians": {
+        "3117___Mining and metallurgical technicians": [],
+        "3116___Chemical engineering technicians": [],
+        "3114___Electronics and telecommunications engineering technicians": [],
+        "3118___Draughtspersons": [],
+        "3115___Mechanical engineering technicians": [],
+        "3112___Civil engineering technicians": [],
+        "3113___Electrical engineering technicians": [],
+        "3111___Chemical and physical science technicians": [],
+        "3119___Physical and engineering science technicians not elsewhere classified": []
+      },
+      "314___Ship and aircraft controllers and technicians": {
+        "3144___Air traffic controllers": [],
+        "3141___Ships engineers": [],
+        "3145___Air traffic safety technicians": [],
+        "3143___Aircraft pilots and related associate professionals": [],
+        "3142___Ships deck officers and pilots": []
+      },
+      "315___Safety and quality inspectors": {
+        "3152___Safety health and quality inspectors": [],
+        "3151___Building and fire inspectors": []
+      }
+    },
+    "34___Other associate professionals": {
+      "343___Administrative associate professionals": {
+        "3432___Legal and related business associate professionals": [],
+        "3433___Bookkeepers": [],
+        "3431___Administrative secretaries and related associate professionals": [],
+        "3434___Statistical mathematical and related associate professionals": []
+      },
+      "344___Customs tax and related government associate professionals": {
+        "3441___Customs and border inspectors": [],
+        "3449___Customs tax and related government associate professionals not elsewhere classified": [],
+        "3444___Government licensing officials": [],
+        "3443___Government social benefits officials": [],
+        "3442___Government tax and excise officials": []
+      },
+      "342___Business services agents and trade brokers": {
+        "3422___Clearing and forwarding agents": [],
+        "3421___Trade brokers": [],
+        "3429___Business services agents and trade brokers not elsewhere classified": [],
+        "3423___Employment agents and labour contractors": []
+      },
+      "341___Finance and sales associate professionals": {
+        "3417___Appraisers valuers and auctioneers": [],
+        "3415___Technical and commercial sales representatives": [],
+        "3419___Finance and sales associate professionals not elsewhere classified": [],
+        "3414___Travel consultants and organisers": [],
+        "3416___Buyers": [],
+        "3413___Estate agents": [],
+        "3412___Insurance representatives": [],
+        "3411___Securities and finance dealers and brokers": []
+      },
+      "347___Artistic entertainment and sports associate professionals": {
+        "3474___Clowns magicians acrobats and related associate professionals": [],
+        "3475___Athletes sports persons and related associate professionals": [],
+        "3471___Decorators and commercial designers": [],
+        "3473___Street nightclub and related musicians singers and dancers": [],
+        "3472___Radio television and other announcers": []
+      },
+      "348___Religious associate professionals": {
+        "3480___Religious associate professionals": []
+      },
+      "345___Police inspectors and detectives": {
+        "3450___Police inspectors and detectives": []
+      },
+      "346___Social work associate professionals": {
+        "3460___Social work associate professionals": []
+      }
+    },
+    "32___Life science and health associate professionals": {
+      " 322___Health associate professionals": {
+        "3228___Pharmaceutical assistants": [],
+        "3226___Physiotherapists and related associate professionals": [],
+        "3225___Dental assistants": [],
+        "3229___Health associate professionals": [],
+        "3227___Veterinary assistants": [],
+        "3222___Hygienists health and environmental officers": [],
+        "3221___Medical assistants": [],
+        "3224___Optometrists and opticians": [],
+        "3223___Dieticians and nutritionists": []
+      },
+      "323___Nursing and midwifery associate professionals": {
+        "3231___Nursing associate professionals": [],
+        "3232___Midwifery associate professionals": []
+      },
+      "321___Life science technicians and related associate professional": {
+        "3211___Life science technicians": [],
+        "3213___Farming and forestry advisers": [],
+        "3212___Agronomy and forestry technicians": []
+      }
+    },
+    "33___Teaching associate professionals": {
+      "332___Preprimary education teaching associate professionals": {
+        "3320___Preprimary education teaching associate professionals": []
+      },
+      "331___Primary education teaching associate professionals": {
+        "3310___Primary education teaching associate professionals": []
+      },
+      "333___Special education teaching associate professionals": {
+        "3330___Special education teaching associate professionals": []
+      },
+      "334___Other teaching associate professionals": {
+        "3340___Other teaching associate professionals": []
+      }
+    }
+  },
+  "6___SKILLED AGRICULTURAL AND FISHERY WORKERS": {
+    "61___Skilled agricultural and fishery workers": {
+      "612___Animal producers and related workers": {
+        "6122___Poultry producers": [],
+        "6121___Dairy and livestock producers": [],
+        "6129___Animal producers and related workers not elsewhere classified": []
+      },
+      "613___Crop and animal producers": {
+        "6130___Crop and animal producers": []
+      },
+      "611___Market gardeners and crop growers": {
+        "6112___Gardeners horticultural and nursery growers": [],
+        "6111___Field crop and vegetable growers": []
+      },
+      "615___Fishery workers hunters and trappers": {
+        "6152___Inland and coastal waters fishery workers": [],
+        "6153___Deepsea fishery workers": [],
+        "6154___Hunters and trappers": [],
+        "6151___Aquatic life cultivation workers": []
+      },
+      "614___Forestry and related workers": {
+        "6141___Forestry workers and loggers": [],
+        "6142___Charcoal burners and related workers": []
+      }
+    }
+  },
+  "2___PROFESSIONALS": {
+    "23___Teaching professionals": {
+      "233___Primary and preprimary education teaching professionals": {
+        "2331___Primary education teaching professionals": [],
+        "2332___Preprimary education teaching professionals": []
+      },
+      "234___Special education teaching professionals": {
+        "2340___Special education teaching professionals": []
+      },
+      "231___College university and higher education teaching professionals": {
+        "2310___College university and higher education teaching professionals": []
+      },
+      "235___Other teaching professionals": {
+        "2359___Other teaching professionals not elsewhere classified": [],
+        "2351___Education methods specialists": [],
+        "2352___School inspectors": []
+      },
+      "232___Secondary education teaching professionals": {
+        "2320___Secondary education teaching professionals": []
+      }
+    },
+    "22___Life science and health professionals": {
+      " 222___Health professionals": {
+        "2223___Veterinarians": [],
+        "2222___Dentists": [],
+        "2229___Health professionals": [],
+        "2224___Pharmacists": [],
+        "2221___Medical doctors": []
+      },
+      "221___Life science professionals": {
+        "2212___Pharmacologists pathologists and related professionals": [],
+        "2213___Agronomists and related professionals": [],
+        " 2211___Biologists botanists zoologists and related professionals": []
+      },
+      "223___Nursing and midwifery professionals": {
+        " 2230___Nursing and midwifery professionals": []
+      }
+    },
+    "21___Physical mathematical and engineering science professionals": {
+      "212___Mathematicians statisticians and related professionals": {
+        "2121___Mathematicians and related professionals": [],
+        "2122___Statisticians": []
+      },
+      "214___Architects engineers and related professionals": {
+        "2148___Cartographers and surveyors": [],
+        "2146___Chemical engineers": [],
+        "2145___Mechanical engineers": [],
+        "2142___Civil engineers": [],
+        "2143___Electrical engineers": [],
+        "2144___Electronics and telecommunications engineers": [],
+        "2141___Architects town and traffic planners": [],
+        "2147___Mining engineers metallurgists and related professionals": [],
+        "2149___Architects engineers and related professionals not elsewhere classified": []
+      },
+      "211___Physicists chemists and related professionals": {
+        "2112___Meteorologists": [],
+        "2113___Chemists": [],
+        "2111___Physicists and astronomers": [],
+        "2114___Geologists and geophysicists": []
+      }
+    },
+    "24___Other professionals": {
+      "244___Social science and related professionals": {
+        "2446___Social work professionals": [],
+        "2443___Philosophers historians and political scientists": [],
+        "2444___Philologists translators and interpreters": [],
+        "2445___Psychologists": [],
+        "2441___Economists": [],
+        "2442___Sociologists anthropologists and related professionals": []
+      },
+      "242___Legal professionals": {
+        "2422___Judges": [],
+        "2421___Lawyers": [],
+        "2429___Legal professionals not elswhere classified": []
+      },
+      "243___Archivists librarians and related information professionals": {
+        "2431___Archivists and curators": [],
+        "2432___Librarians and related information professionals": []
+      },
+      "246___Religious professionals": {
+        "2460___Religious professionals": []
+      },
+      "245___Writers and creative or performing artists": {
+        "2455___Film stage and related actors and directors": [],
+        "2451___Authors journalists and other writers": [],
+        "2454___Choreographers and dancers": [],
+        "2453___Composers musicians and singers": [],
+        "2452___Sculptors painters and related artists": []
+      },
+      "241___Business professionals": {
+        "2411___Accountants": [],
+        "2419___Business professionals not elsewhere classified": [],
+        "2412___Personnel and careers professionals": []
+      },
+      "247___Public service administrative professionals": {
+        "2470___Public service administrative professionals": []
+      }
+    }
+  },
+  "0___ARMED FORCES": {
+    "01___Armed forces": {
+      "010___Armed forces": {
+        "0100___Armed forces": []
+      }
+    }
+  },
+  "4___CLERKS": {
+    "42___Customer services clerks": {
+      "421___Cashiers tellers and related clerks": {
+        "4215___Debtcollectors and related workers": [],
+        "4213___Bookmakers and croupiers": [],
+        "4211___Cashiers and ticket clerks": [],
+        "4212___Tellers and other counter clerks": [],
+        "4214___Pawnbrokers and moneylenders": []
+      },
+      "422___Client information clerks": {
+        "4222___Receptionists and information clerks": [],
+        "4221___Travel agency and related clerks": [],
+        "4223___Telephone switchboard operators": []
+      }
+    },
+    "41___Office clerks": {
+      "414___Library mail and related clerks": {
+        "4144___Scribes and related workers": [],
+        "4142___Mail carriers and sorting clerks": [],
+        "4143___Coding proofreading and related clerks": [],
+        "4141___Library and filing clerks": []
+      },
+      "413___Materialrecording and transport clerks": {
+        "4132___Production clerks": [],
+        "4133___Transport clerks": [],
+        "4131___Stock clerks": []
+      },
+      "412___Numerical clerks": {
+        "4122___Statistical and finance clerks": [],
+        "4121___Accounting and bookkeeping clerks": []
+      },
+      "411___Secretaries and keyboardoperating clerks": {
+        "4115___Secretaries": [],
+        "4111___Stenographers and typists": [],
+        "4113___Data entry operators": [],
+        "4112___Wordprocessor and related operators": [],
+        "4114___Calculatingmachine operators": []
+      },
+      "419___Other office clerks": {
+        "4190___Other office clerks": []
+      }
+    }
+  },
+  "8___PLANT AND MACHINE OPERATORS AND ASSEMBLERS": {
+    "82___Machine operators and assemblers": {
+      "824___Woodproducts machine operators": {
+        "8240___Woodproducts machine operators": []
+      },
+      "829___Other machine operators not elsewhere classified": {
+        "8290___Other machine operators not elsewhere classified": []
+      },
+      "823___Rubber and plasticproducts machine operators": {
+        "8232___Plasticproducts machine operators": [],
+        "8231___Rubberproducts machine operators": []
+      },
+      "825___Printing binding and paperproducts machine operators": {
+        "8252___Bookbindingmachine operators": [],
+        "8251___Printingmachine operators": [],
+        "8253___Paperproducts machine operators": []
+      },
+      "827___Food and related products machine operators": {
+        "8276___Sugar production machine operators": [],
+        "8277___Tea coffee and cocoaprocessingmachine operators": [],
+        "8278___Brewers wine and other beverage machine operators": [],
+        "8272___Dairyproducts machine operators": [],
+        "8273___Grain and spicemillingmachine operators": [],
+        "8274___Bakedgoods cereal and chocolateproducts machine operators": [],
+        "8279___Tobacco production machine operators": [],
+        "8275___Fruit vegetable and nutprocessingmachine operators": [],
+        "8271___Meat and fishprocessingmachine operators": []
+      },
+      "822___Chemicalproducts machine operators": {
+        "8229___Chemicalproducts machine operators not elsewhere classified": [],
+        "8224___Photographicproducts machine operators": [],
+        "8222___Ammunition and explosiveproducts machine operators": [],
+        "8223___Metal finishing plating and coatingmachine operators": [],
+        "8221___Pharmaceuticaland toiletryproducts machine operators": []
+      },
+      "828___Assemblers": {
+        "8283___Electronicequipment assemblers": [],
+        "8281___Mechanicalmachinery assemblers": [],
+        "8282___Electricalequipment assemblers": [],
+        "8286___Paperboard textile and related products assemblers": [],
+        "8287___Composite products assemblers": [],
+        "8285___Wood and related products assemblers": [],
+        "8284___Metal rubber and plasticproducts assemblers": []
+      },
+      "826___Textile fur and leatherproducts machine operators": {
+        "8263___Sewingmachine operators": [],
+        "8262___Weaving and knittingmachine operators": [],
+        "8264___Bleaching dyeing and cleaningmachine operators": [],
+        "8266___Shoemaking and related machine operators": [],
+        "8261___Fibrepreparing spinning and windingmachine operators": [],
+        "8265___Fur and leatherpreparingmachine operators": [],
+        "8269___Textile fur and leatherproducts machine operators not elsewhere classified": []
+      },
+      "821___Metal and mineralproducts machine operators": {
+        "8212___Cement and other mineral products machine operators": [],
+        "8211___Machinetool operators": []
+      }
+    },
+    "81___Stationary plant and related operators": {
+      "815___Chemicalprocessingplant operators": {
+        " 8154___Chemicalstill and reactor operators": [],
+        "8155___Petroleum and naturalgasrefiningplant operators": [],
+        "8152___Chemicalheattreatingplant operators": [],
+        "8153___Chemicalfiltering and separatingequipment operators": [],
+        "8159___Chemicalprocessingplant operators not elsewhere classified": [],
+        "8151___Crushing grinding and chemicalmixingmachinery operators": []
+      },
+      "817___Industrial robot operators": {
+        "8170___Industrial robot operators": []
+      },
+      "812___Metalprocessing plant operators": {
+        "8124___Metal drawers and extruders": [],
+        "8123___Metal heattreatingplant operators": [],
+        "8121___Ore and metal furnace operators": [],
+        "8122___Metal melters casters and rollingmill operators": []
+      },
+      "813___Glass ceramics and related plant operators": {
+        "8131___Glass and ceramics kiln and related machine operators": [],
+        "8139___Glass ceramics and related plant operators not elsewhere classified": []
+      },
+      "816___Powerproduction and related plant operators": {
+        "8163___Incinerator watertreatment and related plant operators": [],
+        "8162___Steamengine and boiler operators": [],
+        "8161___Powerproduction plant operators": []
+      },
+      "814___Woodprocessing and papermakingplant operators": {
+        "8143___Papermakingplant operators": [],
+        "8142___Paperpulp plant operators": [],
+        "8141___Woodprocessingplant operators": []
+      },
+      "811___Mining and mineralprocessingplant operators": {
+        "8111___Mining plant operators": [],
+        "8112___Mineralore and stoneprocessingplant operators": [],
+        "8113___Well drillers and borers and related workers": []
+      }
+    },
+    "83___Drivers and mobile plant operators": {
+      "833___Agricultural and other mobile plant operators": {
+        "8333___Crane hoist and related plant operators": [],
+        "8334___Liftingtruck operators": [],
+        "8332___Earthmoving and related plant operators": [],
+        "8331___Motorised farm and forestry plant operators": []
+      },
+      "831___Locomotive engine drivers and related workers": {
+        "8312___Railway brakers signallers and shunters": [],
+        "8311___Locomotive engine drivers": []
+      },
+      "834___Ships deck crews and related workers": {
+        "8340___Ships deck crews and related workers": []
+      },
+      "832___Motor vehicle drivers": {
+        "8322___Car taxi and van drivers": [],
+        "8323___Bus and tram drivers": [],
+        "8324___Heavy truck and lorry drivers": [],
+        "8321___Motorcycle drivers": []
+      }
+    }
+  }
+}
