@@ -9,6 +9,25 @@
 
 
 ##################################################################################
+#STRING STATS
+##################################################################################
+
+def tokenDistribution(listOfStrings):
+	import utilsString
+	distribDict = {}
+	base = [0, []]	
+	for line in listOfStrings:
+		line = line.lower()
+		tokens = utilsString.naiveRegexTokenizer(line, caseSensitive=False, eliminateEnStopwords=True)
+		value = distribDict.get(len(tokens), list(base))
+		if line not in value[1]:
+			value[0] += 1
+			value[1].append(line)
+			distribDict[len(tokens)] = value
+	return distribDict
+
+
+##################################################################################
 #DIAGRAMS
 ##################################################################################
 

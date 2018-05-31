@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 
 
-import os, codecs, gzip
+import os, json, codecs, gzip
 
 ##################################################################################
 #FOLDERS
@@ -61,7 +61,7 @@ def getIntersectionOf2Folders(aFolder, bFolder):
 #FILES
 ##################################################################################
 
-def createEmptyFile(filePath):
+def createEmptyFile(filePath, headerLine=None):
 	'''
 	we dump an empty string to make sure the file is empty
 	and we return the handle to the ready to append file
@@ -70,6 +70,9 @@ def createEmptyFile(filePath):
 	openFile.write(u'')
 	openFile.close()
 	openFile = codecs.open(filePath, 'a', encoding='utf8')
+	#if needed we add a header
+	if headerLine != None:
+		openFile.write(u'{0}\n'.format(headerLine))
 	return openFile
 
 
@@ -82,7 +85,6 @@ def getLastLineIndexOfExistingFile(filePath):
 		return None
 	with codecs.open(filePath, 'r', encoding='utf8') as openedFile:
 		return len(openedFile.readlines()) - 1 #we count starting with 0
-
 
 
 def theFileExists(directoryPath, nameOfFile=None, fileExtension=None):
@@ -150,6 +152,22 @@ def openJsonFileAsDict(pathToFile):
 		return json.load(openedFile)
 
 
+def convertJsonLineToDict(jsonFileStringLine):
+	'''
+	Given a line (string) from a json file as argument,
+	we try to return a dict corresponding to said line,
+	otherwise, we return None.
+	Useful if the json file has one json dict per line
+	and we must read line by lane and transform each one
+	'''
+	try:
+		jsonLine = json.loads(jsonFileStringLine)
+		#we dump each job title
+		return jsonLine
+	except ValueError:
+		return None
+
+
 def dumpRawLines(listOfRawLines, filePath, addNewline=True, rewrite=True): 
 	'''
 	Dumps a list of raw lines in a a file 
@@ -171,7 +189,7 @@ def dumpRawLines(listOfRawLines, filePath, addNewline=True, rewrite=True):
 		else:
 			openedFile.write(u'%s' %(line))
 	openedFile.close()
-	return None
+	return
 
 
 def dumpDictToJsonFile(aDict, pathOutputFile='./dump.json'):
@@ -182,10 +200,9 @@ def dumpDictToJsonFile(aDict, pathOutputFile='./dump.json'):
 	#to avoid overwriting the name may change
 	pathOutputFile = safeFilePath(pathOutputFile)
 	#dumping
-	dictFile = codecs.open(pathOutputFile, u'wb', encoding=u'utf8')
-	json.dump(aDict, dictFile)
-	dictFile.close()
-	return None
+	with codecs.open(pathOutputFile, u'wb', encoding=u'utf8') as dictFile:
+		json.dump(aDict, dictFile)
+	return 
 
 
 def deleteTheFile(directoryPath, nameOfFile, fileExtension):
@@ -229,6 +246,7 @@ def deleteTheFile(directoryPath, nameOfFile, fileExtension):
 	#we delete the files
 	for file in intersection:
 		os.remove(directoryPath + file)
+	return
 
 
 def deleteFileContent(pathToFile, openAnAppendFile=False):

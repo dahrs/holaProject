@@ -21,8 +21,6 @@ def toUtf8(stringOrUnicode):
 		return stringOrUnicode.decode(u'utf8')
 
 
-
-
 ##################################################################################
 #REGEX
 ##################################################################################
@@ -35,7 +33,7 @@ def findAcronyms(string):
 	acronyms = re.compile(r'((?<![A-Z])(([A-Z][\.][&]?){2,}|([A-Z][&]?){2,5})(?![a-z])(?=\b)+)')
 	'''
 	#we make the regex of acronyms, all uppercase tokens and plain tokens
-	acronyms = re.compile(r'((?<![A-Z])(([A-Z]([\.]|[&])?){2,4})(?![a-z])(?=(\b|\n))+)')
+	acronyms = re.compile(r'((?<![A-Z])(([A-Z]([\.]|[&])?){2,4})(?![a-z])(?=(\b|\n))+)') #2-4 uppercase characters that might be separated by . or & 
 	upperTokens = re.compile(r'(\b([A-Z0-9&-][\.]?)+\b)')
 	plainTokens = re.compile(r'(\b\w+\b)')
 	#if the whole sent is all in caps then we discard it
@@ -44,12 +42,22 @@ def findAcronyms(string):
 	return None
 
 
-def naiveRegexTokenizer(string):
+def naiveRegexTokenizer(string, caseSensitive=True, eliminateEnStopwords=False):
 	'''
 	returns the token list using a very naive regex tokenizer
 	'''
 	plainWords = re.compile(r'(\b\w+\b)', re.UNICODE)
-	return re.findall(plainWords, string)
+	tokens = re.findall(plainWords, string)
+	#if we don't want to be case sensitive
+	if caseSensitive != True:
+		tokens = [tok.lower() for tok in tokens]
+	#if we don't want the stopwords
+	if eliminateEnStopwords != False:
+		from nltk.corpus import stopwords		
+		#stopwords
+		to_remove = set(stopwords.words("english") + ['', ' ', '&'])
+		tokens = list(filter(lambda tok: tok not in to_remove, tokens))
+	return tokens 
 
 
 ##################################################################################
@@ -63,16 +71,28 @@ def englishOrFrench(string):
 	for char in diacriticals:
 		if char in string:
 			return u'fr'
-	#ngram detection
-	string = string.replace(u'\n', u' ').replace(u'\r', u'')
-	unkNgramDict = trigramDictMaker(string)
-	frenchScore = langDictComparison(unkNgramDict, utilsOs.openJsonFileAsDict(u'./utilsString/fr3gram.json'))
-	englishScore = langDictComparison(unkNgramDict, utilsOs.openJsonFileAsDict(u'./utilsString/en3gram.json'))
 	#token detection
 	unkTokendict = tokenDictMaker(string)
-	frenchScore += langDictComparison(unkTokendict, utilsOs.openJsonFileAsDict(u'./utilsString/frTok.json'))
-	englishScore += langDictComparison(unkTokendict, utilsOs.openJsonFileAsDict(u'./utilsString/enTok.json'))
-	if frenchScore < englishScore:
+	#ngram char detection
+	unkNgramDict = trigramDictMaker(string.replace(u'\n', u' ').replace(u'\r', u''))
+	#if the obtained dict is empty, unable to detect (probably just noise)
+	if len(unkTokendict) == 0 or len(unkNgramDict) == 0:
+		return 'unknown'
+	#token scores
+	frenchTokScore = langDictComparison(unkTokendict, utilsOs.openJsonFileAsDict(u'./utilsString/frTok.json'))
+	englishTokScore = langDictComparison(unkTokendict, utilsOs.openJsonFileAsDict(u'./utilsString/enTok.json'))
+	#ngram scores
+	frenchNgramScore = langDictComparison(unkNgramDict, utilsOs.openJsonFileAsDict(u'./utilsString/fr3gram.json'))
+	englishNgramScore = langDictComparison(unkNgramDict, utilsOs.openJsonFileAsDict(u'./utilsString/en3gram.json'))
+	#the smaller the string (in tokens), the more we want to prioritize the token score instead of the ngram score
+	if len(unkTokendict) < 5:
+		ratioNgram = float(len(unkTokendict))/10.0
+		frenchTokScore = frenchTokScore * (1.0-ratioNgram)
+		frenchNgramScore = frenchNgramScore * ratioNgram
+		englishTokScore = englishTokScore * (1.0-ratioNgram)
+		englishNgramScore = englishNgramScore * ratioNgram
+	#we compare the sum of the language scores
+	if (frenchTokScore+frenchNgramScore) < (englishTokScore+englishNgramScore):
 		return u'fr'
 	return u'en'
 
@@ -168,21 +188,11 @@ def tokenDictMakerFromFile(inputFilePath, outputFilePath=None):
 ##################################################################################
 
 def langDictComparison(dictUnk,dictLang):
-	'''compares 2 dictionnaries and returns the distance between its keys'''
+	'''
+	compares 2 dictionnaries and returns the distance between its keys
+	'''
 	distance=0
 	maxUnk = max(dictUnk.values())
 	for key in dictUnk:
 		distance+=abs((dictUnk[key]/maxUnk) - dictLang.get(key,0))
 	return distance
-
-
-##################################################################################
-#QUICK COMMANDS
-##################################################################################
-
-#trigramDictMakerFromFile(u'./utilsString/en.txt', u'./utilsString/en3gram.json')
-#trigramDictMakerFromFile(u'./utilsString/fr.txt', u'./utilsString/fr3gram.json')
-#quadrigramDictMakerFromFile(u'./utilsString/en.txt', u'./utilsString/en4gram.json')
-#quadrigramDictMakerFromFile(u'./utilsString/fr.txt', u'./utilsString/fr4gram.json')
-#tokenDictMakerFromFile(u'./utilsString/en.txt', u'./utilsString/enTok.json')
-#tokenDictMakerFromFile(u'./utilsString/fr.txt', u'./utilsString/frTok.json')
