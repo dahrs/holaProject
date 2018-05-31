@@ -1,0 +1,2 @@
+after producing the 'network' folder using the sigma.js plug-in in gephi
+replace the config.json file in network/config.json with this one
