@@ -3,6 +3,7 @@
 
 
 import os, json, codecs, gzip
+import utilsString
 
 ##################################################################################
 #FOLDERS
@@ -108,8 +109,15 @@ def theFileExists(directoryPath, nameOfFile=None, fileExtension=None):
 				splittedFileName = ['.'.join(splittedFileName[:len(splittedFileName)-1])]
 			#if the file exists
 			for nb in range(100):
-				if u'%s_%s' %(nameOfFile, unicode(nb)) == toUtf8(splittedFileName[0]) or u'%s_%s' %(noTroublesomeName(nameOfFile), unicode(nb)) == toUtf8(splittedFileName[0]):
+				#for python 2
+				try:
+					strNb = unicode(nb)
+				#for python 3
+				except NameError:
+					strNb = str(nb)
+				if u'%s_%s' %(nameOfFile, strNb) == utilsString.toUtf8(splittedFileName[0]) or u'%s_%s' %(noTroublesomeName(nameOfFile), strNb) == utilsString.toUtf8(splittedFileName[0]):
 					return True
+				
 		#if the file never appeared
 		return False
 	#exclusive extension
@@ -227,17 +235,22 @@ def deleteTheFile(directoryPath, nameOfFile, fileExtension):
 	fileNamesToBeDeleted.append(namePlusExt)
 	fileNamesToBeDeleted.append(noTroublesomeName(namePlusExt))
 	for nb in range(10):
-		fileNamesToBeDeleted.append(u'%s_%s.%s' %(nameOfFile, unicode(nb), fileExtension))
-		fileNamesToBeDeleted.append(u'%s_%s.%s' %(noTroublesomeName(nameOfFile), unicode(nb), fileExtension))
+		#for python 2
+		try:
+			strNb = unicode(nb)
+		#for python 3
+		except NameError:
+			strNb = str(nb)
+		fileNamesToBeDeleted.append(u'%s_%s.%s' %(nameOfFile, strNb, fileExtension))
+		fileNamesToBeDeleted.append(u'%s_%s.%s' %(noTroublesomeName(nameOfFile), strNb, fileExtension))
 
 	#we make a list of all extension-like 
 	try:
 		#we catch all corresponding names
-		if type(fileExtension) is unicode:	
-			filelist = [toUtf8(file) for file in os.listdir(directoryPath) if file.endswith(".%s" %(fileExtension.encode('utf8'))) ]
-		elif type(fileExtension) is str:
-			filelist = [toUtf8(file) for file in os.listdir(directoryPath) if file.endswith(".%s" %(fileExtension)) ]
-		
+		if type(fileExtension) is str:
+			filelist = [utilsString.toUtf8(file) for file in os.listdir(directoryPath) if file.endswith(".%s" %(fileExtension)) ]
+		elif type(fileExtension) or unicode:	
+			filelist = [utilsString.toUtf8(file) for file in os.listdir(directoryPath) if file.endswith(".%s" %(fileExtension.encode('utf8'))) ]		
 	except OSError:
 		filelist = []
 

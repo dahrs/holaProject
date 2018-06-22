@@ -4,7 +4,7 @@
 import dataFormater
 import extractor
 import stats
-import utilsOs, utilsStats, utilsString
+import utilsOs, utilsStats, utilsString, utilsGraph
 
 """
 testing
@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
 	#we make a sample tsv file of 100000 job titles + description
 	#and also a json file containig all the needed information of the sample LinkedIn profiles
-	makeSampleFileHavingNJobTitles(pathInput, pathOutput, 100000, True)
+	dataFormater.makeSampleFileHavingNJobTitles(pathInput, pathOutput, 100000, True)
 	'''
 	'''
 	#we open the taxonomies json dicts (trees) 
@@ -97,15 +97,38 @@ if __name__ == '__main__':
 	pathInputSample = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/sample.json'
 	pathOutputToEdgeListFile = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeight.tsv'
 	pathOutputToNodeListFile = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListType.tsv'
-	dataFormater.linkedInJobSkillEdgeList(pathInputSample, pathOutputToEdgeListFile, pathOutputToNodeListFile, lowercaseItAll=True)
+	dataFormater.linkedInJobSkillEdgeAndNodeList(pathInputSample, pathOutputToEdgeListFile, pathOutputToNodeListFile, lowercaseItAll=True)
 	
 
 	#from all english FR candidates
 	pathInputSample = u'/u/kessler/LBJ/data/2016-09-15/fr/anglophone/candidats.json'
 	pathOutputToEdgeListFile = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/edgeListWeight.tsv'
 	pathOutputToNodeListFile = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListType.tsv'
-	dataFormater.linkedInJobSkillEdgeList(pathInputSample, pathOutputToEdgeListFile, pathOutputToNodeListFile, lowercaseItAll=True)
+	dataFormater.linkedInJobSkillEdgeAndNodeList(pathInputSample, pathOutputToEdgeListFile, pathOutputToNodeListFile, lowercaseItAll=True)
 	''' 
+
+	##################################################################################
+	#CALLING FUNCT FROM utilsGraph.py TO MAKE THE GRAPH EDGES AND NODES FILES
+	##################################################################################
+	
+	#from the 100 000 sample
+	edgeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeight.tsv'
+	nodeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListType.tsv'
+	outputFilePath=u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListTypeModularity.tsv'
+
+	nodesDict, communityDict = utilsGraph.modularize(edgeFilePath, nodeFilePath, 150, outputFilePath)
+	#STATS previsualization of modularity result
+	utilsGraph.getModularityPercentage(outputFilePath)
+	
+	#from all english FR candidates
+	edgeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/edgeListWeight.tsv'
+	nodeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListType.tsv'
+	outputFilePath=u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListTypeModularity.tsv'
+
+	nodesDict, communityDict = utilsGraph.modularize(edgeFilePath, nodeFilePath, 150, outputFilePath)
+	#STATS previsualization of modularity result
+	utilsGraph.getModularityPercentage(outputFilePath)
+	''' '''
 
 
 	##################################################################################

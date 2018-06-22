@@ -15,10 +15,13 @@ def toUtf8(stringOrUnicode):
 	Unescape html entities???????
 	'''
 	typeArg = type(stringOrUnicode)
-	if typeArg is unicode:
-		return stringOrUnicode.encode(u'utf8').decode(u'utf8', u'replace')
-	elif typeArg is str:
-		return stringOrUnicode.decode(u'utf8')
+	try:
+		if typeArg is str:
+			return stringOrUnicode.decode(u'utf8')
+		elif typeArg is unicode:
+			return stringOrUnicode.encode(u'utf8').decode(u'utf8', u'replace')
+	except AttributeError:
+		return stringOrUnicode
 
 
 ##################################################################################

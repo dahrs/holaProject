@@ -2,7 +2,19 @@
 #-*- coding:utf-8 -*-
 
 
-import utilsOs
+import utilsOs, utilsString
+import dataFormater
+
+
+
+
+##################################################################################
+#DATA COMPARISON FOR STATS
+##################################################################################
+
+
+
+
 
 
 ##################################################################################
@@ -113,3 +125,6 @@ def printEscoJobs(escoFile, verbose=False):
 		for key in escoJobsDict:
 			print(key)
 	return escoJobsDict
+
+
+

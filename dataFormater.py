@@ -3,7 +3,7 @@
 
 
 import json, codecs, nltk
-import utilsOs
+import utilsOs, utilsGraph
 
 
 ##################################################################################
@@ -274,130 +274,10 @@ def loadJobSetFromFile(pathInput, n=float('inf')):
 
 
 ##################################################################################
-#EDGE LIST MAKER IN O(n^2) where n is the nb of skills
+#LINKEDIN GRAPH FILES MAKER IN O(n^2) where n is the nb of skills
 ##################################################################################
 
-def edgeListTemp(pathInput, pathTempFile, lowercaseItAll=False):
-	'''
-	takes the linkedin data and makes a temporary file that is an edge list of (columns):
-		- jobNode(source)
-		- skillNode(target)
-	It's only a temporary file because we still need to erase doubles, 
-	to make the weight (count coreference of skills) and count how 
-	many times the job titles appeared
-	'''
-	#we open a temp file
-	outputTempFile = utilsOs.createEmptyFile(pathTempFile, headerLine=u'jobNode\tskillNode')
-
-	with open(pathInput) as jsonFile:
-		#we read the original json file line by line
-		jsonData = jsonFile.readline()
-		while jsonData:
-			jsonDict = json.loads(jsonData)
-			#if there are experiences
-			if u'experiences' in jsonDict:
-				#reliable job-skill correspondence if we only have one job title
-				if len(jsonDict[u'experiences']) == 1:
-					if u'function' in jsonDict[u'experiences'][0]:
-						jobTitle = jsonDict[u'experiences'][0][u'function']
-						if lowercaseItAll != False:
-							jobtitle = jobTitle.lower()
-						if u'skills' in jsonDict:
-							for skillDict in jsonDict[u'skills']:
-								skill = skillDict[u'name']
-								if lowercaseItAll != False:
-									skill = skill.lower()
-								outputTempFile.write(u'{0}\t{1}\n'.format(jobTitle, skill))
-								#outputTxt.write(u'{0}\t{1}\n'.format(jobTitle, skill))
-								#######################DOUBLES to be suppressed later
-			jsonData = jsonFile.readline()
-	#closing the file	
-	outputTempFile.close()
-
-
-def edgeListDump(pathTempFile, pathOutput):
-	'''
-	opens the temp file containing the extracted linkedin data and makes an edge list of (columns):
-		- jobNode(source)
-		- skillNode(target)	
-		- weight(coreference) 
-		- nbOfTimesJobTitleAppeared
-	
-	[in a further function we might want to add keywords (non stop-words most common tokens for each jobtitle)]
-	'''
-	skillCorefDict = {}
-	jobTitleCorefDict = {}
-	lastJobTitle = None
-	lineSet = set()
-
-	#open the output file
-	outputTxt = utilsOs.createEmptyFile(pathOutput, headerLine=u'jobNode\tskillNode\tweight\tnbOfTimesJobTitleAppeared')
-	#we browse the data once to get the weight and nbOfTimesJobTitleAppeared data
-
-	with codecs.open(pathTempFile, u'r', encoding=u'utf8') as tempData:
-		dataLine = tempData.readline()
-		while dataLine:
-			dataList = dataLine.replace(u'\n', u'').split(u'\t')
-			if len(dataList) > 1:
-				#count the skills coref
-				skillCorefDict[dataList[1]] = skillCorefDict.get(dataList[1], 0) + 1
-				#count the repetitions of job titles
-				if dataList[0] != lastJobTitle:
-					jobTitleCorefDict[dataList[0]] = jobTitleCorefDict.get(dataList[0], 0) + 1
-					lastJobTitle = dataList[0]
-				#we add the line to the set
-				lineSet.add(dataLine)
-			else:
-				print(111111, dataList)
-			#get to the next line
-			dataLine = tempData.readline()
-	#we browse the data a second time to dump it
-	for dataLine in lineSet:
-		dataList = dataLine.replace(u'\n', u'').split(u'\t')
-		outputTxt.write(u'{0}\t{1}\t{2}\t{3}\n'.format(dataList[0], dataList[1], skillCorefDict[dataList[1]], jobTitleCorefDict[dataList[0]]))
-
-	#closing the file	
-	outputTxt.close()
-
-
-def nodeListIdType(pathEdgeListFile, pathNodeFileOutput):
-	'''
-	opens the temp file containing the extracted linkedin data and makes an edge list of (columns):
-		- id(same as label)
-		- label(jobTitle / skill node)	
-		- type(source or target; 2 for source 1 for target) #the job title is always the source, the skill is always the target
-	'''
-	jobTitleSet = set()
-	skillSet = set()
-
-	#open the output file
-	outputTxt = utilsOs.createEmptyFile(pathNodeFileOutput, headerLine=u'Id\tLabel\tNodeType')
-
-	with codecs.open(pathEdgeListFile, u'r', encoding=u'utf8') as edgeData:
-		dataLine = edgeData.readline()
-		while dataLine:
-			dataList = dataLine.replace(u'\n', u'').split(u'\t')
-			if len(dataList) > 1:
-				#add to the jobTitle (source) set
-				jobTitleSet.add(dataList[0])
-				#add to the skill (target) set
-				skillSet.add(dataList[1])
-			else:
-				print(111111, dataList)
-			#get to the next line
-			dataLine = edgeData.readline()
-	#browse the data sets to dump them
-	for jobTitle in jobTitleSet:
-		outputTxt.write(u'{0}\t{1}\t{2}\n'.format(jobTitle, jobTitle, 2)) #2 means 'source'
-	for skill in skillSet:
-		outputTxt.write(u'{0}\t{1}\t{2}\n'.format(skill, skill, 1)) #1 means 'target'
-
-
-			
-
-
-
-def linkedInJobSkillEdgeList(pathEdgeFileInput, pathEdgeFileOutput, pathNodeFileOutput, lowercaseItAll=False):
+def linkedInJobSkillEdgeAndNodeList(pathEdgeFileInput, pathEdgeFileOutput, pathNodeFileOutput, lowercaseItAll=False):
 	'''
 	takes the linkedin data and makes an edge list of (columns):
 		- jobNode(source)
@@ -410,8 +290,10 @@ def linkedInJobSkillEdgeList(pathEdgeFileInput, pathEdgeFileOutput, pathNodeFile
 	pathTempFile = u'./temp.txt'
 	
 	#we populate the temp file
-	edgeListTemp(pathEdgeFileInput, pathTempFile, lowercaseItAll)
+	utilsGraph.edgeListTemp(pathEdgeFileInput, pathTempFile, lowercaseItAll)
 	#we populate the final output file
-	edgeListDump(pathTempFile, pathEdgeFileOutput)
+	utilsGraph.edgeListDump(pathTempFile, pathEdgeFileOutput)
 	#we populate the node list (defining each node as source or target)
-	nodeListIdType(pathEdgeFileOutput, pathNodeFileOutput)
+	utilsGraph.nodeListIdType(pathEdgeFileOutput, pathNodeFileOutput)
+	#delete the temp file
+	utilsOs.deleteTheFile(u'./', u'temp', u'txt')
