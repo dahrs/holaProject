@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 import networkx as nx
 
-import utilsOs
+import utilsOs, utilsString
 
 
 ##################################################################################
@@ -202,6 +202,25 @@ def modularizeUsingBlondelEtAlCode(edgeFilePath, nodeFilePath, maxCommunities, o
 	return nodeDf, dendrogram
 
 
+def fillBagOfWords(bowSet, jobTitleList, occupationsUkDf, occupationsUsDf):
+	'''
+	Takes an empty of full set and fills it with the job title and description bag of words
+	'''
+	#adding the job titles to the bag of words
+	for jobTitle in jobTitleList:
+		bowSet = bowSet.union(set(utilsString.naiveRegexTokenizer(jobTitle, caseSensitive=False, eliminateEnStopwords=True)))
+	#adding the description(s) to the bag of words
+	selectiveEscoDf = occupationsUkDf.loc[occupationsUkDf['preferredLabel'].isin(jobTitleList)]
+	if selectiveEscoDf.empty:
+		selectiveEscoDf = occupationsUsDf.loc[occupationsUkDf['preferredLabel'].isin(jobTitleList)]
+		if selectiveEscoDf.empty:
+			return bowSet
+	for rowIndex, row in selectiveEscoDf.iterrows():
+		#adding the description(s) to the bag of words
+		bowSet = bowSet.union(set(utilsString.naiveRegexTokenizer(row['description'], caseSensitive=False, eliminateEnStopwords=True)))
+	return bowSet
+
+
 def getEscoBowByLevel(escoTree):
 	'''
 	starting at level 0 : the most abstract job title domain,
@@ -214,10 +233,42 @@ def getEscoBowByLevel(escoTree):
 						b1: bow of b1 ...
 						b2: bow of b2 ...
 	'''
+	from nltk.corpus import stopwords
 	bowsDict = {0:{}, 1:{}, 2:{}, 3:{}}
+	#open a dataframe of all occupation data, ready to extract the description
+	occupationsUkDf = pd.read_csv(u'./001ontologies/ESCO/v1.0.2/occupations_en.csv')
+	occupationsUsDf = pd.read_csv(u'./001ontologies/ESCO/v1.0.2/occupations_en-us.csv')
+	#browsing the esco tree by hand to add the bow in the 4 levels	
 	with codecs.open(u'./001ontologies/ESCO/v1.0.2/occupations_en.csv', u'r', encoding=u'utf8') as escoFileForDescription:
-
-	####for 
+		#level 0
+		for domain1digit, value1digit in escoTree.items():
+			bow0 = set()
+			#level 1
+			for domain2digit, value2digit in value1digit.items():
+				bow1 = set()
+				#level 2
+				for domain3digit, value3digit in value2digit.items():
+					bow2 = set()
+					#when the job titles are at level 3
+					if type(value3digit) is list:
+						bow2 = fillBagOfWords(bow2, value3digit, occupationsUkDf, occupationsUsDf)
+					else:
+						#level 3
+						for domain4digit, value4digit in value3digit.items():
+							bow3 = set()
+							#when the job titles are at level 4
+							bow3 = fillBagOfWords(bow3, value4digit, occupationsUkDf, occupationsUsDf)						
+							#saving in the bow dict
+							bowsDict[3][domain4digit] = bow3
+							bow2 = bow2.union(bow3)
+					#saving in the bow dict
+					bowsDict[2][domain3digit] = bow2
+					bow1 = bow1.union(bow2)
+				#saving in the bow dict
+				bowsDict[1][domain2digit] = bow1
+				bow0 = bow0.union(bow1)
+			#saving in the bow dict
+			bowsDict[0][domain1digit] = bow0
 	return bowsDict
 
 
@@ -227,9 +278,12 @@ def getCommunityNameEstimation():
 	job titles and descriptions from existing ontologies (ESCO)
 	we estimate what is the name of the community domain
 	'''
-	bowSameCommunity
+	bowSameCommunity = 0
 	escoTree = utilsOs.openJsonFileAsDict(u'./jsonJobTaxonomies/escoTree.json')
 	escoTreeBagOfWords = getEscoBowByLevel(escoTree)
+	#for nb in reversed(range(4)):
+	######### COUNT USING BAG OF WORDS
+	print(escoTreeBagOfWords)
 
 
 
@@ -490,4 +544,5 @@ def ontoQA():
 edgeFilePath = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/edgeListSimple.tsv'
 nodeFilePath = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListType.tsv'
 
-modularizeUsingBlondelEtAlCode(edgeFilePath, nodeFilePath, 1, outputFilePath=u'./nodeDf.tsv')
+#modularizeUsingBlondelEtAlCode(edgeFilePath, nodeFilePath, 1, outputFilePath=u'./nodeDf.tsv')
+getCommunityNameEstimation()

@@ -45,6 +45,13 @@ def findAcronyms(string):
 	return None
 
 
+def removeStopwords(tokenList, language=u'english'):
+	from nltk.corpus import stopwords		
+	#stopwords
+	to_remove = set(stopwords.words("english") + ['', ' ', '&'])
+	return list(filter(lambda tok: tok not in to_remove, tokenList))
+
+
 def naiveRegexTokenizer(string, caseSensitive=True, eliminateEnStopwords=False):
 	'''
 	returns the token list using a very naive regex tokenizer
@@ -56,10 +63,7 @@ def naiveRegexTokenizer(string, caseSensitive=True, eliminateEnStopwords=False):
 		tokens = [tok.lower() for tok in tokens]
 	#if we don't want the stopwords
 	if eliminateEnStopwords != False:
-		from nltk.corpus import stopwords		
-		#stopwords
-		to_remove = set(stopwords.words("english") + ['', ' ', '&'])
-		tokens = list(filter(lambda tok: tok not in to_remove, tokens))
+		tokens = removeStopwords(tokens, language='english')
 	return tokens 
 
 
