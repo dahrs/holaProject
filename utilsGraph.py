@@ -1,16 +1,19 @@
 #!/usr/bin/python
 #-*- coding:utf-8 -*-
 
-import json, codecs, random
+import json, codecs, random, community
 from tqdm import tqdm
 import pandas as pd
 import numpy as np
+import networkx as nx
+
 import utilsOs
 
 
 ##################################################################################
 #GRAPH FILES MAKER (EDGE_LIST and NODE_LIST) in O(n^2) where n is the nb of skills
 ##################################################################################
+
 
 def edgeListTemp(pathInput, pathTempFile, lowercaseItAll=False):
 	'''
@@ -81,8 +84,8 @@ def edgeListDump(pathTempFile, pathOutput):
 					lastJobTitle = dataList[0]
 				#we add the line to the set
 				lineSet.add(dataLine)
-			else:
-				print(111111, dataList)
+			###else:
+			###	print(111111, dataList)
 			#get to the next line
 			dataLine = tempData.readline()
 	#we browse the data a second time to dump it
@@ -117,8 +120,8 @@ def nodeListIdType(pathEdgeListFile, pathNodeFileOutput):
 				jobTitleSet.add(dataList[0])
 				#add to the skill (target) set
 				skillSet.add(dataList[1])
-			else:
-				print(111111, dataList)
+			###else:
+			###	print(111111, dataList)
 			#get to the next line
 			dataLine = edgeData.readline()
 	#browse the data sets to dump them
@@ -174,6 +177,66 @@ def randomWalk(edgeDf, nodeDf):
 #MODULARITY
 ##################################################################################
 
+def modularizeUsingBlondelEtAlCode(edgeFilePath, nodeFilePath, maxCommunities, outputFilePath=u'./nodeDf.tsv'):
+	'''
+	uses the original code of the louvain algorithm to give modularity to a graph
+	downloaded from https://github.com/taynaud/python-louvain
+	documentation at: http://python-louvain.readthedocs.io/en/latest/api.html
+	official website: https://perso.uclouvain.be/vincent.blondel/research/louvain.html
+	'''
+	#open the edge list as a networkx graph
+	graph = nx.read_weighted_edgelist(edgeFilePath, delimiter='\t')
+	#compute the best partition
+	dendrogram = community.generate_dendrogram(graph, weight='weight')
+	dendroBestPartitionDict = community.partition_at_level(dendrogram, len(dendrogram)-1) #dendroBestPartitionDict = community.best_partition(graph)
+	#open the node list as a data frame	
+	nodeDf = pd.read_csv(nodeFilePath, sep=u'\t')
+	#add a column to the node data frame so we can add the community values
+	nodeDf[u'Community'] = np.nan	
+	#add the community values to the node data frame
+	nodeDf[u'Community'] = nodeDf[u'Id'].map(dendroBestPartitionDict)
+	#making sure all 'modularity_class' NaN were deleted 
+	nodeDf = nodeDfCleaner(nodeDf)
+	#dumps the dataframe with the modularization data
+	nodeDf.to_csv(outputFilePath, sep='\t')
+	return nodeDf, dendrogram
+
+
+def getEscoBowByLevel(escoTree):
+	'''
+	starting at level 0 : the most abstract job title domain,
+	we make a bag of words of the job titles and added descriptions 
+	contained in the domain
+	e.g., 	0: 		a0 : bow of a1+a2
+					b0: bow of b1+b2
+				1: 		a1: bow of a1 ...
+						a2: bow of a2 ...
+						b1: bow of b1 ...
+						b2: bow of b2 ...
+	'''
+	bowsDict = {0:{}, 1:{}, 2:{}, 3:{}}
+	with codecs.open(u'./001ontologies/ESCO/v1.0.2/occupations_en.csv', u'r', encoding=u'utf8') as escoFileForDescription:
+
+	####for 
+	return bowsDict
+
+
+def getCommunityNameEstimation():
+	''' 
+	using a bag of words on jobtitles of the same community and on
+	job titles and descriptions from existing ontologies (ESCO)
+	we estimate what is the name of the community domain
+	'''
+	bowSameCommunity
+	escoTree = utilsOs.openJsonFileAsDict(u'./jsonJobTaxonomies/escoTree.json')
+	escoTreeBagOfWords = getEscoBowByLevel(escoTree)
+
+
+
+##################################################################################
+#MODULARITY DIY
+##################################################################################
+
 def getNodeAdjacencyDf(nodeId, edgeDf):
 	'''
 	returns a data frame of the edges where the nodeId appears
@@ -200,6 +263,12 @@ def getNodeAdjacencyDf(nodeId, edgeDf):
 def getReducedDf(df, columnName, detailList):
 	'''	returns a reduced and specialized data frame	'''
 	return df.loc[df[columnName].isin(detailList)]
+
+
+def nodeDfCleaner(nodeDf):
+	''' cleans all the node dataframe from NaN values in the modularity class '''
+	#return nodeDf.loc[nodeDf[u'modularity_class'] != float(u'nan')]
+	return nodeDf.dropna()
 
 
 def getSumOfAllWeights(df):
@@ -273,7 +342,7 @@ def updatingDicts(gainModularity, nodeId, communityId, nodesDict, communityDict)
 		###########################################
 		#from time to time they might be a call to a node in the community dict that has just been changed so we obtain
 		#a KeyError, whenever we encounter that problem we pass since it will be solved in the next step of the loop
-		print(2222222221111111, 'keyerror updating dict  ', communityId)
+		pass
 	return nodesDict, communityDict
 
 
@@ -297,7 +366,6 @@ def modularize(edgeFilePath, nodeFilePath, maxCommunities, outputFilePath=u'./no
 
 	#add a column to the nodeDf so we can add a modularity class
 	nodeDf[u'modularity_class'] = np.nan
-
 	#each node in the network is assigned to its own community
 	for nodeIndex, nodeRow in nodeDf.iterrows():
 		nodeId = nodeRow[u'Id']
@@ -332,7 +400,6 @@ def modularize(edgeFilePath, nodeFilePath, maxCommunities, outputFilePath=u'./no
 							newCommunityOfI = nodesDict[jRow[iAdjacentType]][1]
 							changeToBeMade = [gainModularity, iNode, newCommunityOfI]
 					except KeyError:
-						print(2222222233333333, 'keyerrors  ', nodesDict[jRow[iAdjacentType]][1])
 						pass
 				#if there is a significant change to be made
 				if changeToBeMade[1] != None :
@@ -348,6 +415,8 @@ def modularize(edgeFilePath, nodeFilePath, maxCommunities, outputFilePath=u'./no
 		#repetition limit
 		if repetitionCounter[0] >= 10:
 			break
+	#making sure all 'modularity_class' NaN were deleted 
+	nodeDf = nodeDfCleaner(nodeDf)
 	#dumps the dataframe with the modularization data
 	nodeDf.to_csv(outputFilePath, sep='\t')
 	return nodesDict, communityDict
@@ -379,18 +448,46 @@ def getModularityPercentage(nodeFilePathWithModularity):
 	return resultDict
 
 
+##################################################################################
+#ONTOLOGY EVALUATION METRICS
+##################################################################################
+
+def ontoQA():
+	'''
+	given an ontology (edge list and node list) it calculates the ontoQA score
+	'''
+	#SCHEMA - RR - relation richness
+	#SCHEMA - RD - relation diversity
+	#SCHEMA - AR - atribute richness
+	#SCHEMA - SD - schema deepness
+	#SCHEMA - IRs - inheritance richness
+
+	# - NbC - number of classes
+	# - NbR - number of relationships
+	# - NbI - number of instances
+
+	#INSTANCE - CR - class richness
+	#INSTANCE - CU - class utilization
+	#INSTANCE - P - average population
+	#INSTANCE - Coh - cohesion
+	#INSTANCE - Imp - Importance
+	#INSTANCE - Imp(Ci) - class importance
+	#INSTANCE - Imp(Ri) - relationship importance
+	#INSTANCE - F - fullness
+	#INSTANCE - IRc - inheritance richness
+	#INSTANCE - RRc - relationship richness
+	#INSTANCE - RU(Ci) - relationship utilization
+	#INSTANCE - Cn - connectivity
+	#INSTANCE - Ci - class connectivity
+	#INSTANCE - Rd - readability
+	#INSTANCE - CID - class instance distribution
+	#INSTANCE - AR - atribute richness
 
 
-edgeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/testsGephi/oldOnes/edgeListWeight.tsv'
-nodeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/testsGephi/oldOnes/nodeListType.tsv'
-outputFilePath=u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/testsGephi/oldOnes/nodeListTypeModularity.tsv'
 
-#edgeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeight.tsv'
-#nodeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListType.tsv'
-#outputFilePath=u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListTypeModularity.tsv'
 
-nodesDict, communityDict = modularize(edgeFilePath, nodeFilePath, 150, outputFilePath)
-#print(nodesDict)
-#print(communityDict)
-#STATS previsualization of modularity result
-getModularityPercentage(outputFilePath)
+
+edgeFilePath = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/edgeListSimple.tsv'
+nodeFilePath = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListType.tsv'
+
+modularizeUsingBlondelEtAlCode(edgeFilePath, nodeFilePath, 1, outputFilePath=u'./nodeDf.tsv')

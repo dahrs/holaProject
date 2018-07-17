@@ -1,0 +1,568 @@
+@prefix skos-xl: <http://www.w3.org/2008/05/skos-xl#> .
+@prefix dct:   <http://purl.org/dc/terms/> .
+@prefix adms:  <http://www.w3.org/ns/adms#> .
+@prefix esco:  <http://data.europa.eu/esco/model#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix org:   <http://www.w3.org/ns/org#> .
+@prefix iso-thes: <http://purl.org/iso25964/skos-thes#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix prov:  <http://www.w3.org/ns/prov#> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+
+<http://data.europa.eu/esco/skill/1a4cc54f-1e53-442b-a6d2-1682dc8ef8f9>
+        a                       esco:Skill , skos:Concept , esco:MemberConcept ;
+        esco:referenceLanguage  "en"^^xsd:language ;
+        esco:skillReuseLevel    <http://data.europa.eu/esco/skill-reuse-level/transversal> ;
+        esco:skillType          <http://data.europa.eu/esco/skill-type/skill> ;
+        dct:description         <http://data.europa.eu/esco/node-literal/7d44a65e-ca7d-4631-a5ce-b33223f383ed> , <http://data.europa.eu/esco/node-literal/059327cb-5ded-4a22-89c5-f0950a69d9d0> ;
+        iso-thes:status         "released" ;
+        skos:altLabel           "digitale technologieën inzetten voor innovatie"@nl , "twórcze wykorzystanie technologii cyfrowych"@pl , "innovatief gebruikmaken van digitale technologieën"@nl ;
+        skos:broader            <http://data.europa.eu/esco/skill/7e5147d1-60b1-4a68-804b-1f5cb0396b91> ;
+        skos:broaderTransitive  <http://data.europa.eu/esco/skill/7e5147d1-60b1-4a68-804b-1f5cb0396b91> ;
+        skos:inScheme           <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> ;
+        skos:prefLabel          "notar stafræna tækni á hugvitsamlegan hátt"@is , "käyttää digitaaliteknologiaa luovasti"@fi , "využívat digitální technologie kreativně"@cs , "kreativno se koristiti digitalnim tehnologijama"@hr , "utilizare creativă a tehnologiilor digitale"@ro , "bruke digitale teknologier kreativt"@no , "använda digital teknik på ett kreativt sätt"@sv , "utilizar de forma criativa as tecnologias digitais"@pt , "radoši izmantot digitālās tehnoloģijas"@lv , "kreatywne wykorzystanie technologii cyfrowych"@pl , "creatief gebruikmaken van digitale technologieën"@nl , "kūrybiškai naudoti skaitmenines technologijas"@lt , "digitale Technologien kreativ einsetzen"@de , "kreativno uporabljati digitalne tehnologije"@sl , "utilizar creativamente las tecnologías digitales"@es , "digitaaltehnoloogiat loovalt kasutama"@et , "anvende digitale teknologier kreativt"@da , "يستخدم بشكل خلاق التكنولوجيات الرقمية"@ar , "teicneolaíochtaí digiteacha a úsáid ar dhóigh chruthaitheach"@ga , "δημιουργική χρήση ψηφιακών τεχνολογιών"@el , "usare le tecnologie digitali in modo creativo"@it , "kreatívan alkalmazza a digitális technológiákat"@hu , "utiliser des technologies numériques de façon créative"@fr , "tvorivo využívať digitálne technológie"@sk , "creatively use digital technologies"@en-us , "creatively use digital technologies"@en , "użu kreattiv tat-teknoloġiji diġitali"@mt , "творческо използване на цифровите технологии"@bg .
+
+<http://data.europa.eu/esco/node-literal/60953fa2-4a4c-45de-b64f-10c475e5674e>
+        a                 esco:NodeLiteral ;
+        esco:language     "en-us"^^xsd:language ;
+        esco:nodeLiteral  "Apply behavioral norms and know-how while using digital technologies and interacting in digital environments. Adapt communication strategies to the specific audience and be aware of cultural and generational diversity in digital environments." .
+
+<http://data.europa.eu/esco/node-literal/02eb4966-46f0-4311-af66-2bbab192c978>
+        a                 esco:NodeLiteral ;
+        esco:language     "en" ;
+        esco:nodeLiteral  "Articulate information needs, search for data, information and content in digital environments, access them and navigate between them. Create and update personal search strategies." .
+
+<http://data.europa.eu/esco/skill/1d6c7de4-350e-4868-a47b-333b4b0d9650>
+        a                       esco:Skill , esco:MemberConcept , skos:Concept ;
+        esco:referenceLanguage  "en"^^xsd:language ;
+        esco:skillReuseLevel    <http://data.europa.eu/esco/skill-reuse-level/transversal> ;
+        esco:skillType          <http://data.europa.eu/esco/skill-type/skill> ;
+        dct:description         <http://data.europa.eu/esco/node-literal/065e18f8-df44-49a9-a153-25eef949fb07> , <http://data.europa.eu/esco/node-literal/4a925ea1-89a8-4819-94c6-0f2c49e7212e> ;
+        iso-thes:status         "released" ;
+        skos:altLabel           "gegevens, informatie en digitale content evalueren"@nl , "gegevens, informatie en digitale inhoud beoordelen"@nl , "analizar datos, información y contenido digitales"@es , "evaluar datos, información y contenidos digitales"@es , "izvērtēt datus, informāciju un digitālo saturu"@lv , "gegevens, informatie en digitale content beoordelen"@nl , "examinar datos, información y contenido digitales"@es , "analizează date, informații și conținut digital"@ro , "sonraí, faisnéis agus ábhar digiteach a mheas"@ga , "interpretează date, informații și conținut digital"@ro , "evaluar datos, información y contenido electrónicos"@es ;
+        skos:broader            <http://data.europa.eu/esco/skill/629685b8-5f9e-4522-8cff-b3e2c4ec625a> ;
+        skos:broaderTransitive  <http://data.europa.eu/esco/skill/629685b8-5f9e-4522-8cff-b3e2c4ec625a> ;
+        skos:inScheme           <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> ;
+        skos:prefLabel          "evalwazzjoni tad-dejta, tal-informazzjoni u tal-kontenut diġitali"@mt , "evaluate data, information and digital content"@en , "evaluate data, information and digital content"@en-us , "Daten, Informationen und digitale Inhalte bewerten"@de , "αξιολόγηση δεδομένων, πληροφοριών και ψηφιακού περιεχομένου"@el , "evaluează date, informații și conținut digital"@ro , "presojati podatke, informacije in digitalne vsebine"@sl , "analiza danych, informacji i treści cyfrowych"@pl , "оценяване на данни, информация и цифрово съдържание"@bg , "يحدد البيانات والمعلومات والمحتوى الرقمي"@ar , "sonraí, faisnéis agus inneachar digiteach a mheas"@ga , "bedöma data, information och digitalt innehåll"@sv , "gegevens, informatie en digitale inhoud evalueren"@nl , "andmete, teabe ja digitaalset sisu hindama"@et , "valutare dati, informazioni e contenuti digitali"@it , "avaliar dados, informações e conteúdos digitais"@pt , "evaluar datos, información y contenido digitales"@es , "vyhodnocovat údaje, informace a digitální obsah"@cs , "vyhodnocovať údaje, informácie a digitálny obsah"@sk , "adatokat, információkat és digitális tartalmakat értékel"@hu , "arvioida dataa, tietoa ja digitaalista sisältöä"@fi , "evaluere data, informasjon og digitalt innhold"@no , "ocjenjivati podatke, informacije i digitalni sadržaj"@hr , "metur gögn, upplýsingar og stafrænt inntak"@is , "évaluer des données, des informations et des contenus numériques"@fr , "novērtēt datus, informāciju un digitālo saturu"@lv , "evaluere data, oplysninger og digitalt indhold"@da , "vertinti duomenis, informaciją ir skaitmeninį turinį"@lt .
+
+<http://data.europa.eu/esco/node-literal/cb13cca3-347d-4e49-96e2-bf4dbee3c17e>
+        a                 esco:NodeLiteral ;
+        esco:language     "en-us"^^xsd:language ;
+        esco:nodeLiteral  "Create and manage one or multiple digital identities, be able to protect one's own reputation, deal with the data that one produces through several digital tools, environments and services." .
+
+<http://data.europa.eu/esco/skill/a91732ce-988e-4105-9570-f425c6ffdc82>
+        a                       skos:Concept , esco:Skill , esco:MemberConcept ;
+        esco:referenceLanguage  "en"^^xsd:language ;
+        esco:skillReuseLevel    <http://data.europa.eu/esco/skill-reuse-level/transversal> ;
+        esco:skillType          <http://data.europa.eu/esco/skill-type/knowledge> ;
+        dct:description         <http://data.europa.eu/esco/node-literal/07ea2711-d095-4f5e-b4a8-59b7995226e0> , <http://data.europa.eu/esco/node-literal/68746aa2-91be-45f8-93d2-039e07766cc2> ;
+        iso-thes:status         "released" ;
+        skos:altLabel           "derechos de autor y licencias relacionados con los contenidos digitales"@es , "copyright en licenties in verband met digitale inhoud"@nl , "rozumienie prawa własności intelektualnej i licencji w zakresie zasobów cyfrowych"@pl , "przestrzeganie prawa autorskiego i licencji związanych z zasobami cyfrowymi"@pl , "copyright en licenties voor digitale content"@nl , "derechos de autor y licencias relacionados con el contenido electrónico"@es , "cóipcheart agus ceadúnais a bhaineann le hábhar digiteach"@ga , "copyright en licenties in verband met digitale content"@nl , "derechos de autor y licencias relacionados con los contenidos electrónicos"@es ;
+        skos:broader            <http://data.europa.eu/esco/skill/f5369f2f-e52b-43d8-8d31-79a6c11188d8> ;
+        skos:broaderTransitive  <http://data.europa.eu/esco/skill/f5369f2f-e52b-43d8-8d31-79a6c11188d8> ;
+        skos:inScheme           <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> ;
+        skos:prefLabel          "digitaalse sisuga seotud autoriõigused ja litsentsid"@et , "autorska prava i licence povezane s digitalnim sadržajem"@hr , "copyright and licenses related to digital content"@en-us , "copyright and licenses related to digital content"@en , "авторски права и лицензи, свързани с цифрово съдържание"@bg , "avtorsko pravo in licence v zvezi z digitalnimi vsebinami"@sl , "drepturi de autor și licențe în domeniul conținutului digital"@ro , "höfundaréttur og leyfi í tengslum við stafrænt inntak"@is , "ophavsret og licenser i forbindelse med digitalt indhold"@da , "suprasti autorių teises ir licencijas, susijusias su skaitmeniniu turiniu"@lt , "autore e le licenze relativi a contenuti digitali"@it , "licenças e direitos de autor relacionados com conteúdos digitais"@pt , "opphavsrett og lisenser knyttet til digitalt innhold"@no , "förstå upphovsrätt och licenser för digitalt innehåll"@sv , "autorské práva a licencie súvisiace s digitálnym obsahom"@sk , "حقوق النشر والتوزيع والرخصة المتعلقة بالمحتوى الرقمي"@ar , "a digitális tartalmakhoz kapcsolódó szerzői jogok és engedélyek"@hu , "Urheberrechte und Lizenzen im Zusammenhang mit digitalen Inhalten verstehen"@de , "cóipcheart agus ceadúnais a bhaineann le hinneachar digiteach"@ga , "autorská práva a licence související s digitálním obsahem"@cs , "ar digitālo saturu saistītās autortiesības un licences"@lv , "znajomość prawa autorskiego i licencji związanych z zasobami cyfrowymi"@pl , "derechos de autor y licencias relacionados con el contenido digital"@es , "πνευματική ιδιοκτησία και άδειες ψηφιακού περιεχομένου"@el , "copyright en licenties voor digitale inhoud"@nl , "drittijiet tal-awtur u liċenzji marbuta mal-kontenut diġitali"@mt , "droits d’auteur et autorisations liées à des contenus numériques"@fr , "digitaaliseen sisältöön liittyvät tekijänoikeudet ja lisenssit"@fi .
+
+<http://data.europa.eu/esco/node-literal/122db7c1-033c-4c33-aef0-8d5414731017>
+        a                 esco:NodeLiteral ;
+        esco:language     "en" ;
+        esco:nodeLiteral  "Apply behavioural norms and know-how while using digital technologies and interacting in digital environments. Adapt communication strategies to the specific audience and be aware of cultural and generational diversity in digital environments." .
+
+<http://data.europa.eu/esco/node-literal/3a401001-3b80-4779-a2f5-237cb364ab3d>
+        a                 esco:NodeLiteral ;
+        esco:language     "en" ;
+        esco:nodeLiteral  "Participate in society through the use of public and private digital services. Seek opportunities for self-empowerment and for participatory citizenship through appropriate digital technologies." .
+
+<http://data.europa.eu/esco/node-literal/7fbd6a0c-59d9-4c13-af8c-bd670c883454>
+        a                 esco:NodeLiteral ;
+        esco:language     "en" ;
+        esco:nodeLiteral  "Identify digital needs and resources, make informed decisions on most appropriate digital tools according to the purpose or need, solve conceptual problems through digital means, creatively use technologies, solve technical problems, update own and other's competence." .
+
+<http://data.europa.eu/esco/skill/33a82b83-c838-4889-ae62-fae1317481eb>
+        a                       skos:Concept , esco:Skill , esco:MemberConcept ;
+        esco:referenceLanguage  "en"^^xsd:language ;
+        esco:skillReuseLevel    <http://data.europa.eu/esco/skill-reuse-level/transversal> ;
+        esco:skillType          <http://data.europa.eu/esco/skill-type/skill> ;
+        dct:description         <http://data.europa.eu/esco/node-literal/7ef48bf6-6c6f-4226-947c-390871540d0c> , <http://data.europa.eu/esco/node-literal/67895a23-938b-476d-98ce-3e5a75db86db> ;
+        iso-thes:status         "released" ;
+        skos:altLabel           "protect online privacy and identity"@en , "sonraí pearsanta agus príobháideacht a chosaint"@ga , "safeguarding online privacy and identity"@en , "safeguard online privacy and identities"@en , "protect digital identity"@en , "protect digital privacy"@en , "asigură protecția datelor cu caracter personal și a confidențialității"@ro , "keep online privacy and identity secure"@en , "proteger los datos y la intimidad personales"@es , "review online privacy settings"@en , "safeguard online privacy and identity"@en , "take action to ensure online privacy"@en , "defend online privacy and identity"@en , "safeguard online identity and privacy"@en ;
+        skos:broader            <http://data.europa.eu/esco/skill/426ceaba-6867-481c-bb6b-aee3933da7d2> ;
+        skos:broaderTransitive  <http://data.europa.eu/esco/skill/426ceaba-6867-481c-bb6b-aee3933da7d2> ;
+        skos:inScheme           <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> ;
+        skos:prefLabel          "يحمي البيانات الشخصية والخصوصية"@ar , "saugoti asmens duomenis ir privatumą"@lt , "защита на личните данни и неприкосновеността на личния живот"@bg , "aizsargāt personas datus un privātumu"@lv , "proteger dados pessoais e privacidade"@pt , "štititi osobne podatke i privatnost"@hr , "ochrona danych osobowych i prywatności"@pl , "persönliche Daten und Privatsphäre schützen"@de , "skydda personliga uppgifter och privatlivet"@sv , "chránit osobní údaje a soukromí"@cs , "protéger des données à caractère personnel et la vie privée"@fr , "biztosítja a személyes adatok és a magánélet védelmét"@hu , "beskytte personoplysninger og privatlivets fred"@da , "protejează datele cu caracter personal și confidențialitatea"@ro , "proteger los datos personales y la privacidad"@es , "protect personal data and privacy"@en , "protect personal data and privacy"@en-us , "chrániť osobné údaje a súkromie"@sk , "isikuandmeid ja eraelu puutumatust kaitsma"@et , "suojata henkilötietoja ja yksityisyyttä"@fi , "tutelare i dati personali e la privacy"@it , "sonraí pearsanta agus príobháideachas a chosaint"@ga , "beskytte personopplysninger og personvern"@no , "persoonlijke gegevens en privacy beschermen"@nl , "varovati osebne podatke in zasebnost"@sl , "προστασία των δεδομένων προσωπικού χαρακτήρα και της ιδιωτικής ζωής"@el , "protezzjoni tad-dejta personali u tal-privatezza"@mt , "verndar persónugögn og friðhelgi"@is .
+
+<http://data.europa.eu/esco/node-literal/667075c3-aa23-4822-b344-c1a1b98aa9b8>
+        a                 esco:NodeLiteral ;
+        esco:language     "en" ;
+        esco:nodeLiteral  "Create and edit new content (from word processing to images and video); integrate and re-elaborate previous knowledge and content; produce creative expressions, media outputs and programming; deal with and apply intellectual property rights and licences." .
+
+<http://data.europa.eu/esco/node-literal/82ef87ec-47c6-46da-9000-fc2ff225596f>
+        a                 esco:NodeLiteral ;
+        esco:language     "en" ;
+        esco:nodeLiteral  "Share data, information and digital content with others through appropriate digital technologies. Act as an intermediary, know about referencing and attribution practices." .
+
+<http://data.europa.eu/esco/skill/40001d93-8937-4859-89d5-2dca53290ff4>
+        a                       esco:MemberConcept , skos:Concept , esco:Skill ;
+        esco:referenceLanguage  "en"^^xsd:language ;
+        esco:skillReuseLevel    <http://data.europa.eu/esco/skill-reuse-level/transversal> ;
+        esco:skillType          <http://data.europa.eu/esco/skill-type/skill> ;
+        dct:description         <http://data.europa.eu/esco/node-literal/82ef87ec-47c6-46da-9000-fc2ff225596f> , <http://data.europa.eu/esco/node-literal/78e94fdd-fc15-4c0a-8d1b-0ccde6765879> ;
+        iso-thes:status         "released" ;
+        skos:altLabel           "dzielenie się informacjami i zasobami z wykorzystaniem technologii cyfrowych"@pl , "sonraí, faisnéis agus ábhar digiteach a roinnt trí mheán teicneolaíochtaí digiteacha"@ga , "κοινοποίηση πληροφοριών μέσω ψηφιακών τεχνολογιών"@el , "kopīgot, izmantojot digitālās tehnoloģijas"@lv , "utilizar tecnologías digitales para compartir datos, información y contenidos digitales"@es , "digitaal delen"@nl , "face schimb de date, informații și conținut digital prin intermediul tehnologiilor digitale"@ro , "dzielenie się informacjami i zasobami w środowiskach cyfrowych"@pl , "delen met behulp van digitale technologie"@nl ;
+        skos:broader            <http://data.europa.eu/esco/skill/574257ea-7b64-4100-b7b6-e27c233fe143> ;
+        skos:broaderTransitive  <http://data.europa.eu/esco/skill/574257ea-7b64-4100-b7b6-e27c233fe143> ;
+        skos:inScheme           <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> ;
+        skos:prefLabel          "utilizar tecnologías digitales para compartir datos, información y contenido digitales"@es , "partajează date, informații și conținut digital prin intermediul tehnologiilor digitale"@ro , "kondiviżjoni permezz ta’ teknoloġiji diġitali"@mt , "sdílet prostřednictvím digitálních technologií"@cs , "participer à des échanges au moyen de technologies numériques"@fr , "deliti podatke, informacije in digitalne vsebine s pomočjo digitalnih tehnologij"@sl , "kopīgot ar digitālo tehnoloģiju palīdzību"@lv , "share through digital technologies"@en-us , "share through digital technologies"@en , "dele ved hjælp af digitale teknologier"@da , "dela data, information och digitalt innehåll genom digital teknik"@sv , "споделяне чрез цифровите технологии"@bg , "condividere mediante le tecnologie digitali"@it , "dele gjennom digitale teknologier"@no , "digitaaltehnoloogia kaudu sisu jagama"@et , "dijeliti s pomoću digitalnih tehnologija"@hr , "partilhar através das tecnologias digitais"@pt , "sonraí, faisnéis agus inneachar digiteach a roinnt trí mheán teicneolaíochtaí digiteacha"@ga , "zdieľať prostredníctvom digitálnych technológií"@sk , "łączenie i kontakt za pomocą środków cyfrowych"@pl , "mithilfe digitaler Technologien teilen"@de , "يشارك من خلال التقنيات الرقمية"@ar , "dalytis informacija naudojantis skaitmeninėmis technologijomis"@lt , "delen met behulp van digitale technologieën"@nl , "digitális technológiák használatával információkat és digitális tartalmakat oszt meg"@hu , "κοινοποίηση δεδομένων μέσω ψηφιακών τεχνολογιών"@el , "deilir gegnum stafræna tækni"@is , "jakaa digitaaliteknologian välityksellä"@fi .
+
+<http://data.europa.eu/esco/node-literal/6daa7ff9-a25e-413e-bc87-2b4e9e8df010>
+        a                 esco:NodeLiteral ;
+        esco:language     "en" ;
+        esco:nodeLiteral  "Use digital tools and technologies for collaborative processes, and for co-construction and co-creation of resources and knowledge." .
+
+<http://data.europa.eu/esco/node-literal/688630ff-feec-4b92-a819-5b87ed951ae2>
+        a                 esco:NodeLiteral ;
+        esco:language     "en-us"^^xsd:language ;
+        esco:nodeLiteral  "Be aware of the environmental impact of digital technologies and their use." .
+
+<http://data.europa.eu/esco/node-literal/059327cb-5ded-4a22-89c5-f0950a69d9d0>
+        a                 esco:NodeLiteral ;
+        esco:language     "en" ;
+        esco:nodeLiteral  "Use digital tools and technologies to create knowledge and to innovate processes and products. Engage individually and collectively in cognitive processing to understand and resolve conceptual problems and problem situations in digital environments." .
+
+<http://data.europa.eu/esco/skill/2b34a99f-9813-4c91-9509-b6b9b8c3132e>
+        a                       esco:Skill , esco:MemberConcept , skos:Concept ;
+        esco:referenceLanguage  "en"^^xsd:language ;
+        esco:skillReuseLevel    <http://data.europa.eu/esco/skill-reuse-level/transversal> ;
+        esco:skillType          <http://data.europa.eu/esco/skill-type/skill> ;
+        dct:description         <http://data.europa.eu/esco/node-literal/6daa7ff9-a25e-413e-bc87-2b4e9e8df010> , <http://data.europa.eu/esco/node-literal/969322d3-6f5d-44ee-87a5-e92c2b059080> ;
+        iso-thes:status         "released" ;
+        skos:altLabel           "able to use online tools to collaborate"@en , "utilise online tools to collaborate"@en , "use online tools to collaborate"@en , "kopīgi radīt, izmantojot digitālās tehnoloģijas"@lv , "make use of online tools to collaborate"@en , "use VoIP conference calling"@en , "use online meeting tools"@en , "samenwerken met behulp van digitale technologie"@nl , "colaborar mediante tecnologías digitales"@es , "use concurrent file editing"@en , "współpraca z wykorzystaniem narzędzi cyfrowych"@pl , "apply online tools to collaborate"@en , "samenwerken via digitale platformen"@nl , "using online tools to collaborate"@en , "samenwerken met digitale hulpmiddelen"@nl , "współpraca w oparciu o technologie cyfrowe"@pl ;
+        skos:broader            <http://data.europa.eu/esco/skill/574257ea-7b64-4100-b7b6-e27c233fe143> ;
+        skos:broaderTransitive  <http://data.europa.eu/esco/skill/574257ea-7b64-4100-b7b6-e27c233fe143> ;
+        skos:inScheme           <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> ;
+        skos:prefLabel          "sadarboties, izmantojot digitālās tehnoloģijas"@lv , "współpraca z wykorzystaniem technologii cyfrowych"@pl , "digitális technológiák használatával együttműködésben vesz részt"@hu , "сътрудничене чрез цифровите технологии"@bg , "colaborar utilizando tecnologías digitales"@es , "collaborate through digital technologies"@en , "collaborate through digital technologies"@en-us , "colaborar através das tecnologias digitais"@pt , "comhoibriú trí mheán teicneolaíochtaí digiteacha"@ga , "mener des collaborations au moyen de technologies numériques"@fr , "digitaaltehnoloogia kaudu koostööd korraldama"@et , "samarbeide gjennom digitale teknologier"@no , "samenwerken met behulp van digitale technologieën"@nl , "collaborare mediante le tecnologie digitali"@it , "sodelovati s pomočjo digitalnih tehnologij"@sl , "spolupracovat prostřednictvím digitálních technologií"@cs , "spolupracovať prostredníctvom digitálnych technológií"@sk , "bendradarbiauti naudojantis skaitmeninėmis technologijomis"@lt , "samarbejde ved hjælp af digitale teknologier"@da , "kollaborazzjoni permezz ta’ teknoloġiji diġitali"@mt , "συνεργασία μέσω ψηφιακών τεχνολογιών"@el , "surađivati s pomoću digitalnih tehnologija"@hr , "tehdä yhteistyötä digitaaliteknologian välityksellä"@fi , "يتعاون من خلال التقنيات الرقمية"@ar , "er í samstarfi gegnum stafræna tækni"@is , "mithilfe digitaler Technologien zusammenarbeiten"@de , "samarbeta genom digital teknik"@sv , "colaborează cu ajutorul tehnologiilor digitale"@ro .
+
+<http://data.europa.eu/esco/skill/5af49836-2269-46d9-87b9-0d3140c6c22e>
+        a                       esco:MemberConcept , esco:Skill , skos:Concept ;
+        esco:referenceLanguage  "en"^^xsd:language ;
+        esco:skillReuseLevel    <http://data.europa.eu/esco/skill-reuse-level/transversal> ;
+        esco:skillType          <http://data.europa.eu/esco/skill-type/skill> ;
+        dct:description         <http://data.europa.eu/esco/node-literal/6080fc22-edf1-4220-b100-33b9374e98dd> , <http://data.europa.eu/esco/node-literal/450d2dd2-9b78-4b65-9934-bed64e5d8243> ;
+        iso-thes:status         "released" ;
+        skos:altLabel           "integrar y modificar contenido digital"@es , "ábhar digiteach a chomhtháthú agus a ath-mhionsaothrú"@ga , "digitale content combineren en verwerken"@nl , "integrează și rafinează conținut digital"@ro , "incorporar y reelaborar contenido digital"@es , "integrar y reelaborar contenidos digitales"@es , "integrează și modifică conținut digital"@ro , "añadir y reelaborar contenido digital"@es ;
+        skos:broader            <http://data.europa.eu/esco/skill/f5369f2f-e52b-43d8-8d31-79a6c11188d8> ;
+        skos:broaderTransitive  <http://data.europa.eu/esco/skill/f5369f2f-e52b-43d8-8d31-79a6c11188d8> ;
+        skos:inScheme           <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> ;
+        skos:prefLabel          "integrera och omarbeta digitalt innehåll"@sv , "integrează și recreează conținut digital"@ro , "inneachar digiteach a chomhtháthú agus a ath-mhionsaothrú"@ga , "digitale inhoud combineren en verwerken"@nl , "samþættir og endurmótar stafrænt inntak"@is , "intégrer et ré-élaborer des contenus numériques"@fr , "integrirati in nadalje razvijati digitalne vsebine"@sl , "интегриране и редактиране на цифрово съдържание"@bg , "integrirati i iznova razraditi digitalni sadržaj"@hr , "integrovat a opětovně zpracovávat digitální obsah"@cs , "integruoti ir plėtoti skaitmeninį turinį"@lt , "integroida ja kehittää edelleen digitaalista sisältöä"@fi , "integrazzjoni u elaborazzjoni mill-ġdid tal-kontenut diġitali"@mt , "integrere og videreudvikle digitalt indhold"@da , "integracja i ponowne przetwarzanie treści cyfrowych"@pl , "يدمج المحتوى الرقمي ويعيد توضيحه"@ar , "integrar y reelaborar contenido digital"@es , "integrare e rielaborare i contenuti digitali"@it , "digitális tartalmakat integrál és dolgoz fel"@hu , "integrovať a opätovne spracúvať digitálny obsah"@sk , "integrar e reelaborar conteúdos digitais"@pt , "προσαρμογή και ενσωμάτωση ψηφιακού περιεχομένου"@el , "digitale Inhalte integrieren und umarbeiten"@de , "digitaalset sisu integreerima ja kohandama"@et , "integrere og gjennomarbeide digitalt innhold på nytt"@no , "integrate and re-elaborate digital content"@en-us , "integrēt un pilnveidot digitālo saturu"@lv , "integrate and re-elaborate digital content"@en .
+
+<http://data.europa.eu/esco/skill/14832d87-2f2f-4895-b290-e4760ebae42a>
+        a                       esco:MemberConcept , skos:Concept , esco:Skill ;
+        esco:referenceLanguage  "en"^^xsd:language ;
+        esco:skillReuseLevel    <http://data.europa.eu/esco/skill-reuse-level/transversal> ;
+        esco:skillType          <http://data.europa.eu/esco/skill-type/skill> ;
+        dct:description         <http://data.europa.eu/esco/node-literal/cb3843ed-eb4c-4866-a829-c4e2f10c2eba> , <http://data.europa.eu/esco/node-literal/7be3ccfb-8d62-4083-91f3-dba6e1932379> ;
+        iso-thes:status         "released" ;
+        skos:altLabel           "solucionar problemas técnicos"@es , "arreglar problemas técnicos"@es , "atrisināt tehniskās problēmas"@lv , "detectar problemas técnicos"@es ;
+        skos:broader            <http://data.europa.eu/esco/skill/7e5147d1-60b1-4a68-804b-1f5cb0396b91> ;
+        skos:broaderTransitive  <http://data.europa.eu/esco/skill/7e5147d1-60b1-4a68-804b-1f5cb0396b91> ;
+        skos:inScheme           <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> ;
+        skos:prefLabel          "løse tekniske problemer"@da , "løse tekniske problemer"@no , "επίλυση τεχνικών προβλημάτων"@el , "solve technical problems"@en-us , "solve technical problems"@en , "technische Probleme lösen"@de , "soluționează probleme tehnice"@ro , "spręsti technines problemas"@lt , "technische problemen oplossen"@nl , "rješavati tehničke probleme"@hr , "řešit technické problémy"@cs , "technikai problémákat old meg"@hu , "soluzzjoni tal-problemi tekniċi"@mt , "fadhbanna teicniúla a réiteach"@ga , "riešiť technické problémy"@sk , "разрешаване на технически проблеми"@bg , "rozwiązywać problemy techniczne"@pl , "tehnilisi probleeme lahendama"@et , "lösa tekniska problem"@sv , "risolvere i problemi tecnici"@it , "resolver problemas técnicos"@pt , "resolver problemas técnicos"@es , "risināt tehniskās problēmas"@lv , "ratkaista teknisiä ongelmia"@fi , "leysir tæknileg vandamál"@is , "يحل المشكلات التقنية"@ar , "résoudre des problèmes techniques"@fr , "reševati tehnične težave"@sl .
+
+<http://data.europa.eu/esco/skill/4d97e3c3-f335-47cc-a4ee-0d779fd42222>
+        a                       esco:MemberConcept , esco:Skill , skos:Concept ;
+        esco:referenceLanguage  "en"^^xsd:language ;
+        esco:skillReuseLevel    <http://data.europa.eu/esco/skill-reuse-level/transversal> ;
+        esco:skillType          <http://data.europa.eu/esco/skill-type/skill> ;
+        dct:description         <http://data.europa.eu/esco/node-literal/8d2afeca-3107-4e29-8320-ca1c18a8a248> , <http://data.europa.eu/esco/node-literal/2b5a763a-d2de-406f-963d-dd6b718b88d4> ;
+        iso-thes:status         "released" ;
+        skos:altLabel           "gestionar datos, información y contenidos electrónicos"@es , "zarządzanie zasobami cyfrowymi"@pl , "gegevens, informatie en digitale content beheren"@nl , "gestionar datos, información y contenidos digitales"@es , "gestionar datos, información y contenido electrónicos"@es , "sonraí, faisnéis agus ábhar digiteach a bhainistiú"@ga ;
+        skos:broader            <http://data.europa.eu/esco/skill/629685b8-5f9e-4522-8cff-b3e2c4ec625a> ;
+        skos:broaderTransitive  <http://data.europa.eu/esco/skill/629685b8-5f9e-4522-8cff-b3e2c4ec625a> ;
+        skos:inScheme           <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> ;
+        skos:prefLabel          "spravovať údaje, informácie a digitálny obsah"@sk , "upravljati podacima, informacijama i digitalnim sadržajem"@hr , "Daten, Informationen und digitale Inhalte verwalten"@de , "administrere data, informasjon og digitalt innhold"@no , "spravovat údaje, informace a digitální obsah"@cs , "andmeid, teavet ja digitaalset sisu haldama"@et , "forvalte data, oplysninger og digitalt indhold"@da , "adatokat, információkat és digitális tartalmakat kezel"@hu , "hallinnoida dataa, tietoja ja digitaalista sisältöä"@fi , "valdyti duomenis, informaciją ir skaitmeninį turinį"@lt , "skipuleggur gögn, upplýsingar og stafrænt inntak"@is , "управляване на данни, информация и цифрово съдържание"@bg , "hantera data, information och digitalt innehåll"@sv , "immaniġġjar tad-dejta, tal-informazzjoni u tal-kontenut diġitali"@mt , "يشرف على البيانات والمعلومات والمحتوى الرقمي"@ar , "gérer des données, des informations et des contenus numériques"@fr , "gestire dati, informazioni e contenuti digitali"@it , "sonraí, faisnéis agus inneachar digiteach a bhainistiú"@ga , "upravljati podatke, informacije in digitalne vsebine"@sl , "organizacja danych, informacji i treści cyfrowych"@pl , "διαχείριση δεδομένων, πληροφοριών και ψηφιακού περιεχομένου"@el , "gestionar datos, información y contenido digitales"@es , "gegevens, informatie en digitale inhoud beheren"@nl , "gerir dados, informações e conteúdos digitais"@pt , "gestionează date, informații și conținut digital"@ro , "manage data, information and digital content"@en-us , "manage data, information and digital content"@en , "pārvaldīt datus, informāciju un digitālo saturu"@lv .
+
+<http://data.europa.eu/esco/skill/97c1895a-a890-47da-abfc-79dc272add2e>
+        a                       esco:MemberConcept , skos:Concept , esco:Skill ;
+        esco:referenceLanguage  "en"^^xsd:language ;
+        esco:skillReuseLevel    <http://data.europa.eu/esco/skill-reuse-level/transversal> ;
+        esco:skillType          <http://data.europa.eu/esco/skill-type/skill> ;
+        dct:description         <http://data.europa.eu/esco/node-literal/60953fa2-4a4c-45de-b64f-10c475e5674e> , <http://data.europa.eu/esco/node-literal/122db7c1-033c-4c33-aef0-8d5414731017> ;
+        iso-thes:status         "released" ;
+        skos:altLabel           "respectă codul bunelor maniere pe internet"@ro , "online afspraken inzake internet-etiquette toepassen"@nl , "observe netiquette"@en , "able to use online conventions of netiquette"@en , "apply online conventions of netiquette"@en , "aplică reguli de netiquette"@ro , "make use of online conventions of netiquette"@en , "utilise online conventions of netiquette"@en , "toimia netiketin mukaisesti"@fi , "using online conventions of netiquette"@en , "Netiquette einhalten"@de , "aplică regulile de comportament pe internet"@ro ;
+        skos:broader            <http://data.europa.eu/esco/skill/574257ea-7b64-4100-b7b6-e27c233fe143> ;
+        skos:broaderTransitive  <http://data.europa.eu/esco/skill/574257ea-7b64-4100-b7b6-e27c233fe143> ;
+        skos:inScheme           <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> ;
+        skos:prefLabel          "bruke elektroniske konvensjoner for nettikette"@no , "naudotis interneto etiketo taisyklėmis"@lt , "följa nätetikett"@sv , "użu tal-konvenzjonijiet onlajn tan-netikett"@mt , "използване на норми на поведение при онлайн общуване"@bg , "cloí le dea-bhéasaíocht Idirlín"@ga , "Netiquette beachten"@de , "use online conventions of netiquette"@en-us , "use online conventions of netiquette"@en , "ievērot interneta saziņas etiķeti"@lv , "utilizar convenções de netiqueta"@pt , "alkalmazza az internetes kommunikáció illemszabályait"@hu , "χρήση κανόνων του κώδικα δεοντολογικής συμπεριφοράς στο διαδίκτυο"@el , "používat zásady netikety"@cs , "uporabljati spletne sporazume in spletni bonton"@sl , "overholde konventioner for etikette på internettet"@da , "používať internetové konvencie netikety"@sk , "veebis kasutatavast netiketist kinni pidama"@et , "يستخدم اتفاقيات على الإنترنت خاصة بأخلاقيات الإنترنت"@ar , "fylgir netsiðareglum"@is , "primjenjivati pravila ponašanja na internetu"@hr , "utilizar las convenciones en línea sobre netiqueta"@es , "online afspraken inzake netiquette toepassen"@nl , "noudattaa verkkoetikettiä"@fi , "utiliser les conventions en ligne de la nétiquette"@fr , "stosować zasady netykiety"@pl , "utilizează convențiile online specifice netiquette"@ro , "utilizzare le convenzioni di netiquette"@it .
+
+<http://data.europa.eu/esco/skill/574257ea-7b64-4100-b7b6-e27c233fe143>
+        a                  skos:Concept ;
+        dct:description    <http://data.europa.eu/esco/node-literal/95e60f1c-20b1-413f-98cd-aa358a06e456> ;
+        skos:altLabel      "electronic communication"@en , "paperless communication"@en , "digitaalinen tietoliikenne"@fi , "digital communications"@en , "digitale Kommunikation"@de , "digitaalinen viestintä"@fi , "digitaal communiceren en samenwerken"@nl , "επικοινωνία και συνεργασία σε ψηφιακό περιβάλλον"@el ;
+        skos:inScheme      <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> ;
+        skos:prefLabel     "digital kommunikation og kollaboration"@da , "communication et collaboration numériques"@fr , "digital communication and collaboration"@en , "цифрова комуникация и сътрудничество"@bg , "stafræn samskipti og samvinna"@is , "digitalno sporazumevanje in sodelovanje"@sl , "digitális kommunikáció és együttműködés"@hu , "digitalna komunikacija i suradnja"@hr , "comunicación y colaboración digitales"@es , "comunicare e collaborare mediante mezzi digitali"@it , "digitale communicatie en samenwerking"@nl , "comunicação e colaboração digitais"@pt , "cumarsáid agus comhoibriú digiteach"@ga , "digitale Kommunikation und Zusammenarbeit"@de , "digitaalse teabevahetuse ja koostöö korraldamine"@et , "digitaalinen viestintä ja yhteistyö"@fi , "ψηφιακή επικοινωνία και συνεργασία"@el , "digital kommunikasjon og digitalt samarbeid"@no , "digitálna komunikácia a spolupráca"@sk , "komunikazzjoni u kollaborazzjoni diġitali"@mt , "digitální komunikace a spolupráce"@cs , "skaitmeninė komunikacija ir bendradarbiavimas"@lt , "digitālā saziņa un sadarbošanās"@lv , "kommunicera och samarbeta digitalt"@sv , "współpraca i komunikacja cyfrowa"@pl , "comunicare și colaborare digitală"@ro ;
+        skos:topConceptOf  <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> .
+
+<http://data.europa.eu/esco/node-literal/8d2afeca-3107-4e29-8320-ca1c18a8a248>
+        a                 esco:NodeLiteral ;
+        esco:language     "en-us"^^xsd:language ;
+        esco:nodeLiteral  "organize, store and retrieve data, information and content in digital environments. organize and process them in a structured environment." .
+
+<http://data.europa.eu/esco/skill/f5369f2f-e52b-43d8-8d31-79a6c11188d8>
+        a                  skos:Concept ;
+        dct:description    <http://data.europa.eu/esco/node-literal/667075c3-aa23-4822-b344-c1a1b98aa9b8> ;
+        skos:altLabel      "ustvarjati vsebine s pomočjo programske opreme IKT"@sl , "Erstellung von Inhalten mit IKT-Software"@de , "contentcreatie met digitale tools"@nl , "creëren van inhoud met digitale tools"@nl , "content creation with ICT software"@en , "maken van digitale inhoud"@nl , "ábhar digiteach a chruthú"@ga , "inneachar a chruthú le bogearraí TFC"@ga , "tartalomgyártás IKT-technológiák használatával"@hu , "tworzenie treści z wykorzystaniem oprogramowania ICT"@pl , "ICT software content-creation"@en , "content created by ICT software"@en , "content-creation with ICT softwares"@en , "creación de contenidos con programas informáticos"@es , "content-creation with ICT program"@en , "Content-Erstellung mit IKT-Software"@de , "maken van digitale content"@nl , "creación de contenidos con programas de TIC"@es , "sisällöntuotanto tieto- ja viestintäteknisillä ohjelmistoilla"@fi , "creación de contenidos con programas de tecnologías de la información y de las comunicaciones"@es , "wykorzystywanie oprogramowania ICT do tworzenia treści"@pl , "creëren van inhoud met behulp van software"@nl , "creëren van digitale content"@nl , "criação de conteúdos com software TIC"@pt , "digitālā satura veidošana"@lv , "skabelse af indhold ved hjælp af IKT-software"@da , "ábhar a chruthú le bogearraí TFC"@ga , "contentcreatie met behulp van software"@nl ;
+        skos:inScheme      <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> ;
+        skos:prefLabel     "δημιουργία ψηφιακού περιεχομένου"@el , "criação de conteúdos digitais"@pt , "digitālā satura radīšana"@lv , "digitaalisen sisällön luominen"@fi , "myndun stafræns inntaks"@is , "skapa digitalt innehåll med mjukvara"@sv , "skabelse af digitalt indhold"@da , "opprettelse av digitalt innhold"@no , "ħolqien tal-kontenut diġitali"@mt , "ustvarjati digitalne vsebine"@sl , "digital content creation"@en , "creación de contenidos digitales"@es , "creëren van digitale inhoud"@nl , "създаване на цифрово съдържание"@bg , "tworzenie treści cyfrowych"@pl , "creare contenuti digitali"@it , "Erstellung digitaler Inhalte"@de , "tvorba digitálního obsahu"@cs , "creare de conținut digital"@ro , "stvaranje digitalnog sadržaja"@hr , "digitális tartalomgyártás"@hu , "création de contenus numériques"@fr , "tvorba digitálneho obsahu"@sk , "inneachar digiteach a chruthú"@ga , "skaitmeninio turinio kūrimas"@lt , "digitaalse infosisu loomine"@et ;
+        skos:topConceptOf  <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> .
+
+<http://data.europa.eu/esco/node-literal/07ea2711-d095-4f5e-b4a8-59b7995226e0>
+        a                 esco:NodeLiteral ;
+        esco:language     "en-us"^^xsd:language ;
+        esco:nodeLiteral  "Understand how copyright and licenses apply to data, information and digital content." .
+
+<http://data.europa.eu/esco/node-literal/2b927216-b603-4e7c-9da9-a123aba870ed>
+        a                 esco:NodeLiteral ;
+        esco:language     "en-us"^^xsd:language ;
+        esco:nodeLiteral  "Articulate information needs, search for data, information and content in digital environments, access them and navigate between them. Create and update personal search strategies." .
+
+<http://data.europa.eu/esco/node-literal/7be3ccfb-8d62-4083-91f3-dba6e1932379>
+        a                 esco:NodeLiteral ;
+        esco:language     "en" ;
+        esco:nodeLiteral  "Identify technical problems when operating devices and using digital environments, and solve them (from trouble-shooting to solving more complex problems)." .
+
+<http://data.europa.eu/esco/node-literal/f25662e8-3d44-4622-be42-b57c6b342591>
+        a                 esco:NodeLiteral ;
+        esco:language     "en" ;
+        esco:nodeLiteral  "Be able to avoid health-risks and threats to physical and psychological well-being while using digital technologies. Be able to protect oneself and others from possible dangers in digital environments (e.g. cyber bullying). Be aware of digital technologies for social well-being and social inclusion." .
+
+<http://data.europa.eu/esco/node-literal/7142c99c-87ba-49ce-ba90-f31c4d7530f6>
+        a                 esco:NodeLiteral ;
+        esco:language     "en" ;
+        esco:nodeLiteral  "Interact through a variety of digital technologies and understand appropriate digital communication means for a given context." .
+
+<http://data.europa.eu/esco/node-literal/6c3e5f75-b7ab-45a1-8a01-ea86f61204db>
+        a                 esco:NodeLiteral ;
+        esco:language     "en-us"^^xsd:language ;
+        esco:nodeLiteral  "Be able to avoid health-risks and threats to physical and psychological well-being while using digital technologies. Be able to protect oneself and others from possible dangers in digital environments (e.g. cyber bullying). Be aware of digital technologies for social well-being and social inclusion." .
+
+<http://data.europa.eu/esco/skill/16a00c69-9c74-4c37-96d7-6301d285e5ce>
+        a                       esco:Skill , esco:MemberConcept , skos:Concept ;
+        esco:referenceLanguage  "en"^^xsd:language ;
+        esco:skillReuseLevel    <http://data.europa.eu/esco/skill-reuse-level/transversal> ;
+        esco:skillType          <http://data.europa.eu/esco/skill-type/skill> ;
+        dct:description         <http://data.europa.eu/esco/node-literal/2ab88747-4d98-4348-ab0b-78fd76851a05> , <http://data.europa.eu/esco/node-literal/3a401001-3b80-4779-a2f5-237cb364ab3d> ;
+        iso-thes:status         "released" ;
+        skos:altLabel           "als burger actief zijn via digitale technologieën"@nl , "burgerschap uitoefenen met digitale technologieën"@nl , "aktywność obywatelska z wykorzystaniem technologii cyfrowych"@pl , "apply e-services"@en , "use e-services"@en , "able to use e-services"@en , "utilise e-services"@en , "sich mithilfe digitaler Technologien bürgerschaftlich engagieren"@de , "als burger actief zijn via digitale technologie"@nl , "δραστηριοποίηση στα κοινά μέσω ψηφιακών τεχνολογιών"@el , "make use of e-services"@en , "digitale technologieën gebruiken voor actief burgerschap"@nl , "intervenir en la vida ciudadana mediante tecnologías digitales"@es , "iesaistīties sabiedriskajā dzīvē, izmantojot digitālās tehnoloģijas"@lv , "use online payment solutions"@en , "using e-services"@en , "bidrage til fællesskabet via digitale teknologier"@da , "participar en la vida ciudadana utilizando tecnologías digitales"@es ;
+        skos:broader            <http://data.europa.eu/esco/skill/574257ea-7b64-4100-b7b6-e27c233fe143> ;
+        skos:broaderTransitive  <http://data.europa.eu/esco/skill/574257ea-7b64-4100-b7b6-e27c233fe143> ;
+        skos:inScheme           <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> ;
+        skos:prefLabel          "engage in citizenship through digital technologies"@en , "engage in citizenship through digital technologies"@en-us , "يشارك في المواطنة من خلال التكنولوجيات الرقمية"@ar , "digitaaltehnoloogia abil kodanikuõigusi kaitsma"@et , "s’engager dans des actions citoyennes au moyen de technologies numériques"@fr , "participar en la vida ciudadana mediante tecnologías digitales"@es , "harjoittaa kansalaisuuttaan digitaaliteknologian avulla"@fi , "partecipare alle attività civiche mediante le tecnologie digitali"@it , "συμμετοχή στα κοινά μέσω ψηφιακών τεχνολογιών"@el , "skuldbindur sig þegnskapar gegnum stafræna tækni"@is , "involviment fiċ-ċittadinanza permezz ta’ teknoloġiji diġitali"@mt , "engasjere seg i statsborgerskap gjennom digitale teknologier"@no , "mithilfe digitaler Technologien an gesellschaftlichen Entscheidungsprozessen partizipieren"@de , "stimulează spiritul civic prin intermediul tehnologiilor digitale"@ro , "indgå i aktivt medborgerskab via digitale teknologier"@da , "aktivno djelovati kao građanin s pomoću digitalnih tehnologija"@hr , "biti dejaven kot državljan s pomočjo digitalnih tehnologij"@sl , "zapájať sa do občianskeho života prostredníctvom digitálnych technológií"@sk , "bheith gníomhach i gcáil saoránaigh trí mheán teicneolaíochtaí digiteacha"@ga , "plėtoti pilietiškumą naudojantis skaitmeninėmis technologijomis"@lt , "zapojovat se do občanského života prostřednictvím digitálních technologií"@cs , "iesaistīties sabiedriskajā dzīvē ar digitālo tehnoloģiju palīdzību"@lv , "uczestnictwo w działaniach społecznościowych z wykorzystaniem technologii cyfrowych"@pl , "envolver-se na cidadania através das tecnologias digitais"@pt , "a digitális technológiák révén aktív polgári szerepet vállal"@hu , "delta aktivt i samhällslivet genom digital teknik"@sv , "digitale technologie gebruiken voor actief burgerschap"@nl , "участване в обществения живот чрез цифровите технологии"@bg .
+
+<http://data.europa.eu/esco/skill/21d2f96d-35f7-4e3f-9745-c533d2dd6e97>
+        a                         esco:MemberConcept , esco:Skill , skos:Concept ;
+        esco:isEssentialSkillFor  <http://data.europa.eu/esco/occupation/9ebaf3f0-0be0-47b7-b2b1-b3b04130fa81> , <http://data.europa.eu/esco/occupation/6e5ceba0-df96-465f-adb4-2e06ae715d43> , <http://data.europa.eu/esco/occupation/cf2b03cd-feb7-4f47-90f6-ff1ed6016d3d> , <http://data.europa.eu/esco/occupation/bd272aee-adc9-4a06-a15c-a73b4b4a46a7> , <http://data.europa.eu/esco/occupation/f2b15a0e-e65a-438a-affb-29b9d50b77d1> , <http://data.europa.eu/esco/occupation/2ed56c3f-61d6-4f7e-9ef8-8849eb102e4c> , <http://data.europa.eu/esco/occupation/68d973df-bf10-4bf7-9a1b-fbd9f604b9db> , <http://data.europa.eu/esco/occupation/a7c1d23d-aeca-4bee-9a08-5993ed98b135> , <http://data.europa.eu/esco/occupation/c3b82711-273d-4fa8-8de7-0ac3d99c16fc> , <http://data.europa.eu/esco/occupation/866c7813-2c03-47d7-9bdc-192cfbace57c> , <http://data.europa.eu/esco/occupation/456ed487-02f2-45c9-9213-d0fd8e9a069d> , <http://data.europa.eu/esco/occupation/57af9090-55b4-4911-b2d0-86db01c00b02> , <http://data.europa.eu/esco/occupation/bb6198c4-1d3e-40b9-9cc4-ad2dd9d7c74b> , <http://data.europa.eu/esco/occupation/62979364-6fac-41f2-87ca-202bca19a6ab> , <http://data.europa.eu/esco/occupation/c40a2919-48a9-40ea-b506-1f34f693496d> , <http://data.europa.eu/esco/occupation/81480b40-a318-47f3-9b2c-56b69ed67d95> ;
+        esco:isOptionalSkillFor   <http://data.europa.eu/esco/occupation/07e60525-1aad-4099-aaf3-2c7014c92212> , <http://data.europa.eu/esco/occupation/812c217d-32b7-4f6a-9faf-993d3577ac7f> , <http://data.europa.eu/esco/occupation/38a7f453-a7f0-45d2-a74d-5b92506e4a21> , <http://data.europa.eu/esco/occupation/2bef94db-0088-4507-982a-2ca717529adb> , <http://data.europa.eu/esco/occupation/10469d70-78a3-4650-9e29-d04de13c62c1> , <http://data.europa.eu/esco/occupation/d84bf1d7-ef99-40c4-a407-3791d6531b44> , <http://data.europa.eu/esco/occupation/a6a0b60f-08da-4faa-bf54-942987efb471> , <http://data.europa.eu/esco/occupation/86ca306c-ab99-420a-9e2a-aa73c5c4de22> , <http://data.europa.eu/esco/occupation/8d9ec84d-cf2d-4179-87bc-335cda54a427> , <http://data.europa.eu/esco/occupation/5c082067-ea18-4ccb-8c43-e70b18ad8120> , <http://data.europa.eu/esco/occupation/b37d15b3-402e-4792-8292-f18c0de7aca6> , <http://data.europa.eu/esco/skill/913e7e83-b8f8-4574-b1ca-1b38f3fd974a> , <http://data.europa.eu/esco/occupation/d0aa0792-4345-474b-9365-686cf4869d2e> , <http://data.europa.eu/esco/occupation/02eb0ae6-ecdd-4602-9c8e-60ffe6dbe1e2> , <http://data.europa.eu/esco/occupation/fde4372d-8293-42de-afbb-8b5a9b274fe7> , <http://data.europa.eu/esco/skill/25b291b5-8245-4d9d-b391-86a8a31d7109> , <http://data.europa.eu/esco/occupation/d68ff35f-e34d-4e32-88ab-d6c06a6c25b9> , <http://data.europa.eu/esco/occupation/82f90e87-de92-4678-adae-61d3e5f7e1e4> , <http://data.europa.eu/esco/occupation/276ba420-ef09-4a0e-b215-2c2e2f80ad28> , <http://data.europa.eu/esco/occupation/e1c72b5f-4c5c-487c-a6df-e84b64a51dae> , <http://data.europa.eu/esco/occupation/d5a43cd3-230e-46d0-ba05-d67d61e5cfbb> , <http://data.europa.eu/esco/skill/7d10fcb2-b368-48ab-996b-7c9fafcf68ed> , <http://data.europa.eu/esco/occupation/bab5fa79-7f96-4e21-87b6-1eba560b8d9a> , <http://data.europa.eu/esco/occupation/96e20037-0a25-4bf6-a25e-808d1605d890> , <http://data.europa.eu/esco/occupation/04ba4d6c-957d-417f-bf63-5b9e015a9f86> , <http://data.europa.eu/esco/occupation/35553663-deab-4d9a-bf22-15c1625d28e8> , <http://data.europa.eu/esco/occupation/1562c7a3-c7d9-419d-b9b6-db26610bcf84> , <http://data.europa.eu/esco/skill/d31fab87-2a7d-485c-b699-2901ca294b15> , <http://data.europa.eu/esco/skill/cf200547-25b5-47c8-9eda-bca4aedc13fb> , <http://data.europa.eu/esco/skill/5b9cde20-f1b9-4adc-bfb3-dbf70b14138d> , <http://data.europa.eu/esco/occupation/7b1b5da8-573a-49bb-a38e-68725a949f4f> , <http://data.europa.eu/esco/occupation/b11e1742-5e28-4270-b081-b0193d85ee7d> , <http://data.europa.eu/esco/occupation/106f79e4-6264-45f1-9e7a-297435cd684b> , <http://data.europa.eu/esco/skill/5ef0c719-5bcb-49f8-b8eb-824388225333> , <http://data.europa.eu/esco/occupation/98c3d8f8-e3a8-49b7-9e58-236f25a6f6a0> , <http://data.europa.eu/esco/occupation/3e7bf729-4442-4b9f-ad5e-83111963795c> , <http://data.europa.eu/esco/occupation/92bb3d8c-8a9f-4cd7-80ec-247bbf173004> , <http://data.europa.eu/esco/occupation/dc8ef7da-d2c0-4474-96a0-6d0385eeec1e> , <http://data.europa.eu/esco/skill/2c4e11ef-da18-4e19-816b-e6bc19e12424> , <http://data.europa.eu/esco/occupation/a44a1dc5-be08-4840-8bd5-770c4ac1ca6d> ;
+        esco:referenceLanguage    "en"^^xsd:language ;
+        esco:skillReuseLevel      <http://data.europa.eu/esco/skill-reuse-level/transversal> ;
+        esco:skillType            <http://data.europa.eu/esco/skill-type/knowledge> ;
+        dct:description           <http://data.europa.eu/esco/node-literal/9dfad7a4-0fa9-45b1-a406-659073acde21> , <http://data.europa.eu/esco/node-literal/e09c2119-9773-495d-821f-6112aed90a37> ;
+        iso-thes:status           "released" ;
+        skos:altLabel             "computers programmeren"@nl , "technieken en principes voor softwareontwikkeling"@nl , "σύνταξη υπολογιστικού προγράμματος"@el , "postupy programování"@cs , "ανάπτυξη υπολογιστών και λογισµικού"@el , "programmeertalen"@nl , "ħolqien ta' programmi tal-kompjuter"@mt , "δημιουργία υπολογιστικού προγράμματος"@el , "zásady vývoje softwaru"@cs , "computerprogrammeercode"@nl , "počítačová programování"@cs , "programmeren"@nl , "tvorba počítačových programů"@cs , "programmar tal-kompjuters"@mt , "żvilupp ta' softwer għall-kompjuter"@mt ;
+        skos:broader              <http://data.europa.eu/esco/skill/f5369f2f-e52b-43d8-8d31-79a6c11188d8> ;
+        skos:broaderTransitive    <http://data.europa.eu/esco/skill/f5369f2f-e52b-43d8-8d31-79a6c11188d8> ;
+        skos:inScheme             <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> ;
+        skos:prefLabel            "dataprogrammering"@no , "arvutiprogrammeerimine"@et , "programmazione informatica"@it , "datorprogrammering"@sv , "programação informática"@pt , "computer programming"@en , "computer programming"@en-us , "datorprogrammēšana"@lv , "προγραμματισμός ηλεκτρονικών υπολογιστών"@el , "البرمجة الحاسوبية"@ar , "programación informática"@es , "programare pe calculator"@ro , "tietokoneohjelmointi"@fi , "počítačové programovanie"@sk , "ríomhchlárú"@ga , "компютърно програмиране"@bg , "počítačové programování"@cs , "računalno programiranje"@hr , "programmar tal-kompjuter"@mt , "kompiuterinis programavimas"@lt , "programmation informatique"@fr , "programowanie komputerowe"@pl , "számítógépes programozás"@hu , "tölvuforritun"@is , "computerprogrammering"@nl , "computerprogrammering"@da , "Computerprogrammierung"@de , "računalniško programiranje"@sl .
+
+<http://data.europa.eu/esco/node-literal/7c4dbc85-9d14-4d6f-a21a-2ab1c6145a33>
+        a                 esco:NodeLiteral ;
+        esco:language     "en-us"^^xsd:language ;
+        esco:nodeLiteral  "Assess needs and identify, evaluate, select and use digital tools and possible technological responses to solve them. Adjust and customize digital environments to personal needs (e.g. accessibility)." .
+
+<http://data.europa.eu/esco/node-literal/4a925ea1-89a8-4819-94c6-0f2c49e7212e>
+        a                 esco:NodeLiteral ;
+        esco:language     "en-us"^^xsd:language ;
+        esco:nodeLiteral  "analyze, compare and critically evaluate the credibility and reliability of sources of data, information and digital content. analyze, interpret and critically evaluate the data, information and digital content." .
+
+<http://data.europa.eu/esco/skill/629685b8-5f9e-4522-8cff-b3e2c4ec625a>
+        a                  skos:Concept ;
+        dct:description    <http://data.europa.eu/esco/node-literal/ac4e2c88-811f-4aea-807b-77c3d2c20c5e> ;
+        skos:altLabel      "procesarea de date electronice"@ro , "paperless data processing"@en , "procesamiento digital de datos"@es , "digitaledataverwerking"@nl , "electronic data processing"@en , "processing of data digitally"@en , "proceso digital de datos"@es , "verwerking van digitale data"@nl , "digitale Datenverarbeitung"@de , "digitalegegevensverwerking"@nl , "data processing"@en ;
+        skos:inScheme      <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> ;
+        skos:prefLabel     "próiseáil sonraí digiteacha"@ga , "digital data processing"@en , "verwerking van digitale gegevens"@nl , "stafræn gagnavinnsla"@is , "digitaalne andmetöötlus"@et , "ipproċessar tad-dejta diġitali"@mt , "przetwarzanie danych cyfrowych"@pl , "skaitmeninių duomenų tvarkymas"@lt , "traitement de données numériques"@fr , "digitaalinen tietojenkäsittely"@fi , "procesarea datelor digitale"@ro , "tratamento de dados digitais"@pt , "Verarbeitung digitaler Daten"@de , "obdelava digitalnih podatkov"@sl , "обработка на цифрови данни"@bg , "ψηφιακή επεξεργασία δεδομένων"@el , "spracovanie digitálnych údajov"@sk , "elaborazione di dati digitali"@it , "tratamiento digital de los datos"@es , "zpracování digitálních údajů"@cs , "digitālu datu apstrāde"@lv , "digitális adatfeldolgozás"@hu , "obrada digitalnih podataka"@hr , "digital databehandling"@da , "digital databehandling"@sv , "digital databehandling"@no ;
+        skos:topConceptOf  <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> .
+
+<http://data.europa.eu/esco/node-literal/e09c2119-9773-495d-821f-6112aed90a37>
+        a                 esco:NodeLiteral ;
+        esco:language     "en" ;
+        esco:nodeLiteral  "The techniques and principles of software development, such as analysis, algorithms, coding, testing and compiling of programming paradigms (e.g. object oriented programming, functional programming) and of programming languages." .
+
+<http://data.europa.eu/esco/node-literal/cb3843ed-eb4c-4866-a829-c4e2f10c2eba>
+        a                 esco:NodeLiteral ;
+        esco:language     "en-us"^^xsd:language ;
+        esco:nodeLiteral  "Identify technical problems when operating devices and using digital environments, and solve them (from trouble-shooting to solving more complex problems)." .
+
+<http://data.europa.eu/esco/node-literal/95e60f1c-20b1-413f-98cd-aa358a06e456>
+        a                 esco:NodeLiteral ;
+        esco:language     "en" ;
+        esco:nodeLiteral  "Communicate in digital environments, share resources through online tools, link with others and collaborate through digital tools, interact with and participate in communities and networks, cross-cultural awareness." .
+
+<http://data.europa.eu/esco/skill/a12057b4-6d11-4a12-ab8e-15a028ef0a6d>
+        a                       esco:MemberConcept , skos:Concept , esco:Skill ;
+        esco:referenceLanguage  "en"^^xsd:language ;
+        esco:skillReuseLevel    <http://data.europa.eu/esco/skill-reuse-level/transversal> ;
+        esco:skillType          <http://data.europa.eu/esco/skill-type/skill> ;
+        dct:description         <http://data.europa.eu/esco/node-literal/7142c99c-87ba-49ce-ba90-f31c4d7530f6> , <http://data.europa.eu/esco/node-literal/a7f629f9-2b18-43c0-b750-ad5b770147fb> ;
+        iso-thes:status         "released" ;
+        skos:altLabel           "use e-mail software and services"@en , "interakcja w środowiskach cyfrowych"@pl , "utilise online communication tools"@en , "interactuar utilizando tecnologías digitales"@es , "able to use online communication tools"@en , "using online communication tools"@en , "διάδραση μέσω ψηφιακών τεχνολογιών"@el , "contacten onderhouden met digitale technologieën"@nl , "communicate on-line"@en , "communiceren via digitale technologie"@nl , "make use of online communication tools"@en , "comunică cu ajutorul tehnologiilor digitale"@ro , "communicate in digital environments"@en , "apply online communication tools"@en , "use online communication tools"@en , "interact through ICT"@en , "kommunikere via digitale teknologier"@da , "mijiedarboties ar digitālo tehnoloģiju palīdzību"@lv ;
+        skos:broader            <http://data.europa.eu/esco/skill/574257ea-7b64-4100-b7b6-e27c233fe143> ;
+        skos:broaderTransitive  <http://data.europa.eu/esco/skill/574257ea-7b64-4100-b7b6-e27c233fe143> ;
+        skos:inScheme           <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> ;
+        skos:prefLabel          "hefur gagnkvæm samskiptir gegnum stafræna tækni"@is , "olla vuorovaikutuksessa digitaaliteknologian välityksellä"@fi , "mijiedarboties, izmantojot digitālās tehnoloģijas"@lv , "mithilfe digitaler Technologien interagieren"@de , "komunicirati s pomoću digitalnih tehnologija"@hr , "idirghníomhú trí mheán teicneolaíochtaí digiteacha"@ga , "digitális technológiák használatával kommunikál"@hu , "interagere via digitale teknologier"@da , "communiceren met behulp van digitale technologieën"@nl , "interacționează prin intermediul tehnologiilor digitale"@ro , "interact through digital technologies"@en , "interact through digital technologies"@en-us , "interagovat prostřednictvím digitálních technologií"@cs , "sporazumevati se s pomočjo digitalnih tehnologij"@sl , "يتفاعل من خلال التقنيات الرقمية"@ar , "interakcja z wykorzystaniem technologii cyfrowych"@pl , "interagera genom digital teknik"@sv , "samhandle gjennom digitale teknologier"@no , "digitaaltehnoloogia kaudu suhtlema"@et , "interagovať prostredníctvom digitálnych technológií"@sk , "interazzjoni permezz ta’ teknoloġiji diġitali"@mt , "palaikyti ryšius naudojantis skaitmeninėmis technologijomis"@lt , "επικοινωνία μέσω ψηφιακών τεχνολογιών"@el , "осъществяване на взаимодействие чрез цифровите технологии"@bg , "interactuar mediante tecnologías digitales"@es , "interagir através das tecnologias digitais"@pt , "interagir au moyen de technologies numériques"@fr , "interagire mediante le tecnologie digitali"@it .
+
+<http://data.europa.eu/esco/skill/d1ed5b3a-cab5-4c5d-baf8-0214998b58fb>
+        a                       esco:MemberConcept , skos:Concept , esco:Skill ;
+        esco:referenceLanguage  "en"^^xsd:language ;
+        esco:skillReuseLevel    <http://data.europa.eu/esco/skill-reuse-level/transversal> ;
+        esco:skillType          <http://data.europa.eu/esco/skill-type/skill> ;
+        dct:description         <http://data.europa.eu/esco/node-literal/6c3e5f75-b7ab-45a1-8a01-ea86f61204db> , <http://data.europa.eu/esco/node-literal/f25662e8-3d44-4622-be42-b57c6b342591> ;
+        iso-thes:status         "released" ;
+        skos:altLabel           "προστασία της υγείας και της ευεξίας κατά τη χρήση ψηφιακών τεχνολογιών"@el , "rūpēties par veselību un labsajūtu digitālo tehnoloģiju izmantošanas laikā"@lv , "bezpieczne i zrównoważone użytkowanie technologii cyfrowych"@pl , "gezondheid en welzijn bewaken bij het gebruik van digitale technologieën"@nl , "verantwoord gebruikmaken van digitale technologieën"@nl ;
+        skos:broader            <http://data.europa.eu/esco/skill/426ceaba-6867-481c-bb6b-aee3933da7d2> ;
+        skos:broaderTransitive  <http://data.europa.eu/esco/skill/426ceaba-6867-481c-bb6b-aee3933da7d2> ;
+        skos:inScheme           <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> ;
+        skos:prefLabel          "sláinte agus folláine a chosaint le linn teicneolaíochtaí digiteacha a úsáid"@ga , "опазване на здравето и благополучието чрез използване на цифровите технологии"@bg , "protejează sănătatea și starea de bine la locul de muncă în cazul utilizării tehnologiilor digitale"@ro , "protect health and well-being while using digital technologies"@en-us , "protect health and well-being while using digital technologies"@en , "verndar heilsu og vellíðan við notkun á stafrænni tækni"@is , "beskytte sundhed og velfærd i forbindelse med anvendelse af digitale teknologier"@da , "rūpēties par veselību un labklājību digitālo tehnoloģiju izmantošanas laikā"@lv , "saugoti sveikatą ir gerovę naudojantis skaitmeninėmis technologijomis"@lt , "يحمي الصحة والرفاهية أثناء استخدام التكنولوجيات الرقمية"@ar , "προστασία της υγείας και της ευεξίας κατά την εργασία με ψηφιακές τεχνολογίες"@el , "zapewnianie ochrony zdrowia i dobrostanu przy stosowaniu technologii cyfrowych"@pl , "uso di tecnologie digitali"@it , "käyttää digitaaliteknologioita ottaen huomioon terveyttä ja hyvinvointia koskevat näkökohdat"@fi , "štititi zdravlje i dobrobit tijekom uporabe digitalnih tehnologija"@hr , "använda digital teknik utan risk för hälsa och välbefinnande"@sv , "beskytte helse og velvære under bruk av digitale teknologier"@no , "protezzjoni tas-saħħa u tal-benesseri fl-użu tat-teknoloġiji diġitali"@mt , "protéger la santé et le bien-être lors de l'utilisation des technologies numériques"@fr , "digitaaltehnoloogia kasutamisel tervist ja heaolu kaitsma"@et , "Gesundheit und Wohlbefinden während der Verwendung digitaler Technologien schützen und bewahren"@de , "chrániť zdravie a pohodu pri využívaní digitálnych technológií"@sk , "zajišťovat ochranu zdraví a dobré pracovní podmínky při používání digitálních technologií"@cs , "a digitális technológiák használata során gondoskodik a fizikai és lelki egészség és jóllét védelméről"@hu , "proteger a saúde e o bem-estar durante o uso das tecnologias digitais"@pt , "gezondheid en welzijn beschermen bij het gebruik van digitale technologieën"@nl , "varovati zdravje in dobro počutje pri uporabi digitalnih tehnologij"@sl , "proteger la salud y el bienestar mediante tecnologías digitales"@es .
+
+<http://data.europa.eu/esco/node-literal/b449a11d-4863-4fda-920a-c4064494917d>
+        a                 esco:NodeLiteral ;
+        esco:language     "en" ;
+        esco:nodeLiteral  "Create and manage one or multiple digital identities, be able to protect one's own reputation, deal with the data that one produces through several digital tools, environments and services." .
+
+<http://data.europa.eu/esco/node-literal/a7f629f9-2b18-43c0-b750-ad5b770147fb>
+        a                 esco:NodeLiteral ;
+        esco:language     "en-us"^^xsd:language ;
+        esco:nodeLiteral  "Interact through a variety of digital technologies and understand appropriate digital communication means for a given context." .
+
+<http://data.europa.eu/esco/node-literal/9ab8557c-85bf-4b15-87a6-660ddc4e611c>
+        a                 esco:NodeLiteral ;
+        esco:language     "en" ;
+        esco:nodeLiteral  "Protect devices and digital content, and understand risks and threats in digital environments. Know about safety and security measures and have due regard to reliability and privacy. Make use of tools and methods which maximise security of ICT devices and information by controlling access, such as passwords, digital signatures, biometry, and protecting systems such as firewall, antivirus, spam filters." .
+
+<http://data.europa.eu/esco/node-literal/2b5a763a-d2de-406f-963d-dd6b718b88d4>
+        a                 esco:NodeLiteral ;
+        esco:language     "en" ;
+        esco:nodeLiteral  "Organise, store and retrieve data, information and content in digital environments. Organise and process them in a structured environment." .
+
+<http://data.europa.eu/esco/skill/e439742d-558d-4f52-885e-afdc740b48cf>
+        a                       esco:MemberConcept , skos:Concept , esco:Skill ;
+        esco:referenceLanguage  "en"^^xsd:language ;
+        esco:skillReuseLevel    <http://data.europa.eu/esco/skill-reuse-level/transversal> ;
+        esco:skillType          <http://data.europa.eu/esco/skill-type/skill> ;
+        dct:description         <http://data.europa.eu/esco/node-literal/2b927216-b603-4e7c-9da9-a123aba870ed> , <http://data.europa.eu/esco/node-literal/02eb4966-46f0-4311-af66-2bbab192c978> ;
+        iso-thes:status         "released" ;
+        skos:altLabel           "navegar, buscar y filtrar datos, información y contenidos electrónicos"@es , "in gegevens, informatie en digitale content browsen, zoeken en filteren"@nl , "navegar, buscar y filtrar datos, información y contenido electrónicos"@es , "gegevens, informatie en digitale content verkennen, zoeken en filteren"@nl , "navegar, buscar y filtrar datos, información y contenidos digitales"@es , "sonraí, faisnéis agus ábhar digiteach a bhrabhsáil, a chuardach agus a scagadh"@ga , "in gegevens, informatie en digitale inhoud browsen, zoeken en filteren"@nl ;
+        skos:broader            <http://data.europa.eu/esco/skill/629685b8-5f9e-4522-8cff-b3e2c4ec625a> ;
+        skos:broaderTransitive  <http://data.europa.eu/esco/skill/629685b8-5f9e-4522-8cff-b3e2c4ec625a> ;
+        skos:inScheme           <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> ;
+        skos:prefLabel          "bla gjennom, søke i, og filtrere data, informasjon og digitalt innhold"@no , "tirer parti de données, d’informations et de contenus numériques par la navigation, les recherches et le filtrage"@fr , "prohlížet si, vyhledávat a filtrovat údaje, informace a digitální obsah"@cs , "selata, hakea ja lajitella dataa, tietoa ja digitaalista sisältöä"@fi , "تصفح البيانات والمعلومات والمحتوى الرقمي والبحث فيهم وتصفيتهم"@ar , "pesquisar, procurar e filtrar dados, informações e conteúdos digitais"@pt , "преглеждане, търсене и филтриране на данни, информация и цифрово съдържание"@bg , "peržiūrėti ir filtruoti duomenis, informaciją bei skaitmeninį turinį ir jų ieškoti"@lt , "gegevens, informatie en digitale inhoud verkennen, zoeken en filteren"@nl , "browse, søge efter og filtrere data, oplysninger og digitalt indhold"@da , "läsa, söka och filtrera data, information och digitalt innehåll"@sv , "adatokat, információkat és digitális tartalmakat böngész, keres és szűr"@hu , "andmeid, teavet ja digitaalset sisu sirvima, otsima ja sõeluma"@et , "διερεύνηση, αναζήτηση και φιλτράρισμα δεδομένων, πληροφοριών και ψηφιακού περιεχομένου"@el , "consultare, cercare e filtrare dati, informazioni e contenuti digitali"@it , "sonraí, faisnéis agus inneachar digiteach a bhrabhsáil, a chuardach agus a scagadh"@ga , "Daten, Informationen und digitale Inhalte durchsehen, recherchieren und filtern"@de , "prehliadať, vyhľadávať a filtrovať údaje, informácie a digitálny obsah"@sk , "ibbrawżjar, tiftix u filtrazzjoni tad-dejta, tal-informazzjoni u tal-kontenut diġitali"@mt , "navegar, buscar y filtrar datos, información y contenido digitales"@es , "browse, search and filter data, information and digital content"@en , "browse, search and filter data, information and digital content"@en-us , "fer um netið, leitar og síar gögn, upplýsingar og stafrænt inntak"@is , "pārlūkot, meklēt un filtrēt datus, informāciju un digitālo saturu"@lv , "răsfoiește, caută și filtrează date, informații și conținut digital"@ro , "pregledavati, pretraživati i filtrirati podatke, informacije i digitalni sadržaj"@hr , "pregledovati podatke, informacije in digitalne vsebine v brskalniku, jih iskati in filtrirati"@sl , "przeglądanie, wyszukiwanie i filtrowanie danych, informacji i treści cyfrowych"@pl .
+
+<http://data.europa.eu/esco/skill/c4ba12d1-4698-42fa-8abb-789462ea2586>
+        a                       esco:Skill , esco:MemberConcept , skos:Concept ;
+        esco:referenceLanguage  "en"^^xsd:language ;
+        esco:skillReuseLevel    <http://data.europa.eu/esco/skill-reuse-level/transversal> ;
+        esco:skillType          <http://data.europa.eu/esco/skill-type/skill> ;
+        dct:description         <http://data.europa.eu/esco/node-literal/0c3f2711-856f-4481-ad82-b6b736679c45> , <http://data.europa.eu/esco/node-literal/688630ff-feec-4b92-a819-5b87ed951ae2> ;
+        iso-thes:status         "released" ;
+        skos:altLabel           "προστασία του περιβάλλοντος από τις επιπτώσεις των ψηφιακών τεχνολογιών"@el , "het milieu beschermen bij het gebruik van digitale technologieën"@nl , "proteger el entorno frente al impacto de las tecnologías digitales"@es , "proteger el medio ambiente ante el impacto de las tecnologías digitales"@es , "bezpieczne dla środowiska naturalnego użytkowanie technologii cyfrowych"@pl , "sargāt vidi no digitālo tehnoloģiju radītās ietekmes"@lv , "protejează mediul de efectele tehnologiilor digitale"@ro ;
+        skos:broader            <http://data.europa.eu/esco/skill/426ceaba-6867-481c-bb6b-aee3933da7d2> ;
+        skos:broaderTransitive  <http://data.europa.eu/esco/skill/426ceaba-6867-481c-bb6b-aee3933da7d2> ;
+        skos:inScheme           <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> ;
+        skos:prefLabel          "ochrona środowiska naturalnego przed szkodami związanymi z technologiami cyfrowymi"@pl , "protezzjoni tal-ambjent mill-impatt tat-teknoloġiji diġitali"@mt , "an comhshaol a chosaint ar dhrochthionchar na dteicneolaíochtaí digiteacha"@ga , "proteger el medio ambiente frente al impacto de las tecnologías digitales"@es , "protect the environment from the impact of the digital technologies"@en-us , "protect the environment from the impact of the digital technologies"@en , "beskytte miljøet mod de digitale teknologiers indvirkning"@da , "de invloed van digitale technologieën op het milieu beperken"@nl , "προστασία του περιβάλλοντος από τον αντίκτυπο των ψηφιακών τεχνολογιών"@el , "impatto delle tecnologie digitali"@it , "varovati okolje pred vplivi digitalnih tehnologij"@sl , "skydda miljön från påverkan av digital teknik"@sv , "chrániť životné prostredie pred vplyvom digitálnych technológií"@sk , "verndar umhverfið fyrir áhrifum stafrænnar tækni"@is , "chránit životní prostředí před vlivem digitálních technologií"@cs , "proteger o ambiente do impacto das tecnologias digitais"@pt , "يحمي البيئة من تأثير التكنولوجيات الرقمية"@ar , "apsaugoti aplinką nuo skaitmenių technologijų poveikio"@lt , "suojella ympäristöä digitaaliteknologioiden vaikutukselta"@fi , "combate impactul negativ al tehnologiilor digitale asupra mediului"@ro , "aizsargāt vidi no digitālo tehnoloģiju radītās ietekmes"@lv , "óvja a környezetet a digitális technológiák hatásaitól"@hu , "die Umwelt vor den Folgen digitaler Technologien schützen"@de , "опазване на околната среда от въздействието на цифровите технологии"@bg , "keskkonda digitaaltehnoloogia mõju eest kaitsma"@et , "protéger l’environnement des effets de technologies numériques"@fr , "štititi okoliš od učinka digitalnih tehnologija"@hr , "beskytte miljøet mot påvirkningen fra digitale teknologier"@no .
+
+<http://data.europa.eu/esco/node-literal/450d2dd2-9b78-4b65-9934-bed64e5d8243>
+        a                 esco:NodeLiteral ;
+        esco:language     "en" ;
+        esco:nodeLiteral  "Modify, refine, improve and integrate information and content into an existing body of knowledge to create new, original and relevant content and knowledge." .
+
+<http://data.europa.eu/esco/node-literal/9dfad7a4-0fa9-45b1-a406-659073acde21>
+        a                 esco:NodeLiteral ;
+        esco:language     "en-us"^^xsd:language ;
+        esco:nodeLiteral  "The techniques and principles of software development, such as analysis, algorithms, coding, testing and compiling of programming paradigms (e.g. object oriented programming, functional programming) and of programming languages." .
+
+<http://data.europa.eu/esco/node-literal/0c3f2711-856f-4481-ad82-b6b736679c45>
+        a                 esco:NodeLiteral ;
+        esco:language     "en" ;
+        esco:nodeLiteral  "Be aware of the environmental impact of digital technologies and their use." .
+
+<http://data.europa.eu/esco/skill/7e5147d1-60b1-4a68-804b-1f5cb0396b91>
+        a                  skos:Concept ;
+        dct:description    <http://data.europa.eu/esco/node-literal/7fbd6a0c-59d9-4c13-af8c-bd670c883454> ;
+        skos:altLabel      "problemen oplossen met ICT-instrumenten en hardware"@nl , "επίλυση προβλημάτων με εργαλεία και υλισμικό ΤΠΕ"@el , "resolving issues with ICT tools and hardware"@en , "finding solutions with ICT tools and hardware"@en , "ongelmanratkaisu ICT-työkaluilla ja -laitteilla"@fi , "resolución de problemas mediante hardware y herramientas informáticas"@es , "επίλυση προβλημάτων με εργαλεία και εξοπλισμό ΤΠΕ"@el , "Problemlösung mit IKT-Tools und Hardware"@de , "ICT tools and hardware problem solving"@en , "problem-solving with information and communication technologies tools and hardware"@en , "problem-solve with ICT tools and hardware"@en , "resolución de problemas mediante hardware y herramientas de las TIC"@es , "επίλυση προβλημάτων με εργαλεία και υλισμικό της τεχνολογίας πληροφοριών και επικοινωνιών"@el , "problem-solving with ICT hardware and tools"@en ;
+        skos:inScheme      <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> ;
+        skos:prefLabel     "IKT vahendite ja riistvaraga seotud probleemide lahendamine"@et , "problemløsing med IKT-verktøy og -maskinvare"@no , "risoluzione di problemi con hardware e strumenti ICT"@it , "lausn vandamála með UST-verkfærum og vélbúnaði"@is , "riešenie problémov pomocou nástrojov a hardvéru IKT"@sk , "ongelmanratkaisu tieto- ja viestintäteknisillä työkaluilla ja laitteilla"@fi , "soluzzjoni tal-problemi bl-għodda u bil-ħardwer tal-ICT"@mt , "resolución de problemas mediante hardware y herramientas de las tecnologías de la información y de las comunicaciones"@es , "résolution des problèmes à l'aide d'outils et de matériel TIC"@fr , "rješavanje problema s pomoću alata i hardvera za IKT"@hr , "problēmu risināšana, izmantojot IKT rīkus un aparatūru"@lv , "soluționarea problemelor cu instrumente și hardware TIC"@ro , "probleemoplossing met ICT-instrumenten en hardware"@nl , "problem-solving with digital tools"@en , "problemlösning med IKT-verktyg och maskinvara"@sv , "επίλυση προβλημάτων με εργαλεία και εξοπλισμό της τεχνολογίας πληροφοριών και επικοινωνιών"@el , "problemų sprendimas naudojant IRT priemones ir kompiuterinę aparatinę įrangą"@lt , "fadhbanna a réiteach le huirlisí agus crua-earraí TFC"@ga , "решаване на проблеми с помощта на ИКТ инструменти и хардуер"@bg , "reševanje problemov z orodji in strojno opremo IKT"@sl , "problémamegoldás IKT-eszközök és hardverek használatával"@hu , "řešení problémů pomocí nástrojů a hardware na poli IKT"@cs , "Problemlösung mit IKT-Instrumenten und Hardware"@de , "problemløsning med IKT-værktøjer og hardware"@da , "resolução de problemas com a ajuda de ferramentas e equipamentos TIC"@pt , "rozwiązywanie problemów przy wykorzystaniu narzędzi i sprzętu ICT"@pl ;
+        skos:topConceptOf  <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> .
+
+<http://data.europa.eu/esco/node-literal/b09c3c1a-5479-4a4b-8a1b-9b43e5d64e55>
+        a                 esco:NodeLiteral ;
+        esco:language     "en" ;
+        esco:nodeLiteral  "Assess needs and identify, evaluate, select and use digital tools and possible technological responses to solve them. Adjust and customise digital environments to personal needs (e.g. accessibility)." .
+
+<http://data.europa.eu/esco/node-literal/39b2bff3-7be3-43f2-8916-69f33d684157>
+        a                 esco:NodeLiteral ;
+        esco:language     "en" ;
+        esco:nodeLiteral  "Personal protection, data protection, digital identity protection, security measures, safe and sustainable use." .
+
+<http://data.europa.eu/esco/node-literal/6080fc22-edf1-4220-b100-33b9374e98dd>
+        a                 esco:NodeLiteral ;
+        esco:language     "en-us"^^xsd:language ;
+        esco:nodeLiteral  "Modify, refine, improve and integrate information and content into an existing body of knowledge to create new, original and relevant content and knowledge." .
+
+<http://data.europa.eu/esco/node-literal/5e524614-9a59-4e45-bcd7-8d947e67fe4f>
+        a                 esco:NodeLiteral ;
+        esco:language     "en-us"^^xsd:language ;
+        esco:nodeLiteral  "Protect devices and digital content, and understand risks and threats in digital environments. Know about safety and security measures and have due regard to reliability and privacy. Make use of tools and methods which maximize security of ICT devices and information by controlling access, such as passwords, digital signatures, biometry, and protecting systems such as firewall, antivirus, spam filters." .
+
+<http://data.europa.eu/esco/node-literal/67895a23-938b-476d-98ce-3e5a75db86db>
+        a                 esco:NodeLiteral ;
+        esco:language     "en-us"^^xsd:language ;
+        esco:nodeLiteral  "Protect personal data and privacy in digital environments. Understand how to use and share personally identifiable information while being able to protect oneself and others from damages. Understand that digital services use a “Privacy policy” to inform how personal data is used." .
+
+<http://data.europa.eu/esco/skill/426ceaba-6867-481c-bb6b-aee3933da7d2>
+        a                  skos:Concept ;
+        dct:description    <http://data.europa.eu/esco/node-literal/39b2bff3-7be3-43f2-8916-69f33d684157> ;
+        skos:altLabel      "ICT protection"@en , "informacinių ir komunikacinių technologijų sauga"@lt , "ασφάλεια ΤΠΕ"@el , "ICT-turva"@fi , "information and communication technology safety"@en , "IT-biztonság"@hu , "information and communication technologies safety"@en , "ICT welfare maintenance"@en , "sécurité des technologies de l'information et de la communication"@fr , "seguridad de las TIC"@es , "ICT security"@en , "securitatea tehnologiei informațiilor și comunicațiilor"@ro , "securitate TIC"@ro , "seguridad informática"@es , "ICT-beveiliging"@nl , "ICT well-being  maintenance"@en ;
+        skos:inScheme      <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> ;
+        skos:prefLabel     "informacinių ir ryšių technologijų (IRT) sauga"@lt , "безопасност на ИКТ"@bg , "bezpečnost IKT"@cs , "siguranță TIC"@ro , "IKT-biztonság"@hu , "ICT-veiligheid"@nl , "varnost IKT"@sl , "zasady bezpieczeństwa ICT"@pl , "sikurezza tal-ICT"@mt , "UST-öryggi"@is , "sigurnost IKT-a"@hr , "ICT safety"@en , "bezpečnosť IKT"@sk , "ασφάλεια της τεχνολογίας πληροφοριών και επικοινωνιών"@el , "IKT turvalisus"@et , "segurança TIC"@pt , "IKT-sikkerhet"@no , "informācijas un komunikācijas tehnoloģiju drošība"@lv , "IKT-Sicherheit"@de , "IKT-sikkerhed"@da , "tieto- ja viestintäturva"@fi , "IKT-säkerhet"@sv , "seguridad de las tecnologías de la información y de las comunicaciones"@es , "sicurezza ICT"@it , "sécurité des TIC"@fr , "sábháilteacht TFC"@ga ;
+        skos:topConceptOf  <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> .
+
+<http://data.europa.eu/esco/skill/5fd5c985-eaaa-47aa-8314-62359c54505a>
+        a                       skos:Concept , esco:MemberConcept , esco:Skill ;
+        esco:referenceLanguage  "en"^^xsd:language ;
+        esco:skillReuseLevel    <http://data.europa.eu/esco/skill-reuse-level/transversal> ;
+        esco:skillType          <http://data.europa.eu/esco/skill-type/skill> ;
+        dct:description         <http://data.europa.eu/esco/node-literal/8e11672a-6db0-46dc-9982-7c9f99a63f42> , <http://data.europa.eu/esco/node-literal/b7994d0f-a34e-4f76-aa2b-4251c2bdf40a> ;
+        iso-thes:status         "released" ;
+        skos:altLabel           "desarrollar contenido digital"@es , "crear contenido digital"@es , "creează conținut digital"@ro , "digitale content ontwikkelen"@nl , "concebir contenidos digitales"@es , "elaborar contenidos digitales"@es , "ábhar digiteach a fhorbairt"@ga , "crear contenidos digitales"@es ;
+        skos:broader            <http://data.europa.eu/esco/skill/f5369f2f-e52b-43d8-8d31-79a6c11188d8> ;
+        skos:broaderTransitive  <http://data.europa.eu/esco/skill/f5369f2f-e52b-43d8-8d31-79a6c11188d8> ;
+        skos:inScheme           <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> ;
+        skos:prefLabel          "develop digital content"@en-us , "develop digital content"@en , "разработване на цифрово съдържание"@bg , "opracowywanie treści cyfrowych"@pl , "sviluppare contenuti digitali"@it , "يطور المحتوى الرقمي"@ar , "digitális tartalmakat fejleszt"@hu , "desenvolver conteúdos digitais"@pt , "digitale Inhalte entwickeln"@de , "utvikle digitalt innhold"@no , "digitaalset sisu arendama"@et , "desarrollar contenidos digitales"@es , "ανάπτυξη ψηφιακού περιεχομένου"@el , "żvilupp tal-kontenut diġitali"@mt , "plėtoti skaitmeninį turinį"@lt , "izstrādāt digitālo saturu"@lv , "vyvíjať digitálny obsah"@sk , "razvijati digitalne vsebine"@sl , "udvikle digitalt indhold"@da , "kehittää digitaalista sisältöä"@fi , "dezvoltă conținut digital"@ro , "utveckla digitalt innehåll"@sv , "digitale inhoud ontwikkelen"@nl , "razvijati digitalni sadržaj"@hr , "vytvářet digitální obsah"@cs , "þróar stafrænt inntak"@is , "élaborer des contenus numériques"@fr , "inneachar digiteach a fhorbairt"@ga .
+
+<http://data.europa.eu/esco/concept-scheme/skill-ict-groups>
+        a                   skos:ConceptScheme ;
+        skos:hasTopConcept  <http://data.europa.eu/esco/skill/574257ea-7b64-4100-b7b6-e27c233fe143> , <http://data.europa.eu/esco/skill/629685b8-5f9e-4522-8cff-b3e2c4ec625a> , <http://data.europa.eu/esco/skill/426ceaba-6867-481c-bb6b-aee3933da7d2> , <http://data.europa.eu/esco/skill/f5369f2f-e52b-43d8-8d31-79a6c11188d8> , <http://data.europa.eu/esco/skill/7e5147d1-60b1-4a68-804b-1f5cb0396b91> ;
+        skos:prefLabel      "Information and communications technology" .
+
+<http://data.europa.eu/esco/node-literal/065e18f8-df44-49a9-a153-25eef949fb07>
+        a                 esco:NodeLiteral ;
+        esco:language     "en" ;
+        esco:nodeLiteral  "Analyse, compare and critically evaluate the credibility and reliability of sources of data, information and digital content. Analyse, interpret and critically evaluate the data, information and digital content." .
+
+<http://data.europa.eu/esco/skill/bc0b0b5d-f6be-405a-b224-b6902a4dbe97>
+        a                       esco:MemberConcept , skos:Concept , esco:Skill ;
+        esco:referenceLanguage  "en"^^xsd:language ;
+        esco:skillReuseLevel    <http://data.europa.eu/esco/skill-reuse-level/transversal> ;
+        esco:skillType          <http://data.europa.eu/esco/skill-type/skill> ;
+        dct:description         <http://data.europa.eu/esco/node-literal/cb13cca3-347d-4e49-96e2-bf4dbee3c17e> , <http://data.europa.eu/esco/node-literal/b449a11d-4863-4fda-920a-c4064494917d> ;
+        iso-thes:status         "released" ;
+        skos:altLabel           "de eigen digitale identiteit beheren en beschermen"@nl , "de eigen digitale identiteit beheren"@nl , "gestionar la identidad 2.0"@es , "hallinnoida digitaalista henkilöllisyyttä"@fi , "διαχείριση ψηφιακών ταυτοτήτων"@el , "δημιουργία ψηφιακών ταυτοτήτων"@el , "ochrona tożsamości cyfrowej"@pl ;
+        skos:broader            <http://data.europa.eu/esco/skill/574257ea-7b64-4100-b7b6-e27c233fe143> ;
+        skos:broaderTransitive  <http://data.europa.eu/esco/skill/574257ea-7b64-4100-b7b6-e27c233fe143> ;
+        skos:inScheme           <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> ;
+        skos:prefLabel          "sér um stafrænt auðkenni"@is , "manage digital identity"@en , "manage digital identity"@en-us , "digitaalset identiteeti haldama"@et , "digitale Identität verwalten"@de , "управляване на цифрова самоличност"@bg , "identità digitale"@it , "gérer une identité numérique"@fr , "immaniġġjar tal-identità diġitali"@mt , "διαχείριση ψηφιακής ταυτότητας"@el , "spravovat digitální identitu"@cs , "upravljati digitalnim identitetom"@hr , "يدير الهوية الرقمية"@ar , "hallinnoida digitaalista identiteettiä"@fi , "digitale identiteiten beheren"@nl , "spravovať digitálnu identitu"@sk , "céannacht dhigiteach a bhainistiú"@ga , "hantera digital identitet"@sv , "zarządzanie tożsamością cyfrową"@pl , "valdyti skaitmeninę tapatybę"@lt , "gestionar la identidad digital"@es , "gestionează identitatea digitală"@ro , "digitális személyazonosságot kezel"@hu , "gerir identidades digitais"@pt , "upravljati digitalne identitete"@sl , "administrere digital identitet"@da , "administrere digital identitet"@no , "pārvaldīt digitālo identitāti"@lv .
+
+<http://data.europa.eu/esco/node-literal/969322d3-6f5d-44ee-87a5-e92c2b059080>
+        a                 esco:NodeLiteral ;
+        esco:language     "en-us"^^xsd:language ;
+        esco:nodeLiteral  "Use digital tools and technologies for collaborative processes, and for co-construction and co-creation of resources and knowledge." .
+
+<http://data.europa.eu/esco/node-literal/7ef48bf6-6c6f-4226-947c-390871540d0c>
+        a                 esco:NodeLiteral ;
+        esco:language     "en" ;
+        esco:nodeLiteral  "Protect personal data and privacy in digital environments. Understand how to use and share personally identifiable information while being able to protect oneself and others from damages. Understand that digital services use a “Privacy policy” to inform how personal data is used." .
+
+<http://data.europa.eu/esco/node-literal/d9f98a36-44fb-4318-bfd9-6ac6b520b034>
+        a                 esco:NodeLiteral ;
+        esco:language     "en" ;
+        esco:nodeLiteral  "Understand where one’s own digital competence needs to be improved or updated. Be able to support others with their digital competence development. Seek opportunities for self-development and keep up-to-date with the digital evolution." .
+
+<http://data.europa.eu/esco/node-literal/7d44a65e-ca7d-4631-a5ce-b33223f383ed>
+        a                 esco:NodeLiteral ;
+        esco:language     "en-us"^^xsd:language ;
+        esco:nodeLiteral  "Use digital tools and technologies to create knowledge and to innovate processes and products. Engage individually and collectively in cognitive processing to understand and resolve conceptual problems and problem situations in digital environments." .
+
+<http://data.europa.eu/esco/node-literal/b7994d0f-a34e-4f76-aa2b-4251c2bdf40a>
+        a                 esco:NodeLiteral ;
+        esco:language     "en-us"^^xsd:language ;
+        esco:nodeLiteral  "Create and edit digital content in different formats, express oneself through digital means." .
+
+<http://data.europa.eu/esco/skill/df329d70-87b0-466b-a214-3431f36e2a5e>
+        a                          esco:MemberConcept , esco:Skill , skos:Concept ;
+        esco:referenceLanguage     "en"^^xsd:language ;
+        esco:relatedOptionalSkill  <http://data.europa.eu/esco/skill/a4346013-a967-4a58-a533-6b32ad1364c5> ;
+        esco:skillReuseLevel       <http://data.europa.eu/esco/skill-reuse-level/transversal> ;
+        esco:skillType             <http://data.europa.eu/esco/skill-type/skill> ;
+        dct:description            <http://data.europa.eu/esco/node-literal/9ab8557c-85bf-4b15-87a6-660ddc4e611c> , <http://data.europa.eu/esco/node-literal/5e524614-9a59-4e45-bcd7-8d947e67fe4f> ;
+        iso-thes:status            "released" ;
+        skos:altLabel              "protect ICT device"@en , "keep ICT devices safe"@en , "proteger dispositivos de TIC"@es , "take care of ICT devices"@en , "implement private ICT user security measures"@en , "protect information and communication technologies devices"@en , "up-date online security measures"@en , "suojata ICT-laitteet"@fi , "set up passwords and private settings"@en , "προστασία συσκευών της τεχνολογίας πληροφοριών και επικοινωνιών"@el , "protect personal data"@en , "safeguard ICT devices"@en , "use anti-virus software"@en , "proteger dispositivos informáticos"@es ;
+        skos:broader               <http://data.europa.eu/esco/skill/426ceaba-6867-481c-bb6b-aee3933da7d2> ;
+        skos:broaderTransitive     <http://data.europa.eu/esco/skill/426ceaba-6867-481c-bb6b-aee3933da7d2> ;
+        skos:inScheme              <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> ;
+        skos:prefLabel             "gondoskodik az IKT-eszközök védelméről"@hu , "يحمي أجهزة تكنولوجيا المعلومات والاتصالات"@ar , "ver UST-tæki"@is , "zagotavljati zaščito naprav IKT"@sl , "protéger les dispositifs TIC"@fr , "protect ICT devices"@en , "protect ICT devices"@en-us , "обезпечаване на защита и сигурност на ИКТ устройства"@bg , "protezzjoni tal-apparati tal-ICT"@mt , "beskytte IKT-enheder"@da , "προστασία συσκευών ΤΠΕ"@el , "instalar mecanismos de segurança em aparelhos de TIC"@pt , "skydda IKT-utrustning"@sv , "IKT seadmeid kaitsma"@et , "chrániť zariadenia IKT"@sk , "suojata tieto- ja viestintätekniset laitteet"@fi , "IKT-Geräte schützen"@de , "proteger dispositivos de tecnologías de la información y de las comunicaciones"@es , "štititi uređaje za IKT"@hr , "gléasanna TFC a chosaint"@ga , "proteggere i dispositivi ICT"@it , "chránit zařízení IKT"@cs , "ICT-toestellen beschermen"@nl , "saugoti IRT prietaisus"@lt , "protejează dispozitive TIC"@ro , "aizsargāt IKT ierīces"@lv , "chronić urządzenia ICT"@pl , "beskytte IKT-enheter"@no .
+
+<http://data.europa.eu/esco/skill/238343b1-7b51-42b3-a9ed-cf24d3a236e7>
+        a                       skos:Concept , esco:MemberConcept , esco:Skill ;
+        esco:referenceLanguage  "en"^^xsd:language ;
+        esco:skillReuseLevel    <http://data.europa.eu/esco/skill-reuse-level/transversal> ;
+        esco:skillType          <http://data.europa.eu/esco/skill-type/skill> ;
+        dct:description         <http://data.europa.eu/esco/node-literal/447a21ac-f4e0-41e1-a478-1b7cd4c29af8> , <http://data.europa.eu/esco/node-literal/d9f98a36-44fb-4318-bfd9-6ac6b520b034> ;
+        iso-thes:status         "released" ;
+        skos:altLabel           "reconocer las carencias en competencias digitales"@es , "bearnaí maidir le cumas digiteach a aithint"@ga , "identificere manglende digitale kundskaber"@da , "digitale vaardigheidskloven identificeren"@nl , "detectar las deficiencias en competencias digitales"@es , "behoeften aan digitale vaardigheden herkennen"@nl , "παροχή υποστήριξης για την αντιμετώπιση ελλείψεων όσον αφορά την ψηφιακή ικανότητα"@el , "detectar las lagunas en competencias digitales"@es , "tunnistaa digitaalisten taitojen puutteet"@fi , "Lücken bei den IKT-Kompetenzen erkennen"@de ;
+        skos:broader            <http://data.europa.eu/esco/skill/7e5147d1-60b1-4a68-804b-1f5cb0396b91> ;
+        skos:broaderTransitive  <http://data.europa.eu/esco/skill/7e5147d1-60b1-4a68-804b-1f5cb0396b91> ;
+        skos:inScheme           <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> ;
+        skos:prefLabel          "digitale vaardigheidskloven herkennen"@nl , "εντοπισμός ελλείψεων όσον αφορά την ψηφιακή ικανότητα"@el , "identifisere gap innen digital kompetanse"@no , "rozpoznawanie braków w zakresie kompetencji cyfrowych"@pl , "Defizite bei der digitalen Kompetenz ermitteln"@de , "identifikovať nedostatky v digitálnych kompetenciách"@sk , "identificar lacunas nas competências digitais"@pt , "identify digital competence gaps"@en-us , "identify digital competence gaps"@en , "ber kennsl á stafræn hæfnisbil"@is , "identificare le lacune nelle competenze digitali"@it , "identifikazzjoni tad-diskrepanzi fil-kompetenzi diġitali"@mt , "identifică deficite de competență digitală"@ro , "bearnaí maidir le hinniúlacht dhigiteach a aithint"@ga , "identifiera brister i digital kompetens"@sv , "apzināt trūkstošās digitālās prasmes"@lv , "identifikovat nedostatky v digitálních kompetencích"@cs , "ugotavljati vrzeli na področju digitalnih kompetenc"@sl , "identificere manglende digitale kompetencer"@da , "azonosítja a digitális készségek terén jelentkező hiányosságokat"@hu , "digitaalse pädevuse lünki tuvastama"@et , "nustatyti skaitmeninių įgūdžių spragas"@lt , "идентифициране на пропуски в цифровата компетентност"@bg , "utvrditi nedostatke u pogledu digitalnih kompetencija"@hr , "recenser les déficits de compétences numériques"@fr , "tunnistaa digitaalisen osaamisen puutteet"@fi , "يحدد الثغرات في الكفاءات الرقمية"@ar , "detectar las carencias en competencias digitales"@es .
+
+<http://data.europa.eu/esco/node-literal/78e94fdd-fc15-4c0a-8d1b-0ccde6765879>
+        a                 esco:NodeLiteral ;
+        esco:language     "en-us"^^xsd:language ;
+        esco:nodeLiteral  "Share data, information and digital content with others through appropriate digital technologies. Act as an intermediary, know about referencing and attribution practices." .
+
+<http://data.europa.eu/esco/node-literal/2ab88747-4d98-4348-ab0b-78fd76851a05>
+        a                 esco:NodeLiteral ;
+        esco:language     "en-us"^^xsd:language ;
+        esco:nodeLiteral  "Participate in society through the use of public and private digital services. Seek opportunities for self-empowerment and for participatory citizenship through appropriate digital technologies." .
+
+<http://data.europa.eu/esco/node-literal/447a21ac-f4e0-41e1-a478-1b7cd4c29af8>
+        a                 esco:NodeLiteral ;
+        esco:language     "en-us"^^xsd:language ;
+        esco:nodeLiteral  "Understand where one’s own digital competence needs to be improved or updated. Be able to support others with their digital competence development. Seek opportunities for self-development and keep up-to-date with the digital evolution." .
+
+<http://data.europa.eu/esco/node-literal/ac4e2c88-811f-4aea-807b-77c3d2c20c5e>
+        a                 esco:NodeLiteral ;
+        esco:language     "en" ;
+        esco:nodeLiteral  "Identify, locate, retrieve, store, organise and analyse digital information, judging its relevance and purpose." .
+
+<http://data.europa.eu/esco/node-literal/8e11672a-6db0-46dc-9982-7c9f99a63f42>
+        a                 esco:NodeLiteral ;
+        esco:language     "en" ;
+        esco:nodeLiteral  "Create and edit digital content in different formats, express oneself through digital means." .
+
+<http://data.europa.eu/esco/skill/42fcf80d-7b45-40f3-bd2f-5411c4c0dfa0>
+        a                       esco:MemberConcept , skos:Concept , esco:Skill ;
+        esco:referenceLanguage  "en"^^xsd:language ;
+        esco:skillReuseLevel    <http://data.europa.eu/esco/skill-reuse-level/transversal> ;
+        esco:skillType          <http://data.europa.eu/esco/skill-type/skill> ;
+        dct:description         <http://data.europa.eu/esco/node-literal/7c4dbc85-9d14-4d6f-a21a-2ab1c6145a33> , <http://data.europa.eu/esco/node-literal/b09c3c1a-5479-4a4b-8a1b-9b43e5d64e55> ;
+        iso-thes:status         "released" ;
+        skos:altLabel           "evaluar las necesidades y las respuestas tecnológicas"@es , "identificēt vajadzības un tehnoloģiskos risinājumus"@lv , "behoeften en de bijbehorende technologische oplossingen identificeren"@nl ;
+        skos:broader            <http://data.europa.eu/esco/skill/7e5147d1-60b1-4a68-804b-1f5cb0396b91> ;
+        skos:broaderTransitive  <http://data.europa.eu/esco/skill/7e5147d1-60b1-4a68-804b-1f5cb0396b91> ;
+        skos:inScheme           <http://data.europa.eu/esco/concept-scheme/skill-ict-groups> ;
+        skos:prefLabel          "يحدد الاحتياجات والاستجابات التكنولوجية"@ar , "identifikovat potřeby a technologická řešení"@cs , "identifică problemele și soluțiile tehnologice"@ro , "recenser des besoins et déterminer leurs solutions technologiques"@fr , "ber kennsl á þörfum og tæknilegri svörun"@is , "identyfikacja potrzeb i rozwiązań technologicznych"@pl , "идентифициране на нуждите и технологичните решения"@bg , "identifisere behov og tekniske tiltak"@no , "identificare le esigenze e le risposte tecnologiche"@it , "utvrditi potrebe i odgovor u kontekstu primjene tehnologija"@hr , "identificere behov og teknologiske løsninger"@da , "identificar necessidades e respostas tecnológicas"@pt , "apzināt vajadzības un tehnoloģiskos risinājumus"@lv , "nustatyti poreikius ir technologinius sprendimus"@lt , "Bedarf ermitteln und technologische Lösungen finden"@de , "azonosítja az igényeket és a rájuk adandó technológiai válaszokat"@hu , "identifiera behov och tekniska lösningar"@sv , "tunnistaa tarpeet ja löytää niihin teknologisia ratkaisuja"@fi , "detectar las necesidades y las respuestas tecnológicas"@es , "ugotavljati potrebe in tehnološke odzive nanje"@sl , "προσδιορισμός αναγκών και τεχνολογικών τρόπων αντιμετώπισης"@el , "identifikazzjoni tal-ħtiġijiet u tar-risponsi teknoloġiċi"@mt , "identify needs and technological responses"@en-us , "identify needs and technological responses"@en , "behoeften identificeren en relevante technologische oplossingen aandragen"@nl , "vajadusi ja tehnoloogilisi lahendusi kindlaks tetgema"@et , "identifikovať potreby a technologické riešenia"@sk , "riachtanais agus freagairtí teicneolaíocha a aithint"@ga .
+
+<http://data.europa.eu/esco/node-literal/68746aa2-91be-45f8-93d2-039e07766cc2>
+        a                 esco:NodeLiteral ;
+        esco:language     "en" ;
+        esco:nodeLiteral  "Understand how copyright and licences apply to data, information and digital content." .

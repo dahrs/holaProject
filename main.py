@@ -110,7 +110,7 @@ if __name__ == '__main__':
 	##################################################################################
 	#CALLING FUNCT FROM utilsGraph.py TO MAKE THE GRAPH EDGES AND NODES FILES
 	##################################################################################
-	
+	''' 
 	#from the 100 000 sample
 	edgeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeight.tsv'
 	nodeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListType.tsv'
@@ -119,7 +119,7 @@ if __name__ == '__main__':
 	nodesDict, communityDict = utilsGraph.modularize(edgeFilePath, nodeFilePath, 150, outputFilePath)
 	#STATS previsualization of modularity result
 	utilsGraph.getModularityPercentage(outputFilePath)
-	
+	''' 
 	#from all english FR candidates
 	edgeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/edgeListWeight.tsv'
 	nodeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListType.tsv'
@@ -128,7 +128,7 @@ if __name__ == '__main__':
 	nodesDict, communityDict = utilsGraph.modularize(edgeFilePath, nodeFilePath, 150, outputFilePath)
 	#STATS previsualization of modularity result
 	utilsGraph.getModularityPercentage(outputFilePath)
-	''' '''
+	
 
 
 	##################################################################################
