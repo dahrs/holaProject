@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #-*- coding:utf-8 -*-
 
-import re, codecs
+import re, codecs, nltk
 import utilsOs
 
 
@@ -64,7 +64,48 @@ def naiveRegexTokenizer(string, caseSensitive=True, eliminateEnStopwords=False):
 	#if we don't want the stopwords
 	if eliminateEnStopwords != False:
 		tokens = removeStopwords(tokens, language='english')
-	return tokens 
+	return tokens
+
+
+def tokenizeAndExtractSpecificPos(string, listOfPosToReturn, caseSensitive=True, eliminateEnStopwords=False):
+	'''
+	using nltk pos tagging, tokenize a string and extract the
+	tokens corresponding to the specified pos
+	The pos labels are:	
+		- cc coordinating conjunction
+		- cd cardinal digit
+		- dt determiner
+		- in preposition/subordinating conjunction
+		- j adjective
+		- n noun
+		- np proper noun
+		- p pronoun
+		- rb adverb
+		- vb verb
+	'''
+	posDict = {u'cc': [u'CC'], u'cd': [u'CD'], u'dt': [u'DT', u'WDT'], u'in': [u'IN'], u'j': [u'JJ', u'JJR', u'JJS'], u'n': [u'NN', u'NNS'], u'np': [u'NNP', u'NNPS'], u'p': [u'PRP', u'PRP$', u'WP$'], u'rb': [u'RB', u'RBR', u'RBS', u'WRB'], u'vb': [u'MD', u'VB', u'VBD', u'VBG', u'VBN', u'VBZ']}
+	listPos = []
+	#tokenize
+	tokens = nltk.word_tokenize(string)
+	#we replace the general pos for the actual nltk pos
+	for generalPos in listOfPosToReturn:
+		listPos = listPos + posDict[generalPos]
+	#pos tagging
+	tokensPos = nltk.pos_tag(tokens)
+	#reseting the tokens list
+	tokens = []
+	#selection of the pos specified tokens
+	for tupleTokPos in tokensPos:
+		#if they have the right pos
+		if tupleTokPos[1] in listPos:
+			tokens.append(tupleTokPos[0])
+	#if we don't want to be case sensitive
+	if caseSensitive != True:
+		tokens = [tok.lower() for tok in tokens]
+	#if we don't want the stopwords
+	if eliminateEnStopwords != False:
+		tokens = removeStopwords(tokens, language='english')
+	return tokens
 
 
 ##################################################################################

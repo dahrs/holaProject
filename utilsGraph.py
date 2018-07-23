@@ -177,7 +177,7 @@ def randomWalk(edgeDf, nodeDf):
 #MODULARITY
 ##################################################################################
 
-def modularizeUsingBlondelEtAlCode(edgeFilePath, nodeFilePath, maxCommunities, outputFilePath=u'./nodeDf.tsv'):
+def modularizeLouvain(edgeFilePath, nodeFilePath, maxCommunities, outputFilePath=u'./nodeDf.tsv'):
 	'''
 	uses the original code of the louvain algorithm to give modularity to a graph
 	downloaded from https://github.com/taynaud/python-louvain
@@ -208,7 +208,7 @@ def fillBagOfWords(bowSet, jobTitleList, occupationsUkDf, occupationsUsDf):
 	'''
 	#adding the job titles to the bag of words
 	for jobTitle in jobTitleList:
-		bowSet = bowSet.union(set(utilsString.naiveRegexTokenizer(jobTitle, caseSensitive=False, eliminateEnStopwords=True)))
+		bowSet = bowSet.union(set(utilsString.tokenizeAndExtractSpecificPos(jobTitle, [u'n', u'np', u'j'], caseSensitive=False, eliminateEnStopwords=True)))
 	#adding the description(s) to the bag of words
 	selectiveEscoDf = occupationsUkDf.loc[occupationsUkDf['preferredLabel'].isin(jobTitleList)]
 	if selectiveEscoDf.empty:
@@ -217,7 +217,7 @@ def fillBagOfWords(bowSet, jobTitleList, occupationsUkDf, occupationsUsDf):
 			return bowSet
 	for rowIndex, row in selectiveEscoDf.iterrows():
 		#adding the description(s) to the bag of words
-		bowSet = bowSet.union(set(utilsString.naiveRegexTokenizer(row['description'], caseSensitive=False, eliminateEnStopwords=True)))
+		bowSet = bowSet.union(set(utilsString.tokenizeAndExtractSpecificPos(row['description'], [u'n', u'np', u'j'], caseSensitive=False, eliminateEnStopwords=True)))
 	return bowSet
 
 
@@ -272,18 +272,67 @@ def getEscoBowByLevel(escoTree):
 	return bowsDict
 
 
-def getCommunityNameEstimation():
+def getOntologyBowByCommunity(nodeDf):
+	'''
+	makes a bag of words composed of the job title names
+	for each community in the ontology
+	'''
+	communityBagOfWords = {}
+	communitiesSet = set(nodeDf['Community'].tolist())
+	for community in communitiesSet:
+		bowSet = set()
+		#get a reduced df where the community column corresponds to the community value
+		communityDf = nodeDf.loc[nodeDf[u'Community'] == community]
+		#make the bag of words set
+		jobTitleList = communityDf['Label'].tolist()
+		for jobTitle in jobTitleList:
+			bowSet = bowSet.union(set(utilsString.naiveRegexTokenizer(jobTitle, caseSensitive=False, eliminateEnStopwords=True)))
+		#SHOULD WE ADD THE LINKEDIN PROFILES PITCH ??????
+		#save the bag of words to the dict
+		communityBagOfWords[community] = set(bowSet)
+	return communityBagOfWords
+
+
+def getCommunityNameInferences(nodeDf, outputFilePath):
 	''' 
 	using a bag of words on jobtitles of the same community and on
 	job titles and descriptions from existing ontologies (ESCO)
 	we estimate what is the name of the community domain
 	'''
-	bowSameCommunity = 0
+	inferencesDict = {}
+	###nodeDf = nodeDf.head(n=20)
+	#bag of words of the esco ontology
 	escoTree = utilsOs.openJsonFileAsDict(u'./jsonJobTaxonomies/escoTree.json')
 	escoTreeBagOfWords = getEscoBowByLevel(escoTree)
-	#for nb in reversed(range(4)):
-	######### COUNT USING BAG OF WORDS
-	print(escoTreeBagOfWords)
+	#bag of words of the communities in our ontology
+	communityBagOfWords = getOntologyBowByCommunity(nodeDf)
+	#add an empty column
+	nodeDf[u'Infered_Community_Name'] = np.nan
+	#comparing intersection between esco bow and the communities bow
+	for community, communityBow in communityBagOfWords.items():
+		#reset values of best intersection
+		bestIntersection = {u'result': 0.0, u'set': None, u'name': u'00000000___'}
+		for nb in reversed(range(1, 4)):
+			for escoDomain, escoBow in escoTreeBagOfWords[nb].items():
+				#we intersect the 2 bag of words
+				bowIntersection = communityBow.intersection(escoBow)
+				#we evaluate if we are at the same level in the esco taxonomy the score we need to replace the best intersection 
+				#is > than the precedent, if we are one level upper, then the needed score is twice the best intersection score
+				if len(bestIntersection[u'name'].split(u'___')[0]) == len(escoDomain.split(u'___')[0]):
+					multiplier = 1.0
+				else:
+					multiplier = (4.1 - (nb * 1.2))
+				#if the score is greater, we replace the previous best intersection with the new intersection
+				if len(bowIntersection) > bestIntersection['result']*multiplier or bestIntersection['result'] == 0.0:
+					bestIntersection[u'result'] = len(bowIntersection)
+					bestIntersection[u'set'] = bowIntersection
+					bestIntersection[u'name'] = escoDomain
+		#saving the information
+		inferencesDict[community] = bestIntersection
+		nodeDf[u'Infered_Community_Name'].loc[nodeDf[u'Community'] == community] = str(bestIntersection['name'])
+	#dump to file
+	nodeDf.to_csv(outputFilePath, sep='\t')
+	return inferencesDict
 
 
 
@@ -419,7 +468,7 @@ def modularize(edgeFilePath, nodeFilePath, maxCommunities, outputFilePath=u'./no
 	nodeDf = pd.read_csv(nodeFilePath, sep=u'\t')
 
 	#add a column to the nodeDf so we can add a modularity class
-	nodeDf[u'modularity_class'] = np.nan
+	nodeDf[u'modularity_class'] = np.nan 
 	#each node in the network is assigned to its own community
 	for nodeIndex, nodeRow in nodeDf.iterrows():
 		nodeId = nodeRow[u'Id']
@@ -431,7 +480,6 @@ def modularize(edgeFilePath, nodeFilePath, maxCommunities, outputFilePath=u'./no
 	#calculation of the gain of modularity
 	m2 = getSumOfAllWeights(edgeDf) * 2
 	while len(communityDict) > maxCommunities:
-		print(11111111111111111111111111, len(communityDict))
 		#we loop on every remaining community
 		for iNodesList in tqdm(list(communityDict.values())):
 			for iNode in iNodesList[1:]:
@@ -544,5 +592,6 @@ def ontoQA():
 edgeFilePath = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/edgeListSimple.tsv'
 nodeFilePath = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListType.tsv'
 
-#modularizeUsingBlondelEtAlCode(edgeFilePath, nodeFilePath, 1, outputFilePath=u'./nodeDf.tsv')
-getCommunityNameEstimation()
+nodeDf, dendrogram = modularizeLouvain(edgeFilePath, nodeFilePath, 1, outputFilePath=u'./nodeDfModularity.tsv')
+print(333333)
+getCommunityNameInferences(nodeDf, outputFilePath=u'./nodeDfModularityInfered.tsv')
