@@ -177,7 +177,13 @@ def randomWalk(edgeDf, nodeDf):
 #MODULARITY
 ##################################################################################
 
-def modularizeLouvain(edgeFilePath, nodeFilePath, maxCommunities, outputFilePath=u'./nodeDf.tsv'):
+def nodeDfCleaner(nodeDf):
+	''' cleans all the node dataframe from NaN values in the modularity class '''
+	#return nodeDf.loc[nodeDf[u'modularity_class'] != float(u'nan')]
+	return nodeDf.dropna()
+
+
+def modularizeLouvain(edgeFilePath, nodeFilePath, outputFilePath=None):
 	'''
 	uses the original code of the louvain algorithm to give modularity to a graph
 	downloaded from https://github.com/taynaud/python-louvain
@@ -198,7 +204,8 @@ def modularizeLouvain(edgeFilePath, nodeFilePath, maxCommunities, outputFilePath
 	#making sure all 'modularity_class' NaN were deleted 
 	nodeDf = nodeDfCleaner(nodeDf)
 	#dumps the dataframe with the modularization data
-	nodeDf.to_csv(outputFilePath, sep='\t')
+	if outputFilePath != None:
+		nodeDf.to_csv(outputFilePath, sep='\t')
 	return nodeDf, dendrogram
 
 
@@ -300,7 +307,6 @@ def getCommunityNameInferences(nodeDf, outputFilePath):
 	we estimate what is the name of the community domain
 	'''
 	inferencesDict = {}
-	###nodeDf = nodeDf.head(n=20)
 	#bag of words of the esco ontology
 	escoTree = utilsOs.openJsonFileAsDict(u'./jsonJobTaxonomies/escoTree.json')
 	escoTreeBagOfWords = getEscoBowByLevel(escoTree)
@@ -335,198 +341,9 @@ def getCommunityNameInferences(nodeDf, outputFilePath):
 	return inferencesDict
 
 
-
-##################################################################################
-#MODULARITY DIY
-##################################################################################
-
-def getNodeAdjacencyDf(nodeId, edgeDf):
+def getModularityPercentage(nodeFilePathWithModularity, communityColumnHeader=u'Community'):
 	'''
-	returns a data frame of the edges where the nodeId appears
-	and the type of the nodes adjacent to it ('Source' if nodeId is 'Target' and vice-versa)
-	'''
-	#if the node id is marked as source
-	if nodeId[-3:] == u'__s':
-		nodeDf = edgeDf.loc[edgeDf[u'Source'] == nodeId]
-		typeAdjacentNodes = u'Target'
-	#if the node id is marked as target
-	elif nodeId[-3:] == u'__t':
-		nodeDf = edgeDf.loc[edgeDf[u'Target'] == nodeId]
-		typeAdjacentNodes = u'Source'
-	#if the node id is not marked and we don't know if it's a source or a target we explore all possibilities
-	else:
-		nodeDf = edgeDf.loc[edgeDf[u'Source'] == nodeId]
-		typeAdjacentNodes = u'Target'
-		if len(nodeDf[u'Source']) == 0:
-			nodeDf = edgeDf.loc[edgeDf[u'Target'] == nodeId]
-			typeAdjacentNodes = u'Source'
-	return nodeDf, typeAdjacentNodes
-
-
-def getReducedDf(df, columnName, detailList):
-	'''	returns a reduced and specialized data frame	'''
-	return df.loc[df[columnName].isin(detailList)]
-
-
-def nodeDfCleaner(nodeDf):
-	''' cleans all the node dataframe from NaN values in the modularity class '''
-	#return nodeDf.loc[nodeDf[u'modularity_class'] != float(u'nan')]
-	return nodeDf.dropna()
-
-
-def getSumOfAllWeights(df):
-	'''	returns the variable sum of all edges in the data frame	'''
-	return df[u'Weight'].sum()
-
-
-def intersectOf2Df(df1, df2, columnNameInCommon):
-	'''	returns the dataframe obtained after intersecting 2 dataframes	'''
-	return pd.merge(df1, df2, how='inner', on=columnNameInCommon)
-
-
-def unionOf2Df(df1, df2, columnNameInCommon):
-	'''	returns the dataframe obtained after the union of 2 dataframes	'''
-	return pd.merge(df1, df2, how='outer', on=columnNameInCommon)
-
-
-def getSumOfWeightOfEdgesInCommunity(communityNodes, edgeDf):
-	'''	both nodes of the edge must be in the community	'''
-	sourceNodesDf = getReducedDf(edgeDf, u'Source', communityNodes)
-	targetNodesDf = getReducedDf(edgeDf, u'Target', communityNodes)
-	intersection = intersectOf2Df(sourceNodesDf, targetNodesDf, None)
-	if len(intersection) == 0:
-		return 0
-	return getSumOfAllWeights(intersection)
-
-
-def getSumOfWeightOfEdgesIncidentToCommunity(communityNodes, edgeDf):
-	'''	both nodes of the edge must be in the community	'''
-	sourceNodesDf = getReducedDf(edgeDf, u'Source', communityNodes)
-	targetNodesDf = getReducedDf(edgeDf, u'Target', communityNodes)
-	union = unionOf2Df(sourceNodesDf, targetNodesDf, None)
-	return getSumOfAllWeights(union)
-
-
-def getGainOfModularity(jCommunityNodes, edgeDf, iDf, iAdjacentType, m2):
-	'''
-	calculates the gain of modularity
-	'''
-	m2 = float(m2)
-	#sum Of Weights Of Edges In C  = both nodes of the edge must be in the community
-	sigmaIn = float(getSumOfWeightOfEdgesInCommunity(jCommunityNodes, edgeDf))
-	#sum Of Weights Of Edges Incident To Nodes In C  = one node of the edge must be in the community
-	sigmaTot = float(getSumOfWeightOfEdgesIncidentToCommunity(jCommunityNodes, edgeDf))
-	#sum Of Weights Of Edges From I To Nodes In C = all the weights of edges having i and a node of the community
-	kIin = float(getSumOfAllWeights( getReducedDf(iDf, iAdjacentType, jCommunityNodes) ))
-	#sum Of Weights Of Edges Incident To Node I = all the weights of edges having i as one of their node
-	kI = float(getSumOfAllWeights(iDf))
-	gainModularity = float( ((sigmaIn + kIin)/m2)-(((sigmaTot+kI)/m2)**2) ) - ( (sigmaIn/m2)-((sigmaTot/m2)**2)-((kI/m2)**2) )
-	return gainModularity
-
-
-def updatingDicts(gainModularity, nodeId, communityId, nodesDict, communityDict):
-	'''
-	updates the dicts so every node has one community
-	'''
-	oldCommunityId = nodesDict[nodeId][1]
-	#we change the node's community in the node dict
-	nodesDict[nodeId][0] += gainModularity
-	nodesDict[nodeId][1] = communityId
-	#we delete the node from the list of the old community
-	communityDict[oldCommunityId].remove(nodeId)
-	#if the community is empty we delete it
-	if len(communityDict[oldCommunityId]) == 1:
-		del communityDict[oldCommunityId]
-	#we add the node to its new community
-	try:
-		communityDict[communityId][0] += gainModularity
-		communityDict[communityId].append(nodeId)
-	except KeyError:
-		###########################################
-		#from time to time they might be a call to a node in the community dict that has just been changed so we obtain
-		#a KeyError, whenever we encounter that problem we pass since it will be solved in the next step of the loop
-		pass
-	return nodesDict, communityDict
-
-
-def modularize(edgeFilePath, nodeFilePath, maxCommunities, outputFilePath=u'./nodeDf.tsv'):
-	'''
-	takes 2 pandas objects as main arguments:
-	an edgeList and nodeList with the following columns:
-	- edge list:
-		- Source, Target, Weight, etc.
-	- node list:
-		- Id, Label, etc.
-	it starts by giving a community id to each node then it calculates the modularity gain of moving each node to
-	the next community and if there is a gain the communities get fusioned
-	#https://arxiv.org/pdf/0803.0476.pdf
-	'''
-	nodesDict = {}
-	communityDict = {}
-
-	edgeDf = pd.read_csv(edgeFilePath, sep=u'\t')
-	nodeDf = pd.read_csv(nodeFilePath, sep=u'\t')
-
-	#add a column to the nodeDf so we can add a modularity class
-	nodeDf[u'modularity_class'] = np.nan 
-	#each node in the network is assigned to its own community
-	for nodeIndex, nodeRow in nodeDf.iterrows():
-		nodeId = nodeRow[u'Id']
-		#nodeId = id of the node, 0 = basic modularity score, nodeIndex1 = id of the community, nodeIndex2 = index of the df for easy find
-		nodesDict[nodeId] = [0, nodeIndex, nodeIndex]
-		communityDict[nodeIndex] = [0, nodeId]
-	repetitionCounter = [0, None]
-
-	#calculation of the gain of modularity
-	m2 = getSumOfAllWeights(edgeDf) * 2
-	while len(communityDict) > maxCommunities:
-		#we loop on every remaining community
-		for iNodesList in tqdm(list(communityDict.values())):
-			for iNode in iNodesList[1:]:
-				#we save for each node the stronges change based on the modularity gain
-				changeToBeMade = [0, None]
-				iDf, iAdjacentType = getNodeAdjacencyDf(iNode, edgeDf)
-				#the change in modularity is calculated for removing i from its own community and 
-				#moving it into the community of each neighbor j of i
-				for jIndex, jRow in iDf.iterrows():
-					###########################################
-					#from time to time they might be a call to a node in the community dict that has just been changed so we obtain
-					#a KeyError, whenever we encounter that problem we pass it since it will be solved in the next step of the loop
-					try:
-						jCommunityNodes = communityDict[nodesDict[jRow[iAdjacentType]][1]]
-						#louvain modularity gain formula
-						gainModularity = getGainOfModularity(jCommunityNodes, edgeDf, iDf, iAdjacentType, m2)
-
-						#each node can only belong to one community so if the gain of modularity is the same as a preexisting one it gets discarded (could be improved)
-						if gainModularity > changeToBeMade[0]:
-							newCommunityOfI = nodesDict[jRow[iAdjacentType]][1]
-							changeToBeMade = [gainModularity, iNode, newCommunityOfI]
-					except KeyError:
-						pass
-				#if there is a significant change to be made
-				if changeToBeMade[1] != None :
-					nodesDict, communityDict = updatingDicts(changeToBeMade[0], changeToBeMade[1], changeToBeMade[2], nodesDict, communityDict)
-					nodeDf.at[nodesDict[changeToBeMade[1]][2], u'modularity_class'] = changeToBeMade[2]
-
-		#we use a counter to avoid infinite loops of variations of modules without ever obtsining less than the maxCommunities
-		if len(communityDict) == repetitionCounter[1]:
-			repetitionCounter[0] += 1
-		else:
-			repetitionCounter[0] = 0
-			repetitionCounter[1] = len(communityDict)
-		#repetition limit
-		if repetitionCounter[0] >= 10:
-			break
-	#making sure all 'modularity_class' NaN were deleted 
-	nodeDf = nodeDfCleaner(nodeDf)
-	#dumps the dataframe with the modularization data
-	nodeDf.to_csv(outputFilePath, sep='\t')
-	return nodesDict, communityDict
-
-
-def getModularityPercentage(nodeFilePathWithModularity):
-	'''
-	opens the node tsv file and calculates the percentage of communities
+	opens the node list tsv file and calculates the percentage of communities
 	'''
 	communityDict = {}
 	resultDict = {}
@@ -534,7 +351,7 @@ def getModularityPercentage(nodeFilePathWithModularity):
 
 	#remaking a community dict
 	for nodeIndex, nodeRow in nodeDf.iterrows():
-		modCommunity = nodeRow[u'modularity_class']
+		modCommunity = nodeRow[communityColumnHeader]
 		if modCommunity in communityDict:
 			communityDict[modCommunity].append(nodeRow[u'Label'])
 		else:
@@ -545,9 +362,91 @@ def getModularityPercentage(nodeFilePathWithModularity):
 	#printing in order
 	for v,k in (sorted( ((v,k) for k,v in resultDict.items()), reverse=True)):
 		print(44444444444444444444444, 'community {0} normalized score: {1}'.format(k, v))
-		if v > 0.01:
-			print(55555555555, communityDict[k])
+		#if v > 0.01:
+		#	print(55555555555, communityDict[k])
 	return resultDict
+
+
+##################################################################################
+#ONTOLOGY CLEANING AND TRIMMING
+##################################################################################
+
+def ontologyContentCleaning():
+	''''''
+
+
+def remove1DegreeNodes(dictA, dictB):
+	'''
+	recursive function to remove all the less core-connected 
+	nodes from the dicts representing the graph
+	'''
+	aOriginalSize = len(dictA)
+	bOriginalSize = len(dictB)
+	#remove job titles of degree 1 (with only one skill)
+	for aKey, aList in dict(dictA).items():
+		#if there is one (or less) skill for that job title
+		if len(aList) <= 1:
+			#to maintain consistency, delete the job title from the skill to jobs dict
+			for bElem in list(aList):
+				#delete the job title from the skill to jobs dict
+				dictB[bElem].remove(aKey)
+				#remove the keys in the dict with an empty list as value
+				if len(dictB[bElem]) == 0:
+					del dictB[bElem]
+			#delete the dict entry from the job to skills dict
+			del dictA[aKey]
+	if len(dictA) != aOriginalSize and len(dictB) != bOriginalSize:
+		dictB, dictA = remove1DegreeNodes(dictB, dictA)
+	return dictA, dictB
+
+
+
+def ontologyStructureCleaning(edgeFilePathInput, nodeFilePathInput, edgeFilePathOutput=None, nodeFilePathOutput=None):
+	'''
+	given an ontology (edge list and node list), removes:
+		- all communities corresponding to less than 1% of the node
+		- all independent and isolated skills and job titles:
+			- all skills connected to only 1 job title
+			- all job titles with only one skill
+			- all job titles (and skills) whose skills are not connected to any other job titles
+	'''
+	edgeDf = pd.read_csv(edgeFilePathInput, sep=u'\t')
+	nodeDf = pd.read_csv(nodeFilePathInput, sep=u'\t')
+
+	#remove communities corresponding to less than 1% of the node
+	communitiesSet = set(nodeDf['Community'].tolist())
+	copyCommunitiesSet = list(communitiesSet)
+	for communityId in copyCommunitiesSet:
+		bowSet = set()
+		#get a reduced df where the community column corresponds to the community id value
+		communityDf = nodeDf.loc[nodeDf[u'Community'] == communityId]
+		if len(communityDf)/len(nodeDf) < 0.01:
+			communitiesSet.remove(communityId)
+	#save the trimmed df as the new node df
+	nodeDf = nodeDf.loc[nodeDf[u'Community'].isin(list(communitiesSet))]
+	#make a dict of jobtitle to skills and a dict of skill to jobtitles
+	jToSkillsDict = {}
+	sToJobsDict = {}
+	emptyList = []
+	for edgeIndex, edgeRow in edgeDf.iterrows():
+		jToSkillsDict[edgeRow[u'Source']] = list(set(jToSkillsDict.get(edgeRow[u'Source'], list(emptyList)) + [edgeRow[u'Target']]))
+		sToJobsDict[edgeRow[u'Target']] = list(set(sToJobsDict.get(edgeRow[u'Target'], list(emptyList)) + [edgeRow[u'Source']]))
+	#remove independent and isolated skills and job titles
+	jToSkillsDict, sToJobsDict = remove1DegreeNodes(jToSkillsDict, sToJobsDict)
+	#save the trimmed data frames as the new data frames
+	nodeDf = nodeDf.loc[nodeDf[u'Id'].isin( list(jToSkillsDict.keys())+list(sToJobsDict.keys()) )]
+	edgeDf = edgeDf.loc[edgeDf[u'Source'].isin(list(jToSkillsDict.keys())) & edgeDf[u'Target'].isin(list(sToJobsDict.keys()))]
+	#dumping the data frames
+	if edgeFilePathOutput != None:
+		edgeDf.to_csv(edgeFilePathOutput, sep='\t')
+	if nodeFilePathOutput != None:
+		nodeDf.to_csv(nodeFilePathOutput, sep='\t')
+	return edgeDf, nodeDf
+
+
+
+
+	
 
 
 ##################################################################################
@@ -558,40 +457,24 @@ def ontoQA():
 	'''
 	given an ontology (edge list and node list) it calculates the ontoQA score
 	'''
-	#SCHEMA - RR - relation richness
-	#SCHEMA - RD - relation diversity
-	#SCHEMA - AR - atribute richness
-	#SCHEMA - SD - schema deepness
-	#SCHEMA - IRs - inheritance richness
+	#RR - relationship richness
+	#inheritance relationship = class-subclass relationship
 
-	# - NbC - number of classes
-	# - NbR - number of relationships
-	# - NbI - number of instances
+	#IR - inheritance richness
+	#
 
-	#INSTANCE - CR - class richness
-	#INSTANCE - CU - class utilization
-	#INSTANCE - P - average population
-	#INSTANCE - Coh - cohesion
-	#INSTANCE - Imp - Importance
-	#INSTANCE - Imp(Ci) - class importance
-	#INSTANCE - Imp(Ri) - relationship importance
-	#INSTANCE - F - fullness
-	#INSTANCE - IRc - inheritance richness
-	#INSTANCE - RRc - relationship richness
-	#INSTANCE - RU(Ci) - relationship utilization
-	#INSTANCE - Cn - connectivity
-	#INSTANCE - Ci - class connectivity
-	#INSTANCE - Rd - readability
-	#INSTANCE - CID - class instance distribution
-	#INSTANCE - AR - atribute richness
+	#attribute richness
+	#class richness
+	#class connectivity 
+	#class importance
+	#cohesion
+	#relationship richness
 
 
 
 
-
-edgeFilePath = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/edgeListSimple.tsv'
-nodeFilePath = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListType.tsv'
-
-nodeDf, dendrogram = modularizeLouvain(edgeFilePath, nodeFilePath, 1, outputFilePath=u'./nodeDfModularity.tsv')
-print(333333)
-getCommunityNameInferences(nodeDf, outputFilePath=u'./nodeDfModularityInfered.tsv')
+edgeFilePathInput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeight.tsv'
+nodeFilePathInput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListModularityInfered.tsv'
+edgeFilePathOutput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeightCleanedLvl1.tsv'
+nodeFilePathOutput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListModularityInferedCleanedLvl1.tsv'
+ontologyStructureCleaning(edgeFilePathInput, nodeFilePathInput, edgeFilePathOutput, nodeFilePathOutput)

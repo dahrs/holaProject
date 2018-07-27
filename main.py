@@ -107,29 +107,43 @@ if __name__ == '__main__':
 	dataFormater.linkedInJobSkillEdgeAndNodeList(pathInputSample, pathOutputToEdgeListFile, pathOutputToNodeListFile, lowercaseItAll=True)
 	''' 
 
+
 	##################################################################################
 	#CALLING FUNCT FROM utilsGraph.py TO MAKE THE GRAPH EDGES AND NODES FILES
 	##################################################################################
 	''' 
 	#from the 100 000 sample
-	edgeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeight.tsv'
-	nodeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListType.tsv'
-	outputFilePath=u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListTypeModularity.tsv'
+	edgeFilePath = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeightNoHeader.tsv'
+	nodeFilePath = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListType.tsv'
 
-	nodesDict, communityDict = utilsGraph.modularize(edgeFilePath, nodeFilePath, 150, outputFilePath)
+	nodeDf, dendrogram = utilsGraph.modularizeLouvain(edgeFilePath, nodeFilePath, outputFilePath=None)
+	outputFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeDfModularityInfered.tsv'
+	utilsGraph.getCommunityNameInferences(nodeDf, outputFilePath)
+
 	#STATS previsualization of modularity result
 	utilsGraph.getModularityPercentage(outputFilePath)
+
 	''' 
+	'''
 	#from all english FR candidates
-	edgeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/edgeListWeight.tsv'
-	nodeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListType.tsv'
-	outputFilePath=u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListTypeModularity.tsv'
+	edgeFilePath = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/edgeListWeightNoHeader.tsv'
+	nodeFilePath = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListType.tsv'
 
-	nodesDict, communityDict = utilsGraph.modularize(edgeFilePath, nodeFilePath, 150, outputFilePath)
+	nodeDf, dendrogram = utilsGraph.modularizeLouvain(edgeFilePath, nodeFilePath, outputFilePath=None)
+	outputFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeDfModularityInfered.tsv'
+	utilsGraph.getCommunityNameInferences(nodeDf, outputFilePath)
+
 	#STATS previsualization of modularity result
 	utilsGraph.getModularityPercentage(outputFilePath)
-	
+	'''
 
+	##################################################################################
+	#CALLING FUNCT FROM utilsGraph.py TO MAKE THE CLEAN THE GRAPH FILES
+	##################################################################################
+	''' 
+
+	'''
+	
 
 	##################################################################################
 	#CALLING FUNCT FROM extractor.py TO MAKE REALIABLE JOB TITLES
@@ -141,6 +155,7 @@ if __name__ == '__main__':
 	#make file of reliable job titles using Zack Soliman's code
 	extractor.jobTitleExtractorZack().getJobsZackExtracted('./002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/jobTitles.txt', outputPath='./002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/zackReliableJobs.txt')
 	''' 
+
 
 	##################################################################################
 	#CALLING FUNCT FROM stats.py TO MAKE STATS ON THE PROJECT
