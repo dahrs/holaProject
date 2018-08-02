@@ -111,7 +111,7 @@ if __name__ == '__main__':
 	##################################################################################
 	#CALLING FUNCT FROM utilsGraph.py TO MAKE THE GRAPH EDGES AND NODES FILES
 	##################################################################################
-	''' 
+	'''
 	#from the 100 000 sample
 	edgeFilePath = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeightNoHeader.tsv'
 	nodeFilePath = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListType.tsv'
@@ -122,7 +122,6 @@ if __name__ == '__main__':
 
 	#STATS previsualization of modularity result
 	utilsGraph.getModularityPercentage(outputFilePath)
-
 	''' 
 	'''
 	#from all english FR candidates
@@ -137,13 +136,46 @@ if __name__ == '__main__':
 	utilsGraph.getModularityPercentage(outputFilePath)
 	'''
 
+
 	##################################################################################
-	#CALLING FUNCT FROM utilsGraph.py TO MAKE THE CLEAN THE GRAPH FILES
+	#CALLING FUNCT FROM utilsGraph.py TO MAKE AND CLEAN THE GRAPH FILES
 	##################################################################################
+	'''
+	edgeFilePathInput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeight.tsv'
+	nodeFilePathInput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListModularityInfered.tsv'
+	edgeFilePathOutput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeDfWeightCleanedLvl1.tsv'
+	nodeFilePathOutput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeDfModularityInferedCleanedLvl1.tsv'
+	utilsGraph.ontologyStructureCleaning(edgeFilePathInput, nodeFilePathInput, edgeFilePathOutput, nodeFilePathOutput)
 	''' 
 
-	'''
+
+	##################################################################################
+	#CALLING FUNCT FROM utilsGraph.py TO MAKE THE GRAPH EDGES AND NODES FILES
+	##################################################################################
+	'''	
+	#from the 100 000 sample
+	edgeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeight.tsv'
+	nodeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListModularityInfered.tsv'
 	
+	#open the edge list as a data frame	
+	edgeDf = pd.read_csv(edgeFilePath, sep=u'\t')
+	#open the node list as a data frame	
+	nodeDf = pd.read_csv(nodeFilePath, sep=u'\t')
+	
+	#make a new level of modularization and dump the result
+	outputFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeDfModularityInferedLv2.tsv'
+	nodeDf, dendrogram = utilsGraph.modularizeFurther(edgeDf, nodeDf, nameOfCommunityColumn=u'Community', nameOfNewCommunityColumn=u'Community2', outputFilePath=outputFilePath)
+	'''
+
+	
+	##################################################################################
+	#CALLING FUNCT FROM utilsGraph.py TO TWEAK THE CONFIG.JSON AND INDEX.HTML GRAPH FILES
+	##################################################################################
+	'''
+	pathToGraphExportEnvironment = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/testsGephi/gephiExportSigma0/springLayoutAndModularityPythonLouvain/sampleCleanedLv1/network/'
+	utilsGraph.modifyConfigAndIndexFiles(pathToGraphExportEnvironment)
+	'''
+
 
 	##################################################################################
 	#CALLING FUNCT FROM extractor.py TO MAKE REALIABLE JOB TITLES

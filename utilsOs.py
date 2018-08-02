@@ -88,20 +88,20 @@ def getLastLineIndexOfExistingFile(filePath):
 		return len(openedFile.readlines()) - 1 #we count starting with 0
 
 
-def theFileExists(directoryPath, nameOfFile=None, fileExtension=None):
+def theFileExists(directoryOrWholeFilePath, nameOfFile=None, fileExtension=None):
 	'''
 	Returns false if the file does not exists at the directory
 	and returns true if the file exists
 	'''
 	#if the directory path is actually the file path
 	if nameOfFile == None and fileExtension == None:
-		return os.path.isfile(directoryPath)
+		return os.path.isfile(directoryOrWholeFilePath)
 	#if the path is correctly written at the end
-	if directoryPath[-1] !=u'/':
-		directoryPath = u'%s/' %(directoryPath)
+	if directoryOrWholeFilePath[-1] !=u'/':
+		directoryOrWholeFilePath = u'%s/' %(directoryOrWholeFilePath)
 	#all extensions
 	if fileExtension == None:
-		filelist = os.listdir(directoryPath)
+		filelist = os.listdir(directoryOrWholeFilePath)
 		for file in filelist:
 			splittedFileName = file.split('.')
 			#if there was more than one '.'
@@ -122,7 +122,7 @@ def theFileExists(directoryPath, nameOfFile=None, fileExtension=None):
 		return False
 	#exclusive extension
 	else:
-		return os.path.isfile(u'%s%s.%s' %(directoryPath, nameOfFile, fileExtension))
+		return os.path.isfile(u'%s%s.%s' %(directoryOrWholeFilePath, nameOfFile, fileExtension))
 
 
 def readAllLinesFromFile(pathToFile, noNewLineChar=False, asStringNotUnicode=False):

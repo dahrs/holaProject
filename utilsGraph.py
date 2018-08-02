@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #-*- coding:utf-8 -*-
 
-import json, codecs, random, community
+import json, codecs, random, community, shutil, os
 from tqdm import tqdm
 import pandas as pd
 import numpy as np
@@ -84,8 +84,6 @@ def edgeListDump(pathTempFile, pathOutput):
 					lastJobTitle = dataList[0]
 				#we add the line to the set
 				lineSet.add(dataLine)
-			###else:
-			###	print(111111, dataList)
 			#get to the next line
 			dataLine = tempData.readline()
 	#we browse the data a second time to dump it
@@ -120,8 +118,6 @@ def nodeListIdType(pathEdgeListFile, pathNodeFileOutput):
 				jobTitleSet.add(dataList[0])
 				#add to the skill (target) set
 				skillSet.add(dataList[1])
-			###else:
-			###	print(111111, dataList)
 			#get to the next line
 			dataLine = edgeData.readline()
 	#browse the data sets to dump them
@@ -129,6 +125,26 @@ def nodeListIdType(pathEdgeListFile, pathNodeFileOutput):
 		outputTxt.write(u'{0}\t{1}\t{2}\n'.format(jobTitle, jobTitle.replace(u'__s', u''), 2)) #id's '_s' means 'source', 2 means 'source'
 	for skill in skillSet:
 		outputTxt.write(u'{0}\t{1}\t{2}\n'.format(skill, skill.replace(u'__t', u''), 1)) #id's '_t' means 'target', 1 means 'target'
+
+
+def dfToTsv(pathToDfFile, outputFilePath=None):
+	'''
+	opens a pandas dumped data frame file and removes
+	the row indexes, making the matrix a list with columns
+	'''
+	df = pd.read_csv(pathToDfFile, sep=u'\t')
+	#get the header (column names)
+	header = u'\t'.join(df.columns.tolist()[1:]) 
+	listOfRawLines = [header]
+	#add the rest of the row information
+	for index, row in df.iterrows():
+		row = [str(elem) for elem in row.tolist()[1:]]
+		listOfRawLines.append(u'\t'.join(row))
+	#if there is no specification where should we dump the result, the output path IS the input path
+	if outputFilePath == None:
+		outputFilePath = pathToDfFile
+	utilsOs.dumpRawLines(listOfRawLines, outputFilePath, addNewline=True, rewrite=True)
+
 
 
 ##################################################################################
@@ -183,30 +199,111 @@ def nodeDfCleaner(nodeDf):
 	return nodeDf.dropna()
 
 
-def modularizeLouvain(edgeFilePath, nodeFilePath, outputFilePath=None):
+def modularize(edgeGraph, nodeDf, nameOfModularityColumn=u'Community'):
 	'''
 	uses the original code of the louvain algorithm to give modularity to a graph
+	'''
+	#compute the best partition
+	dendrogram = community.generate_dendrogram(edgeGraph, weight='weight')
+	dendroBestPartitionDict = community.partition_at_level(dendrogram, len(dendrogram)-1) #dendroBestPartitionDict = community.best_partition(graph)
+	#add a column to the node data frame so we can add the community values
+	if nameOfModularityColumn not in nodeDf.columns:
+		nodeDf[nameOfModularityColumn] = np.nan	
+	#add the community values to the node data frame
+	nodeDf[nameOfModularityColumn] = nodeDf[u'Id'].map(dendroBestPartitionDict)
+	#making sure all 'modularity_class' NaN were deleted 
+	return nodeDfCleaner(nodeDf), dendrogram
+
+
+def modularizeLouvain(edgeFilePath, nodeFilePath, outputFilePath=None):
+	'''
+	uses the original code of the louvain algorithm to give modularity to a graph on multiple levels
 	downloaded from https://github.com/taynaud/python-louvain
 	documentation at: http://python-louvain.readthedocs.io/en/latest/api.html
 	official website: https://perso.uclouvain.be/vincent.blondel/research/louvain.html
 	'''
 	#open the edge list as a networkx graph
-	graph = nx.read_weighted_edgelist(edgeFilePath, delimiter='\t')
-	#compute the best partition
-	dendrogram = community.generate_dendrogram(graph, weight='weight')
-	dendroBestPartitionDict = community.partition_at_level(dendrogram, len(dendrogram)-1) #dendroBestPartitionDict = community.best_partition(graph)
+	edgeGraph = nx.read_weighted_edgelist(edgeFilePath, delimiter='\t')
 	#open the node list as a data frame	
 	nodeDf = pd.read_csv(nodeFilePath, sep=u'\t')
-	#add a column to the node data frame so we can add the community values
-	nodeDf[u'Community'] = np.nan	
-	#add the community values to the node data frame
-	nodeDf[u'Community'] = nodeDf[u'Id'].map(dendroBestPartitionDict)
-	#making sure all 'modularity_class' NaN were deleted 
-	nodeDf = nodeDfCleaner(nodeDf)
+	#get the louvain modularity algorithm result in the form of a completed node data frame
+	nodeDf, dendrogram = modularize(edgeGraph, nodeDf, nameOfModularityColumn=u'Community')
 	#dumps the dataframe with the modularization data
 	if outputFilePath != None:
 		nodeDf.to_csv(outputFilePath, sep='\t')
+		#transforming the dataframe into node list
+		dfToTsv(outputFilePath, outputFilePath.replace(u'Df', u'List'))
 	return nodeDf, dendrogram
+
+
+def modularizeSubCommunities(edgeListDividedByCommunities):
+	'''
+	reapplies the louvain algorithm to each individual 
+	sub-community obtained from the louvain algorithm
+	'''
+
+
+def modularizeFurther(edgeDf, nodeDf, nameOfCommunityColumn, nameOfNewCommunityColumn, outputFilePath=None):
+	'''
+	recalculates the modularity for each community already in existence (adds one level of modularization)
+	returns a node data frame with 
+	'''
+	#get the list of community ids
+	communityList = list(set(nodeDf[nameOfCommunityColumn].tolist()))
+	#for each community reapply the louvain algorithm
+	for community in communityList:
+		communityNodeDf = nodeDf.loc[nodeDf[nameOfCommunityColumn] == community]
+		#select all the edges that have a community node as a source (we leave behind all the community nodes that are 'targets')
+		selectiveEdgeDf = edgeDf.loc[edgeDf[u'Source'].isin(communityNodeDf[u'Id'].tolist())]
+		#use the reduced edge list to make the graph
+		communityGraph = nx.from_pandas_edgelist(selectiveEdgeDf, u'Source', u'Target', edge_attr=u'Weight')
+		#further modularization
+		subCommunityDf, dendrogram = modularize(communityGraph, communityNodeDf, nameOfModularityColumn=nameOfNewCommunityColumn)
+		if nameOfNewCommunityColumn not in nodeDf.columns:
+			nodeDf[nameOfNewCommunityColumn] = np.nan
+		#add the community2 value to the whole node data frame
+		for index in subCommunityDf.index:
+			nodeDf.loc[index, nameOfNewCommunityColumn] = subCommunityDf.loc[index, nameOfNewCommunityColumn]
+	#dumps the dataframe with the modularization data
+	if outputFilePath != None:
+		nodeDf.to_csv(outputFilePath, sep='\t')
+		#transforming the dataframe into node list
+		dfToTsv(outputFilePath, outputFilePath.replace(u'Df', u'List'))
+	return nodeDf, dendrogram
+
+
+def getModularityPercentage(nodeFilePathWithModularity, communityColumnHeader=u'Community'):
+	'''
+	opens the node list tsv file and calculates the percentage of communities
+	'''
+	communityDict = {}
+	resultDict = {}
+	if type(nodeFilePathWithModularity) is not str:
+		nodeDf = nodeFilePathWithModularity
+	else:
+		nodeDf = pd.read_csv(nodeFilePathWithModularity, sep=u'\t')
+
+	#remaking a community dict
+	for nodeIndex, nodeRow in nodeDf.iterrows():
+		modCommunity = nodeRow[communityColumnHeader]
+		if modCommunity in communityDict:
+			communityDict[modCommunity].append(nodeRow[u'Label'])
+		else:
+			communityDict[modCommunity] = [nodeRow[u'Label']]
+	#calculation
+	for idKey, communityValue in communityDict.items():
+		resultDict[idKey] = (float(len(communityValue)) / float(len(nodeDf)))
+	#printing in order
+	for v,k in (sorted( ((v,k) for k,v in resultDict.items()), reverse=True)):
+		print(44444444444444444444444, 'community {0} normalized score: {1}'.format(k, v))
+		#if v > 0.01:
+		#	print(55555555555, communityDict[k])
+	return resultDict
+
+
+##################################################################################
+#MODULARITY DOMAIN NAME GUESSING
+##################################################################################
 
 
 def fillBagOfWords(bowSet, jobTitleList, occupationsUkDf, occupationsUsDf):
@@ -341,31 +438,6 @@ def getCommunityNameInferences(nodeDf, outputFilePath):
 	return inferencesDict
 
 
-def getModularityPercentage(nodeFilePathWithModularity, communityColumnHeader=u'Community'):
-	'''
-	opens the node list tsv file and calculates the percentage of communities
-	'''
-	communityDict = {}
-	resultDict = {}
-	nodeDf = pd.read_csv(nodeFilePathWithModularity, sep=u'\t')
-
-	#remaking a community dict
-	for nodeIndex, nodeRow in nodeDf.iterrows():
-		modCommunity = nodeRow[communityColumnHeader]
-		if modCommunity in communityDict:
-			communityDict[modCommunity].append(nodeRow[u'Label'])
-		else:
-			communityDict[modCommunity] = [nodeRow[u'Label']]
-	#calculation
-	for idKey, communityValue in communityDict.items():
-		resultDict[idKey] = (float(len(communityValue)) / float(len(nodeDf)))
-	#printing in order
-	for v,k in (sorted( ((v,k) for k,v in resultDict.items()), reverse=True)):
-		print(44444444444444444444444, 'community {0} normalized score: {1}'.format(k, v))
-		#if v > 0.01:
-		#	print(55555555555, communityDict[k])
-	return resultDict
-
 
 ##################################################################################
 #ONTOLOGY CLEANING AND TRIMMING
@@ -398,7 +470,6 @@ def remove1DegreeNodes(dictA, dictB):
 	if len(dictA) != aOriginalSize and len(dictB) != bOriginalSize:
 		dictB, dictA = remove1DegreeNodes(dictB, dictA)
 	return dictA, dictB
-
 
 
 def ontologyStructureCleaning(edgeFilePathInput, nodeFilePathInput, edgeFilePathOutput=None, nodeFilePathOutput=None):
@@ -439,14 +510,13 @@ def ontologyStructureCleaning(edgeFilePathInput, nodeFilePathInput, edgeFilePath
 	#dumping the data frames
 	if edgeFilePathOutput != None:
 		edgeDf.to_csv(edgeFilePathOutput, sep='\t')
+		#transforming the dataframe into edge list
+		dfToTsv(edgeFilePathOutput, edgeFilePathOutput.replace(u'Df', u'List'))
 	if nodeFilePathOutput != None:
 		nodeDf.to_csv(nodeFilePathOutput, sep='\t')
+		#transforming the dataframe into node list
+		dfToTsv(nodeFilePathOutput, nodeFilePathOutput.replace(u'Df', u'List'))
 	return edgeDf, nodeDf
-
-
-
-
-	
 
 
 ##################################################################################
@@ -472,9 +542,39 @@ def ontoQA():
 
 
 
+##################################################################################
+#CALIBRATION OF THE SIGMA.JS EXPORTATION OF THE GRAPH
+##################################################################################
 
-edgeFilePathInput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeight.tsv'
-nodeFilePathInput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListModularityInfered.tsv'
-edgeFilePathOutput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeightCleanedLvl1.tsv'
-nodeFilePathOutput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListModularityInferedCleanedLvl1.tsv'
-ontologyStructureCleaning(edgeFilePathInput, nodeFilePathInput, edgeFilePathOutput, nodeFilePathOutput)
+def modifyConfigAndIndexFiles(pathToTheExportationEnvironment):
+	'''
+	given the path to the sigma.js exportation environment (ending in 
+	the folder "network/"), it changes the config.json file and the index.html
+	file so they show the graph the way intended
+	'''
+	#copying config.json file
+	configContent = {"type": "network","version": "1.0","data": "data.json","logo": {"file": "","link": "","text": ""},"text": {"more": "","intro": "","title": ""},"legend": {"edgeLabel": "","colorLabel": "","nodeLabel": ""},"features": {"search": True,"groupSelectorAttribute": True,"hoverBehavior": "default"},"informationPanel": {"groupByEdgeDirection": True,"imageAttribute": False},"sigma": {"drawingProperties": {"defaultEdgeType": "curve","defaultHoverLabelBGColor": "#002147","defaultLabelBGColor": "#ddd","activeFontStyle": "bold","defaultLabelColor": "#000","labelThreshold": 999,"defaultLabelHoverColor": "#fff","fontStyle": "bold","hoverFontStyle": "bold","defaultLabelSize": 14},"graphProperties": {"maxEdgeSize": 2,"minEdgeSize": 2,"minNodeSize": 0.25,"maxNodeSize": 2.5},"mouseProperties": {"maxRatio": 20,"minRatio": 0.75}}}
+	pathConfigJson = u'{0}config.json'.format(pathToTheExportationEnvironment)
+	if utilsOs.theFileExists(pathConfigJson) == True:
+		os.remove(pathConfigJson)
+	utilsOs.dumpDictToJsonFile(configContent, pathConfigJson)  
+	#getting the color information from the data file
+	colorCommunityDict = {}
+	dataDict = utilsOs.openJsonFileAsDict(u'{0}data.json'.format(pathToTheExportationEnvironment))
+	for nodeDict in dataDict[u'nodes']:
+		try:
+			if nodeDict[u'attributes'][u'community'] not in colorCommunityDict:
+				colorCommunityDict[nodeDict[u'attributes'][u'community']] = u'\t\t\t<div style="color: {0};">● {1}</div>\n'.format(nodeDict[u'color'], nodeDict[u'attributes'][u'infered_community_name'])
+		except KeyError:
+			pass
+	#modifying the index.html file
+	with open(u'{0}index.html'.format(pathToTheExportationEnvironment)) as indexFile:
+		fileLines = indexFile.readlines()
+		for index, line in enumerate(fileLines):
+			if line == u'\t\t<dt class="colours"></dt>\n':
+				indexDivisor = index + 1
+				break
+		fileLines = fileLines[:indexDivisor] + [u'\t\t<dd>\n'] + list(colorCommunityDict.values()) + [u'\t\t</dd>\n'] + fileLines[indexDivisor+1:]
+	utilsOs.dumpRawLines(fileLines, u'{0}index.html'.format(pathToTheExportationEnvironment), addNewline=False, rewrite=True)
+
+

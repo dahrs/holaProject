@@ -28,7 +28,6 @@ def toUtf8(stringOrUnicode):
 #REGEX
 ##################################################################################
 
-
 def findAcronyms(string):
 	'''
 	Returns the acronyms found in the string.
