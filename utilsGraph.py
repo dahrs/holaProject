@@ -127,26 +127,6 @@ def nodeListIdType(pathEdgeListFile, pathNodeFileOutput):
 		outputTxt.write(u'{0}\t{1}\t{2}\n'.format(skill, skill.replace(u'__t', u''), 1)) #id's '_t' means 'target', 1 means 'target'
 
 
-def dfToTsv(pathToDfFile, outputFilePath=None):
-	'''
-	opens a pandas dumped data frame file and removes
-	the row indexes, making the matrix a list with columns
-	'''
-	df = pd.read_csv(pathToDfFile, sep=u'\t')
-	#get the header (column names)
-	header = u'\t'.join(df.columns.tolist()[1:]) 
-	listOfRawLines = [header]
-	#add the rest of the row information
-	for index, row in df.iterrows():
-		row = [str(elem) for elem in row.tolist()[1:]]
-		listOfRawLines.append(u'\t'.join(row))
-	#if there is no specification where should we dump the result, the output path IS the input path
-	if outputFilePath == None:
-		outputFilePath = pathToDfFile
-	utilsOs.dumpRawLines(listOfRawLines, outputFilePath, addNewline=True, rewrite=True)
-
-
-
 ##################################################################################
 #GET ADJACENCY
 ##################################################################################
@@ -199,7 +179,7 @@ def nodeDfCleaner(nodeDf):
 	return nodeDf.dropna()
 
 
-def modularize(edgeGraph, nodeDf, nameOfModularityColumn=u'Community'):
+def modularize(edgeGraph, nodeDf, nameOfModularityColumn=u'Community_Lvl_0'):
 	'''
 	uses the original code of the louvain algorithm to give modularity to a graph
 	'''
@@ -227,20 +207,25 @@ def modularizeLouvain(edgeFilePath, nodeFilePath, outputFilePath=None):
 	#open the node list as a data frame	
 	nodeDf = pd.read_csv(nodeFilePath, sep=u'\t')
 	#get the louvain modularity algorithm result in the form of a completed node data frame
-	nodeDf, dendrogram = modularize(edgeGraph, nodeDf, nameOfModularityColumn=u'Community')
+	nodeDf, dendrogram = modularize(edgeGraph, nodeDf, nameOfModularityColumn=u'Community_Lvl_0')
 	#dumps the dataframe with the modularization data
 	if outputFilePath != None:
-		nodeDf.to_csv(outputFilePath, sep='\t')
-		#transforming the dataframe into node list
-		dfToTsv(outputFilePath, outputFilePath.replace(u'Df', u'List'))
+		nodeDf.to_csv(outputFilePath, sep='\t', index=False)
 	return nodeDf, dendrogram
 
 
-def modularizeSubCommunities(edgeListDividedByCommunities):
+def modularizeSubCommunities(edgeFilePath, nodeFilePath, outputFilePath):
 	'''
-	reapplies the louvain algorithm to each individual 
+	reapplies a second time the louvain algorithm to each individual 
 	sub-community obtained from the louvain algorithm
 	'''
+	#open the edge list as a data frame	
+	edgeDf = pd.read_csv(edgeFilePath, sep=u'\t')
+	#open the node list as a data frame	
+	nodeDf = pd.read_csv(nodeFilePath, sep=u'\t')
+	#modularize
+	nodeDf, dendrogram = modularizeFurther(edgeDf, nodeDf, nameOfCommunityColumn=u'Community_Lvl_0', nameOfNewCommunityColumn=u'Community_Lvl_1', outputFilePath=outputFilePath)
+	return nodeDf, dendrogram
 
 
 def modularizeFurther(edgeDf, nodeDf, nameOfCommunityColumn, nameOfNewCommunityColumn, outputFilePath=None):
@@ -261,18 +246,16 @@ def modularizeFurther(edgeDf, nodeDf, nameOfCommunityColumn, nameOfNewCommunityC
 		subCommunityDf, dendrogram = modularize(communityGraph, communityNodeDf, nameOfModularityColumn=nameOfNewCommunityColumn)
 		if nameOfNewCommunityColumn not in nodeDf.columns:
 			nodeDf[nameOfNewCommunityColumn] = np.nan
-		#add the community2 value to the whole node data frame
+		#add the Community_Lvl_1 value to the whole node data frame in the form : community_lvl_0 . community_lvl_1 (i.e., 1245.00015)
 		for index in subCommunityDf.index:
-			nodeDf.loc[index, nameOfNewCommunityColumn] = subCommunityDf.loc[index, nameOfNewCommunityColumn]
+			nodeDf.loc[index, nameOfNewCommunityColumn] = nodeDf.loc[index, nameOfCommunityColumn] + (subCommunityDf.loc[index, nameOfNewCommunityColumn] / 10000)
 	#dumps the dataframe with the modularization data
 	if outputFilePath != None:
-		nodeDf.to_csv(outputFilePath, sep='\t')
-		#transforming the dataframe into node list
-		dfToTsv(outputFilePath, outputFilePath.replace(u'Df', u'List'))
+		nodeDf.to_csv(outputFilePath, sep='\t', index=False)
 	return nodeDf, dendrogram
 
 
-def getModularityPercentage(nodeFilePathWithModularity, communityColumnHeader=u'Community'):
+def getModularityPercentage(nodeFilePathWithModularity, communityColumnHeader=u'Community_Lvl_0'):
 	'''
 	opens the node list tsv file and calculates the percentage of communities
 	'''
@@ -382,11 +365,11 @@ def getOntologyBowByCommunity(nodeDf):
 	for each community in the ontology
 	'''
 	communityBagOfWords = {}
-	communitiesSet = set(nodeDf['Community'].tolist())
+	communitiesSet = set(nodeDf[u'Community_Lvl_0'].tolist())
 	for community in communitiesSet:
 		bowSet = set()
 		#get a reduced df where the community column corresponds to the community value
-		communityDf = nodeDf.loc[nodeDf[u'Community'] == community]
+		communityDf = nodeDf.loc[nodeDf[u'Community_Lvl_0'] == community]
 		#make the bag of words set
 		jobTitleList = communityDf['Label'].tolist()
 		for jobTitle in jobTitleList:
@@ -410,7 +393,7 @@ def getCommunityNameInferences(nodeDf, outputFilePath):
 	#bag of words of the communities in our ontology
 	communityBagOfWords = getOntologyBowByCommunity(nodeDf)
 	#add an empty column
-	nodeDf[u'Infered_Community_Name'] = np.nan
+	nodeDf[u'Infered_Community_Name_Lvl_0'] = np.nan
 	#comparing intersection between esco bow and the communities bow
 	for community, communityBow in communityBagOfWords.items():
 		#reset values of best intersection
@@ -432,9 +415,9 @@ def getCommunityNameInferences(nodeDf, outputFilePath):
 					bestIntersection[u'name'] = escoDomain
 		#saving the information
 		inferencesDict[community] = bestIntersection
-		nodeDf[u'Infered_Community_Name'].loc[nodeDf[u'Community'] == community] = str(bestIntersection['name'])
+		nodeDf[u'Infered_Community_Name_Lvl_0'].loc[nodeDf[u'Community_Lvl_0'] == community] = str(bestIntersection['name'])
 	#dump to file
-	nodeDf.to_csv(outputFilePath, sep='\t')
+	nodeDf.to_csv(outputFilePath, sep='\t', index=False)
 	return inferencesDict
 
 
@@ -485,16 +468,16 @@ def ontologyStructureCleaning(edgeFilePathInput, nodeFilePathInput, edgeFilePath
 	nodeDf = pd.read_csv(nodeFilePathInput, sep=u'\t')
 
 	#remove communities corresponding to less than 1% of the node
-	communitiesSet = set(nodeDf['Community'].tolist())
+	communitiesSet = set(nodeDf['Community_Lvl_0'].tolist())
 	copyCommunitiesSet = list(communitiesSet)
 	for communityId in copyCommunitiesSet:
 		bowSet = set()
 		#get a reduced df where the community column corresponds to the community id value
-		communityDf = nodeDf.loc[nodeDf[u'Community'] == communityId]
+		communityDf = nodeDf.loc[nodeDf[u'Community_Lvl_0'] == communityId]
 		if len(communityDf)/len(nodeDf) < 0.01:
 			communitiesSet.remove(communityId)
 	#save the trimmed df as the new node df
-	nodeDf = nodeDf.loc[nodeDf[u'Community'].isin(list(communitiesSet))]
+	nodeDf = nodeDf.loc[nodeDf[u'Community_Lvl_0'].isin(list(communitiesSet))]
 	#make a dict of jobtitle to skills and a dict of skill to jobtitles
 	jToSkillsDict = {}
 	sToJobsDict = {}
@@ -509,13 +492,9 @@ def ontologyStructureCleaning(edgeFilePathInput, nodeFilePathInput, edgeFilePath
 	edgeDf = edgeDf.loc[edgeDf[u'Source'].isin(list(jToSkillsDict.keys())) & edgeDf[u'Target'].isin(list(sToJobsDict.keys()))]
 	#dumping the data frames
 	if edgeFilePathOutput != None:
-		edgeDf.to_csv(edgeFilePathOutput, sep='\t')
-		#transforming the dataframe into edge list
-		dfToTsv(edgeFilePathOutput, edgeFilePathOutput.replace(u'Df', u'List'))
+		edgeDf.to_csv(edgeFilePathOutput, sep='\t', index=False)
 	if nodeFilePathOutput != None:
-		nodeDf.to_csv(nodeFilePathOutput, sep='\t')
-		#transforming the dataframe into node list
-		dfToTsv(nodeFilePathOutput, nodeFilePathOutput.replace(u'Df', u'List'))
+		nodeDf.to_csv(nodeFilePathOutput, sep='\t', index=False)
 	return edgeDf, nodeDf
 
 
@@ -563,8 +542,14 @@ def modifyConfigAndIndexFiles(pathToTheExportationEnvironment):
 	dataDict = utilsOs.openJsonFileAsDict(u'{0}data.json'.format(pathToTheExportationEnvironment))
 	for nodeDict in dataDict[u'nodes']:
 		try:
+			if nodeDict[u'attributes'][u'community_Lvl_0'] not in colorCommunityDict:
+				colorCommunityDict[nodeDict[u'attributes'][u'community_Lvl_0']] = u'\t\t\t<div style="color: {0};">● {1}</div>\n'.format(nodeDict[u'color'], nodeDict[u'attributes'][u'infered_Community_Name_Lvl_0'])
+			'''
+			#####################################################
+			#before I changed the names of the columns
 			if nodeDict[u'attributes'][u'community'] not in colorCommunityDict:
 				colorCommunityDict[nodeDict[u'attributes'][u'community']] = u'\t\t\t<div style="color: {0};">● {1}</div>\n'.format(nodeDict[u'color'], nodeDict[u'attributes'][u'infered_community_name'])
+			'''
 		except KeyError:
 			pass
 	#modifying the index.html file
