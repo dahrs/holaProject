@@ -533,6 +533,8 @@ def ontoQA(edgeFilePath, nodeFilePath, verbose=True):
 	#get class (C_i) dependent data (inst)
 	for classId in classes:
 		classDataDict[classId]['inst_nbClassInstances'] = len(nodeDf.loc[nodeDf['Community_Lvl_0'] == classId])
+		#add a NIREL value of 0 in case there is an 'na' in the classes
+		classDataDict[classId]['NIREL_nbRelOtherClass'] = 0
 	#get class (C_i) dependent data (NIREL)
 	for edgeIndex, edgeRow in edgeDf.iterrows():
 		sourceClass = nodeDf.loc[nodeDf['Id'] == edgeRow['Source']]['Community_Lvl_0'].values
@@ -562,7 +564,10 @@ def ontoQA(edgeFilePath, nodeFilePath, verbose=True):
 	#Conn(C_i) - class connectivity 
 	metricsDict['Conn'] = {}
 	for classId, classData in classDataDict.items():
-		metricsDict['Conn'][u'CLASS {0}'.format(classId)] = classData['NIREL_nbRelOtherClass']
+		try:
+			metricsDict['Conn'][u'CLASS {0}'.format(classId)] = classData['NIREL_nbRelOtherClass']
+		except KeyError:
+			print(classId, classData)
 	#Imp(C_i) - class importance
 	metricsDict['Imp'] = {}
 	for classId, classData in classDataDict.items():
@@ -617,7 +622,13 @@ def modifyConfigAndIndexFiles(pathToTheExportationEnvironment):
 	utilsOs.dumpRawLines(fileLines, u'{0}index.html'.format(pathToTheExportationEnvironment), addNewline=False, rewrite=True)
 
 
-
+'''
+#NOTRE ONTO
 edgeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeightCleanedLvl0.tsv'
 nodeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListModularityInferedCleanedLvl1.tsv'
+print(ontoQA(edgeFilePath, nodeFilePath))
+'''
+#ESCO
+edgeFilePath = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/001ontologies/ESCO/v1.0.2/edgeAndNodeList/ESCOedgeList.tsv'
+nodeFilePath = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/001ontologies/ESCO/v1.0.2/edgeAndNodeList/ESCOnodeList.tsv'
 print(ontoQA(edgeFilePath, nodeFilePath))
