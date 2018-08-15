@@ -502,22 +502,76 @@ def ontologyStructureCleaning(edgeFilePathInput, nodeFilePathInput, edgeFilePath
 #ONTOLOGY EVALUATION METRICS
 ##################################################################################
 
-def ontoQA():
+def ontoQA(edgeFilePath, nodeFilePath, verbose=True):
 	'''
 	given an ontology (edge list and node list) it calculates the ontoQA score
+	the lists must contain certain column names:
+	 - edge list: Source, Target
+	 - node list: Id, Community_Lvl_0
 	'''
+	emptyDict = {}
+	dataDict = {}
+	metricsDict = {}
+	#open the edge list as a data frame	
+	edgeDf = pd.read_csv(edgeFilePath, sep=u'\t')
+	#open the node list as a data frame	
+	nodeDf = pd.read_csv(nodeFilePath, sep=u'\t')
+	#make a dict for the class related data
+	classes = set(nodeDf['Community_Lvl_0'].tolist())
+	classDataDict = {k:dict(emptyDict) for k in classes}
+
+	#get C, number of classes
+	dataDict['C'] = len(classes)
+	#get P, non-inheritance relationships
+	dataDict['P'] = len(edgeDf)
+	#get H, inheritance relationships
+	dataDict['H'] = len(nodeDf)	
+	#get att, number of attributes
+	dataDict['att'] = len(edgeDf) + len(nodeDf)
+	#get CI, total number of instances
+	dataDict['CI'] = len(nodeDf) + len(classes)
+	#get class (C_i) dependent data (inst)
+	for classId in classes:
+		classDataDict[classId]['inst_nbClassInstances'] = len(nodeDf.loc[nodeDf['Community_Lvl_0'] == classId])
+	#get class (C_i) dependent data (NIREL)
+	for edgeIndex, edgeRow in edgeDf.iterrows():
+		sourceClass = nodeDf.loc[nodeDf['Id'] == edgeRow['Source']]['Community_Lvl_0'].values
+		targetClass = nodeDf.loc[nodeDf['Id'] == edgeRow['Target']]['Community_Lvl_0'].values
+		try:
+			if sourceClass != targetClass:
+				#get NIREL(Cj), number of relationships instances of the class have with instances of other classes
+				classDataDict[sourceClass[0]]['NIREL_nbRelOtherClass'] = classDataDict[sourceClass[0]].get('NIREL_nbRelOtherClass', 0) + 1 
+			else:
+				classDataDict[sourceClass[0]]['nbRelSameClass'] = classDataDict[sourceClass[0]].get('nbRelSameClass', 0) + 1 
+		except IndexError:
+			pass
+	#open the edge list as a networkx graph to get the nb of connected components
+	edgeGraph = nx.from_pandas_edgelist(edgeDf, u'Source', u'Target', edge_attr=u'Weight')
+	#get CC, number of connected components
+	dataDict['CC'] = nx.number_connected_components(edgeGraph)
+
+	#calculating the ONTOQA METRICS:
 	#RR - relationship richness
-	#inheritance relationship = class-subclass relationship
-
+	metricsDict['RR'] = float(dataDict['P']) / float(dataDict['H']+dataDict['P'])
 	#IR - inheritance richness
-	#
-
-	#attribute richness
-	#class richness
-	#class connectivity 
-	#class importance
-	#cohesion
-	#relationship richness
+	metricsDict['IR'] = float(dataDict['H']) / float(dataDict['C'])
+	#AR - attribute richness
+	metricsDict['AR'] = float(dataDict['att']) / float(dataDict['C'])
+	#CR - class richness
+	##################unable to actually calculate it without having a preconceived schema of the ontology
+	#Conn(C_i) - class connectivity 
+	metricsDict['Conn'] = {}
+	for classId, classData in classDataDict.items():
+		metricsDict['Conn'][u'CLASS {0}'.format(classId)] = classData['NIREL_nbRelOtherClass']
+	#Imp(C_i) - class importance
+	metricsDict['Imp'] = {}
+	for classId, classData in classDataDict.items():
+		metricsDict['Imp'][u'CLASS {0}'.format(classId)] = float(classData['inst_nbClassInstances']) / float(dataDict['CI'])
+	#Coh - cohesion
+	metricsDict[u'Coh'] = dataDict[u'CC']
+	#RR(C_i) - relationship richness per class
+	##################unable to actually calculate it without having a preconceived schema of the ontology
+	return metricsDict
 
 
 
@@ -542,8 +596,8 @@ def modifyConfigAndIndexFiles(pathToTheExportationEnvironment):
 	dataDict = utilsOs.openJsonFileAsDict(u'{0}data.json'.format(pathToTheExportationEnvironment))
 	for nodeDict in dataDict[u'nodes']:
 		try:
-			if nodeDict[u'attributes'][u'community_Lvl_0'] not in colorCommunityDict:
-				colorCommunityDict[nodeDict[u'attributes'][u'community_Lvl_0']] = u'\t\t\t<div style="color: {0};">● {1}</div>\n'.format(nodeDict[u'color'], nodeDict[u'attributes'][u'infered_Community_Name_Lvl_0'])
+			if nodeDict[u'attributes'][u'community_lvl_0'] not in colorCommunityDict:
+				colorCommunityDict[nodeDict[u'attributes'][u'community_lvl_0']] = u'\t\t\t<div style="color: {0};">● {1}</div>\n'.format(nodeDict[u'color'], nodeDict[u'attributes'][u'infered_community_name_lvl_0'])
 			'''
 			#####################################################
 			#before I changed the names of the columns
@@ -563,3 +617,7 @@ def modifyConfigAndIndexFiles(pathToTheExportationEnvironment):
 	utilsOs.dumpRawLines(fileLines, u'{0}index.html'.format(pathToTheExportationEnvironment), addNewline=False, rewrite=True)
 
 
+
+edgeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeightCleanedLvl0.tsv'
+nodeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListModularityInferedCleanedLvl1.tsv'
+print(ontoQA(edgeFilePath, nodeFilePath))
