@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 
 import re, codecs, nltk
-import utilsOs
+from langdetect import detect
 
 
 ##################################################################################
@@ -113,18 +113,26 @@ def tokenizeAndExtractSpecificPos(string, listOfPosToReturn, caseSensitive=True,
 
 def englishOrFrench(string):
 	'''guesses the language of a string between english and french'''
+	import utilsOs
+	#if the string is only made of numbers we return 'unknown'
+	if re.fullmatch(re.compile(r'([0-9]|-|\+|\!|\#|\$|%|&|\'|\*|\?|\.|\^|_|`|\||~|:)+'), string) != None:
+		return u'unknown'
 	#presence of french specific diacriticals
 	diacriticals = [u'à', u'â', u'è', u'é', u'ê', u'ë', u'ù', u'û', u'ô', u'î', u'ï', u'ç', u'œ']
 	for char in diacriticals:
 		if char in string:
 			return u'fr'
+	#use langdetect except if it returns something else than "en" or "fr", if the string is too short it's easy to make a mistake
+	lang = detect(string)
+	if lang in [u'en', u'fr']:
+		return lang
 	#token detection
 	unkTokendict = tokenDictMaker(string)
 	#ngram char detection
 	unkNgramDict = trigramDictMaker(string.replace(u'\n', u' ').replace(u'\r', u''))
 	#if the obtained dict is empty, unable to detect (probably just noise)
 	if len(unkTokendict) == 0 or len(unkNgramDict) == 0:
-		return 'unknown'
+		return u'unknown'
 	#token scores
 	frenchTokScore = langDictComparison(unkTokendict, utilsOs.openJsonFileAsDict(u'./utilsString/frTok.json'))
 	englishTokScore = langDictComparison(unkTokendict, utilsOs.openJsonFileAsDict(u'./utilsString/enTok.json'))
@@ -173,6 +181,7 @@ def trigramDictMakerFromFile(inputFilePath, outputFilePath=None):
 	takes a corpus file, makes a dict of 3grams with their cooccurrence
 	and dumps the result in a json file
 	'''
+	import utilsOs
 	trigramDict = {}
 	stringList = utilsOs.readAllLinesFromFile(inputFilePath, True)
 	langString = u' '.join(stringList)
@@ -189,6 +198,7 @@ def quadrigramDictMakerFromFile(inputFilePath, outputFilePath=None):
 	takes a corpus file, makes a dict of 4grams with their cooccurrence
 	and dumps the result in a json file
 	'''
+	import utilsOs
 	quadrigramDict = {}
 	stringList = utilsOs.readAllLinesFromFile(inputFilePath, True)
 	langString = u' '.join(stringList)
@@ -215,6 +225,7 @@ def tokenDictMakerFromFile(inputFilePath, outputFilePath=None):
 	takes a corpus file, makes a dict of tokens with their cooccurrence
 	and dumps the result in a json file
 	'''
+	import utilsOs
 	tokenDict = {}
 	stringList = utilsOs.readAllLinesFromFile(inputFilePath, True)
 	for string in stringList:
@@ -234,12 +245,18 @@ def tokenDictMakerFromFile(inputFilePath, outputFilePath=None):
 #COMPARISONS AND EVALUATIONS
 ##################################################################################
 
-def langDictComparison(dictUnk,dictLang):
+def langDictComparison(dictUnk, dictLang):
 	'''
-	compares 2 dictionnaries and returns the distance between its keys
+	compares 2 dictionnaries and returns the distance between 
+	its keys (using the scores in the values)
 	'''
 	distance=0
-	maxUnk = max(dictUnk.values())
+	weight = 1
+	#get the greatest value so we can use it as a divisor
+	maxUnk = float(max(dictUnk.values()))
+	#we make the sum of all the distances
 	for key in dictUnk:
+		#distance calculation
 		distance+=abs((dictUnk[key]/maxUnk) - dictLang.get(key,0))
 	return distance
+

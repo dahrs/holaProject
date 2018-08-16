@@ -3,7 +3,6 @@
 
 
 import os, json, codecs, gzip
-import utilsString
 
 ##################################################################################
 #FOLDERS
@@ -93,6 +92,7 @@ def theFileExists(directoryOrWholeFilePath, nameOfFile=None, fileExtension=None)
 	Returns false if the file does not exists at the directory
 	and returns true if the file exists
 	'''
+	import utilsString
 	#if the directory path is actually the file path
 	if nameOfFile == None and fileExtension == None:
 		return os.path.isfile(directoryOrWholeFilePath)
@@ -217,6 +217,7 @@ def deleteTheFile(directoryPath, nameOfFile, fileExtension):
 	'''
 	Removes all files corresponding to the given name and the specified file(s) extension(s).
 	'''	
+	import utilsString
 	#if the path is correctly written at the end
 	if directoryPath[-1] !=u'/':
 		directoryPath = u'%s/' %(directoryPath)

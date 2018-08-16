@@ -426,8 +426,37 @@ def getCommunityNameInferences(nodeDf, outputFilePath):
 #ONTOLOGY CLEANING AND TRIMMING
 ##################################################################################
 
-def ontologyContentCleaning():
-	''''''
+def ontologyContentCleaning(languageOfOntology, edgeFilePathInput, nodeFilePathInput, edgeFilePathOutput=None, nodeFilePathOutput=None):
+	'''
+	NOTE: this function only cleans interlanguage intrusion between FRENCH and ENGLISH
+	given an ontology (edge list and node list), removes:
+		- all nodes detected to be in a different language that the language of the ontology
+		- all over-specific nodes (having more than 5 tokens) 
+	'''
+	import langdetect
+	rightLanguageNodes = []
+	edgeDf = pd.read_csv(edgeFilePathInput, sep=u'\t')
+	nodeDf = pd.read_csv(nodeFilePathInput, sep=u'\t')
+
+	for nodeIndex, nodeRow in nodeDf.iterrows():
+		label = nodeRow['Label']
+		#detecting if the label is in english or french
+		if utilsString.englishOrFrench(label) == languageOfOntology:
+			#if the node is not over-specific
+			if len(utilsString.naiveRegexTokenizer(label)) <= 5:
+				#add the node id to the list of correct nodes
+				rightLanguageNodes.append(nodeRow['Id'])
+	#get the dataframes containing the right nodes
+	cleanedNodeDf = nodeDf.loc[nodeDf[u'Id'].isin(rightLanguageNodes)]
+	cleanedEdgeDf = edgeDf.loc[edgeDf[u'Source'].isin(rightLanguageNodes) & edgeDf[u'Target'].isin(rightLanguageNodes)]
+	print(len(nodeDf), len(cleanedNodeDf))
+	print(len(edgeDf), len(cleanedEdgeDf))
+	#dumping the data frames
+	if edgeFilePathOutput != None:
+		cleanedEdgeDf.to_csv(edgeFilePathOutput, sep='\t', index=False)
+	if nodeFilePathOutput != None:
+		cleanedNodeDf.to_csv(nodeFilePathOutput, sep='\t', index=False)
+	return cleanedEdgeDf, cleanedNodeDf
 
 
 def remove1DegreeNodes(dictA, dictB):
@@ -471,7 +500,6 @@ def ontologyStructureCleaning(edgeFilePathInput, nodeFilePathInput, edgeFilePath
 	communitiesSet = set(nodeDf['Community_Lvl_0'].tolist())
 	copyCommunitiesSet = list(communitiesSet)
 	for communityId in copyCommunitiesSet:
-		bowSet = set()
 		#get a reduced df where the community column corresponds to the community id value
 		communityDf = nodeDf.loc[nodeDf[u'Community_Lvl_0'] == communityId]
 		if len(communityDf)/len(nodeDf) < 0.01:
@@ -622,13 +650,9 @@ def modifyConfigAndIndexFiles(pathToTheExportationEnvironment):
 	utilsOs.dumpRawLines(fileLines, u'{0}index.html'.format(pathToTheExportationEnvironment), addNewline=False, rewrite=True)
 
 
-'''
-#NOTRE ONTO
-edgeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeightCleanedLvl0.tsv'
-nodeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListModularityInferedCleanedLvl1.tsv'
-print(ontoQA(edgeFilePath, nodeFilePath))
-'''
-#ESCO
-edgeFilePath = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/001ontologies/ESCO/v1.0.2/edgeAndNodeList/ESCOedgeList.tsv'
-nodeFilePath = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/001ontologies/ESCO/v1.0.2/edgeAndNodeList/ESCOnodeList.tsv'
-print(ontoQA(edgeFilePath, nodeFilePath))
+
+edgeFilePathInput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeightTrimmedLvl0.tsv'
+nodeFilePathInput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListModularityInferedTrimmedLvl1.tsv'
+edgeFilePathOutput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeightTrimmedCleanedLvl0.tsv'
+nodeFilePathOutput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListModularityInferedTrimmedCleanedLvl1.tsv'
+(ontologyContentCleaning(u'en', edgeFilePathInput, nodeFilePathInput, edgeFilePathOutput, nodeFilePathOutput))
