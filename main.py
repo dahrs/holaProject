@@ -117,9 +117,7 @@ if __name__ == '__main__':
 	nodeFilePath = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListType.tsv'
 
 	nodeDf, dendrogram = utilsGraph.modularizeLouvain(edgeFilePath, nodeFilePath, outputFilePath=None)
-	outputFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListModularityInfered.tsv'
-	utilsGraph.getCommunityNameInferences(nodeDf, outputFilePath)
-
+	
 	#STATS previsualization of modularity result
 	utilsGraph.getModularityPercentage(outputFilePath)
 	''' 
@@ -129,22 +127,33 @@ if __name__ == '__main__':
 	nodeFilePath = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListType.tsv'
 
 	nodeDf, dendrogram = utilsGraph.modularizeLouvain(edgeFilePath, nodeFilePath, outputFilePath=None)
-	outputFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListModularityInfered.tsv'
-	utilsGraph.getCommunityNameInferences(nodeDf, outputFilePath)
-
+	
 	#STATS previsualization of modularity result
 	utilsGraph.getModularityPercentage(outputFilePath)
 	'''
 
 
 	##################################################################################
-	#CALLING FUNCT FROM utilsGraph.py TO MAKE AND CLEAN THE GRAPH FILES
+	#CALLING FUNCT FROM utilsGraph.py TO TRIM THE GRAPH FILES
 	##################################################################################
-	'''
+	#structure cleaning or trimming
+	'''	
+	#from the 100 000 sample
 	edgeFilePathInput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeight.tsv'
 	nodeFilePathInput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListModularityInfered.tsv'
-	edgeFilePathOutput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeightTrimmedLvl0.tsv'
+	edgeFilePathOutput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeightTrimmed.tsv'
 	nodeFilePathOutput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListModularityInferedTrimmedLvl0.tsv'
+	
+	utilsGraph.ontologyStructureCleaning(edgeFilePathInput, nodeFilePathInput, edgeFilePathOutput, nodeFilePathOutput)
+	'''
+		
+	'''
+	#from all english FR candidates
+	edgeFilePathInput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/edgeListWeight.tsv'
+	nodeFilePathInput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListModularityInfered.tsv'
+	edgeFilePathOutput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/edgeListWeightTrimmed.tsv'
+	nodeFilePathOutput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListModularityInferedTrimmedLvl0.tsv'
+	
 	utilsGraph.ontologyStructureCleaning(edgeFilePathInput, nodeFilePathInput, edgeFilePathOutput, nodeFilePathOutput)
 	''' 
 
@@ -154,42 +163,107 @@ if __name__ == '__main__':
 	##################################################################################
 	'''	
 	#from the 100 000 sample
-	edgeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeightTrimmedLvl0.tsv'
-	nodeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListModularityInferedTrimmedLvl0.tsv'
+	edgeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeightTrimmed.tsv'
+	nodeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListModularityInferedTrimmedCleanedLvl1.tsv'
 	
 	outputFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListModularityInferedTrimmedLvl1.tsv'
 		
 	#make a new level of modularization and dump the result
 	utilsGraph.modularizeSubCommunities(edgeFilePath, nodeFilePath, outputFilePath)
 	'''
+	'''
+	#from all english FR candidates
+	edgeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/edgeListWeightTrimmed.tsv'
+	nodeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListModularityInferedTrimmedLvl0.tsv'
+	
+	outputFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListModularityInferedTrimmedLvl1.tsv'
+		
+	#make a new level of modularization and dump the result
+	utilsGraph.modularizeSubCommunities(edgeFilePath, nodeFilePath, outputFilePath)
+	''' 
+
+
+	##################################################################################
+	#CALLING FUNCT FROM utilsGraph.py TO CLEAN THE GRAPH FILES
+	##################################################################################
+	'''
+	#content cleaning or cleaning
+
+	#from the 100 000 sample
+	edgeFilePathInput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeightTrimmed.tsv'
+	nodeFilePathInput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListModularityInferedTrimmedLvl1.tsv'
+	edgeFilePathOutput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeightTrimmedCleaned.tsv'
+	nodeFilePathOutput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListModularityInferedTrimmedCleanedLvl1.tsv'
+	
+	utilsGraph.ontologyContentCleaning(u'en', edgeFilePathInput, nodeFilePathInput, edgeFilePathOutput, nodeFilePathOutput)
+	''' 
+
+	#content cleaning or cleaning
+	'''
+	#from the 100 000 sample
+	edgeFilePathInput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/edgeListWeightTrimmed.tsv'
+	nodeFilePathInput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListModularityInferedTrimmedLvl1.tsv'
+	edgeFilePathOutput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/edgeListWeightTrimmedCleaned.tsv'
+	nodeFilePathOutput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListModularityInferedTrimmedCleanedLvl1.tsv'
+	
+	utilsGraph.ontologyContentCleaning(u'en', edgeFilePathInput, nodeFilePathInput, edgeFilePathOutput, nodeFilePathOutput)
+	'''
+
+
+	##################################################################################
+	#CALLING FUNCT FROM utilsGraph.py TO INFER THE COMMUNITIES NAMES
+	##################################################################################
+	''' 
+	#from the 100 000 sample
+	nodeFile = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListModularityInferedTrimmedCleanedLvl1.tsv'
+	utilsGraph.getCommunityNameInferences(nodeFile, nodeFile)
+	'''
+	'''
+	#from all english FR candidates
+	nodeFile = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListModularityInferedTrimmedCleanedLvl1.tsv'
+	utilsGraph.getCommunityNameInferences(nodeFile, nodeFile)
+	''' 
 
 	
 	##################################################################################
 	#CALLING FUNCT FROM utilsGraph.py TO TWEAK THE CONFIG.JSON AND INDEX.HTML GRAPH FILES
 	##################################################################################
 	'''
+	#from the 100 000 sample
 	pathToGraphExportEnvironment = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/testsGephi/gephiExportSigma0/springLayoutAndModularityPythonLouvain/sampleTrimmedLvl0/network/'
 	utilsGraph.modifyConfigAndIndexFiles(pathToGraphExportEnvironment)
 
-	pathToGraphExportEnvironment = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/testsGephi/gephiExportSigma0/springLayoutAndModularityPythonLouvain/sampleTrimmedLvl1/network/'
+	pathToGraphExportEnvironment = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/testsGephi/gephiExportSigma0/springLayoutAndModularityPythonLouvain/sampleCleanedTrimmedLvl1/network/'
+	utilsGraph.modifyConfigAndIndexFiles(pathToGraphExportEnvironment)
+	'''
+	'''
+	#from all english FR candidates
+	pathToGraphExportEnvironment = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/testsGephi/gephiExportSigma0/springLayoutAndModularityPythonLouvain/wholeTrimmedCleanedLvl1/network/'
 	utilsGraph.modifyConfigAndIndexFiles(pathToGraphExportEnvironment)
 	''' 
+
 
 
 	##################################################################################
 	#CALLING FUNCT FROM utilsGraph.py TO GET THE ONTOQA METRICS
 	##################################################################################
 	'''
-	#NOTRE ONTO
-	edgeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeightTrimmedLvl0.tsv'
-	nodeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListModularityInferedTrimmedLvl1.tsv'
-	print(ontoQA(edgeFilePath, nodeFilePath))
-	
 	#ESCO
 	edgeFilePath = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/001ontologies/ESCO/v1.0.2/edgeAndNodeList/ESCOedgeList.tsv'
 	nodeFilePath = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/001ontologies/ESCO/v1.0.2/edgeAndNodeList/ESCOnodeList.tsv'
-	print(ontoQA(edgeFilePath, nodeFilePath))
+	print(utilsGraph.ontoQA(edgeFilePath, nodeFilePath))
+
+	#Our ontology from the 100 000 sample
+	edgeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeightTrimmed.tsv'
+	nodeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListModularityInferedTrimmedLvl1.tsv'
+	print(utilsGraph.ontoQA(edgeFilePath, nodeFilePath))
 	'''
+	#Our ontology from all english FR candidates
+	edgeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/edgeListWeightTrimmed.tsv'
+	nodeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListModularityInferedTrimmedLvl1.tsv'
+	print(utilsGraph.ontoQA(edgeFilePath, nodeFilePath))
+	
+	
 
 
 

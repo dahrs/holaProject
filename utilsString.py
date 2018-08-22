@@ -114,18 +114,25 @@ def tokenizeAndExtractSpecificPos(string, listOfPosToReturn, caseSensitive=True,
 def englishOrFrench(string):
 	'''guesses the language of a string between english and french'''
 	import utilsOs
-	#if the string is only made of numbers we return 'unknown'
-	if re.fullmatch(re.compile(r'([0-9]|-|\+|\!|\#|\$|%|&|\'|\*|\?|\.|\^|_|`|\||~|:)+'), string) != None:
+	from langdetect.lang_detect_exception import LangDetectException
+	#if the string is only made of numbers and non alphabetic characters we return 'unknown'
+	if re.fullmatch(re.compile(r'([0-9]|-|\+|\!|\#|\$|%|&|\'|\*|\?|\.|\^|_|`|\||~|:|@)+'), string) != None:
 		return u'unknown'
+	#if the string has 
 	#presence of french specific diacriticals
 	diacriticals = [u'à', u'â', u'è', u'é', u'ê', u'ë', u'ù', u'û', u'ô', u'î', u'ï', u'ç', u'œ']
 	for char in diacriticals:
 		if char in string:
 			return u'fr'
-	#use langdetect except if it returns something else than "en" or "fr", if the string is too short it's easy to make a mistake
-	lang = detect(string)
-	if lang in [u'en', u'fr']:
-		return lang
+	#use langdetect except if it returns something else than "en" or "fr", if the string is too short it's easy to mistake the string for another language
+	try:
+		lang = detect(string)
+		if lang in [u'en', u'fr']:
+			return lang
+	#if there is an encoding or character induced error, we try the alternative language detection
+	except LangDetectException:
+		pass 
+	#alternative language detection
 	#token detection
 	unkTokendict = tokenDictMaker(string)
 	#ngram char detection

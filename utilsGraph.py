@@ -278,7 +278,7 @@ def getModularityPercentage(nodeFilePathWithModularity, communityColumnHeader=u'
 		resultDict[idKey] = (float(len(communityValue)) / float(len(nodeDf)))
 	#printing in order
 	for v,k in (sorted( ((v,k) for k,v in resultDict.items()), reverse=True)):
-		print(44444444444444444444444, 'community {0} normalized score: {1}'.format(k, v))
+		print('community {0} normalized score: {1}'.format(k, v))
 		#if v > 0.01:
 		#	print(55555555555, communityDict[k])
 	return resultDict
@@ -289,7 +289,7 @@ def getModularityPercentage(nodeFilePathWithModularity, communityColumnHeader=u'
 ##################################################################################
 
 
-def fillBagOfWords(bowSet, jobTitleList, occupationsUkDf, occupationsUsDf):
+def fillBagOfWords(bowSet, jobTitleList, occupationsDf):
 	'''
 	Takes an empty of full set and fills it with the job title and description bag of words
 	'''
@@ -297,12 +297,16 @@ def fillBagOfWords(bowSet, jobTitleList, occupationsUkDf, occupationsUsDf):
 	for jobTitle in jobTitleList:
 		bowSet = bowSet.union(set(utilsString.tokenizeAndExtractSpecificPos(jobTitle, [u'n', u'np', u'j'], caseSensitive=False, eliminateEnStopwords=True)))
 	#adding the description(s) to the bag of words
-	selectiveEscoDf = occupationsUkDf.loc[occupationsUkDf['preferredLabel'].isin(jobTitleList)]
+	selectiveEscoDf = occupationsDf.loc[occupationsDf['preferredLabel'].isin(jobTitleList)]
 	if selectiveEscoDf.empty:
-		selectiveEscoDf = occupationsUsDf.loc[occupationsUkDf['preferredLabel'].isin(jobTitleList)]
-		if selectiveEscoDf.empty:
-			return bowSet
+		return bowSet
 	for rowIndex, row in selectiveEscoDf.iterrows():
+		#adding the alternative label(s) to the bag of words
+		try:
+			bowSet = bowSet.union(set(utilsString.tokenizeAndExtractSpecificPos(row['altLabels'].replace(u'\n', u' '), [u'n', u'np', u'j'], caseSensitive=False, eliminateEnStopwords=True)))
+		#if the row value is an int or float
+		except AttributeError:
+			pass
 		#adding the description(s) to the bag of words
 		bowSet = bowSet.union(set(utilsString.tokenizeAndExtractSpecificPos(row['description'], [u'n', u'np', u'j'], caseSensitive=False, eliminateEnStopwords=True)))
 	return bowSet
@@ -338,13 +342,15 @@ def getEscoBowByLevel(escoTree):
 					bow2 = set()
 					#when the job titles are at level 3
 					if type(value3digit) is list:
-						bow2 = fillBagOfWords(bow2, value3digit, occupationsUkDf, occupationsUsDf)
+						bow2 = fillBagOfWords(bow2, value3digit, occupationsUkDf)
+						bow2 = fillBagOfWords(bow2, value3digit, occupationsUsDf)
 					else:
 						#level 3
 						for domain4digit, value4digit in value3digit.items():
 							bow3 = set()
 							#when the job titles are at level 4
-							bow3 = fillBagOfWords(bow3, value4digit, occupationsUkDf, occupationsUsDf)						
+							bow3 = fillBagOfWords(bow3, value4digit, occupationsUkDf)	
+							bow3 = fillBagOfWords(bow3, value4digit, occupationsUsDf)						
 							#saving in the bow dict
 							bowsDict[3][domain4digit] = bow3
 							bow2 = bow2.union(bow3)
@@ -359,63 +365,77 @@ def getEscoBowByLevel(escoTree):
 	return bowsDict
 
 
-def getOntologyBowByCommunity(nodeDf):
+def getOntologyBowByCommunity(nodeDf, columnToInferFrom):
 	'''
 	makes a bag of words composed of the job title names
 	for each community in the ontology
 	'''
 	communityBagOfWords = {}
-	communitiesSet = set(nodeDf[u'Community_Lvl_0'].tolist())
+	communitiesSet = set(nodeDf[columnToInferFrom].tolist())
 	for community in communitiesSet:
-		bowSet = set()
+		bowDict = {}
 		#get a reduced df where the community column corresponds to the community value
-		communityDf = nodeDf.loc[nodeDf[u'Community_Lvl_0'] == community]
+		communityDf = nodeDf.loc[nodeDf[columnToInferFrom] == community]
 		#make the bag of words set
 		jobTitleList = communityDf['Label'].tolist()
 		for jobTitle in jobTitleList:
-			bowSet = bowSet.union(set(utilsString.naiveRegexTokenizer(jobTitle, caseSensitive=False, eliminateEnStopwords=True)))
+			#save te coreference of each token in the community as a proxy of the relevance weight of each token for that specific community
+			for jobToken in utilsString.naiveRegexTokenizer(jobTitle, caseSensitive=False, eliminateEnStopwords=True):
+				bowDict[jobToken] = bowDict.get(jobToken, 0) + 1
 		#SHOULD WE ADD THE LINKEDIN PROFILES PITCH ??????
 		#save the bag of words to the dict
-		communityBagOfWords[community] = set(bowSet)
+		communityBagOfWords[community] = bowDict
 	return communityBagOfWords
 
 
-def getCommunityNameInferences(nodeDf, outputFilePath):
+def getCommunityNameInferences(nodeFileInput, outputFilePath, columnToInferFrom=u'Community_Lvl_0'):
 	''' 
 	using a bag of words on jobtitles of the same community and on
 	job titles and descriptions from existing ontologies (ESCO)
-	we estimate what is the name of the community domain
+	estimate what is the name of the community domain
 	'''
 	inferencesDict = {}
+	#we chech if 'edgeFileInput' and 'nodeFileInput' are string paths or pandas dataframes
+	if type(nodeFileInput) != str: # or type(nodeFileInput) != unicode:
+		nodeDf = nodeFileInput
+	else:
+		nodeDf = pd.read_csv(nodeFileInput, sep=u'\t')
 	#bag of words of the esco ontology
 	escoTree = utilsOs.openJsonFileAsDict(u'./jsonJobTaxonomies/escoTree.json')
 	escoTreeBagOfWords = getEscoBowByLevel(escoTree)
 	#bag of words of the communities in our ontology
-	communityBagOfWords = getOntologyBowByCommunity(nodeDf)
+	communityBagOfWords = getOntologyBowByCommunity(nodeDf, columnToInferFrom)
 	#add an empty column
 	nodeDf[u'Infered_Community_Name_Lvl_0'] = np.nan
 	#comparing intersection between esco bow and the communities bow
-	for community, communityBow in communityBagOfWords.items():
+	for community, communityBowDict in communityBagOfWords.items():
 		#reset values of best intersection
 		bestIntersection = {u'result': 0.0, u'set': None, u'name': u'00000000___'}
 		for nb in reversed(range(1, 4)):
 			for escoDomain, escoBow in escoTreeBagOfWords[nb].items():
+				bowIntersectionScore = 0
 				#we intersect the 2 bag of words
-				bowIntersection = communityBow.intersection(escoBow)
-				#we evaluate if we are at the same level in the esco taxonomy the score we need to replace the best intersection 
-				#is > than the precedent, if we are one level upper, then the needed score is twice the best intersection score
+				bowIntersection = set(communityBowDict.keys()).intersection(escoBow)
+				for token in bowIntersection:
+					bowIntersectionScore += communityBowDict[token]
+				#we evaluate if we are at the same level in the esco taxonomy. If we are still on the same level the score 
+				#needed to replace the best intersection is simply the one > than the precedent, 
+				#if we are one level upper, then the needed score is multiplied by a variable (to priorize staying in a 
+				#lower, more specialized, ESCO level)
 				if len(bestIntersection[u'name'].split(u'___')[0]) == len(escoDomain.split(u'___')[0]):
 					multiplier = 1.0
 				else:
-					multiplier = (4.1 - (nb * 1.2))
+					#multiplier = (4.6 - (nb * 1.2))
+					multiplier = 1.5
 				#if the score is greater, we replace the previous best intersection with the new intersection
-				if len(bowIntersection) > bestIntersection['result']*multiplier or bestIntersection['result'] == 0.0:
-					bestIntersection[u'result'] = len(bowIntersection)
+				if bowIntersectionScore > bestIntersection['result']*multiplier or bestIntersection['result'] == 0.0:
+					bestIntersection[u'result'] = bowIntersectionScore
 					bestIntersection[u'set'] = bowIntersection
+					bestIntersection[u'dict'] = communityBowDict
 					bestIntersection[u'name'] = escoDomain
 		#saving the information
 		inferencesDict[community] = bestIntersection
-		nodeDf[u'Infered_Community_Name_Lvl_0'].loc[nodeDf[u'Community_Lvl_0'] == community] = str(bestIntersection['name'])
+		nodeDf[u'Infered_Community_Name_Lvl_0'].loc[nodeDf[columnToInferFrom] == community] = str(bestIntersection['name'])
 	#dump to file
 	nodeDf.to_csv(outputFilePath, sep='\t', index=False)
 	return inferencesDict
@@ -447,10 +467,10 @@ def ontologyContentCleaning(languageOfOntology, edgeFilePathInput, nodeFilePathI
 				#add the node id to the list of correct nodes
 				rightLanguageNodes.append(nodeRow['Id'])
 	#get the dataframes containing the right nodes
-	cleanedNodeDf = nodeDf.loc[nodeDf[u'Id'].isin(rightLanguageNodes)]
 	cleanedEdgeDf = edgeDf.loc[edgeDf[u'Source'].isin(rightLanguageNodes) & edgeDf[u'Target'].isin(rightLanguageNodes)]
-	print(len(nodeDf), len(cleanedNodeDf))
-	print(len(edgeDf), len(cleanedEdgeDf))
+	cleanedNodeDf = nodeDf.loc[nodeDf[u'Id'].isin(rightLanguageNodes)]
+	#trimm again the graph, after cleaning they might be isolated nodes
+	cleanedEdgeDf, cleanedNodeDf = ontologyStructureCleaning(cleanedEdgeDf, cleanedNodeDf, edgeFilePathOutput=None, nodeFilePathOutput=None)
 	#dumping the data frames
 	if edgeFilePathOutput != None:
 		cleanedEdgeDf.to_csv(edgeFilePathOutput, sep='\t', index=False)
@@ -484,7 +504,7 @@ def remove1DegreeNodes(dictA, dictB):
 	return dictA, dictB
 
 
-def ontologyStructureCleaning(edgeFilePathInput, nodeFilePathInput, edgeFilePathOutput=None, nodeFilePathOutput=None):
+def ontologyStructureCleaning(edgeFileInput, nodeFileInput, edgeFilePathOutput=None, nodeFilePathOutput=None):
 	'''
 	given an ontology (edge list and node list), removes:
 		- all communities corresponding to less than 1% of the node
@@ -492,9 +512,15 @@ def ontologyStructureCleaning(edgeFilePathInput, nodeFilePathInput, edgeFilePath
 			- all skills connected to only 1 job title
 			- all job titles with only one skill
 			- all job titles (and skills) whose skills are not connected to any other job titles
+	'edgeFileInput' and 'nodeFileInput' can either be a string/unicode path to the a tsv file or a pandas dataframe
 	'''
-	edgeDf = pd.read_csv(edgeFilePathInput, sep=u'\t')
-	nodeDf = pd.read_csv(nodeFilePathInput, sep=u'\t')
+	#we chech if 'edgeFileInput' and 'nodeFileInput' are string paths or pandas dataframes
+	if type(edgeFileInput) != str: # or type(edgeFileInput) != unicode:
+		edgeDf = edgeFileInput
+		nodeDf = nodeFileInput
+	else:
+		edgeDf = pd.read_csv(edgeFileInput, sep=u'\t')
+		nodeDf = pd.read_csv(nodeFileInput, sep=u'\t')
 
 	#remove communities corresponding to less than 1% of the node
 	communitiesSet = set(nodeDf['Community_Lvl_0'].tolist())
@@ -604,6 +630,8 @@ def ontoQA(edgeFilePath, nodeFilePath, verbose=True):
 	metricsDict[u'Coh'] = dataDict[u'CC']
 	#RR(C_i) - relationship richness per class
 	##################unable to actually calculate it without having a preconceived schema of the ontology
+	if verbose == True:
+		print(metricsDict)
 	return metricsDict
 
 
@@ -649,10 +677,3 @@ def modifyConfigAndIndexFiles(pathToTheExportationEnvironment):
 		fileLines = fileLines[:indexDivisor] + [u'\t\t<dd>\n'] + list(colorCommunityDict.values()) + [u'\t\t</dd>\n'] + fileLines[indexDivisor+1:]
 	utilsOs.dumpRawLines(fileLines, u'{0}index.html'.format(pathToTheExportationEnvironment), addNewline=False, rewrite=True)
 
-
-
-edgeFilePathInput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeightTrimmedLvl0.tsv'
-nodeFilePathInput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListModularityInferedTrimmedLvl1.tsv'
-edgeFilePathOutput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeightTrimmedCleanedLvl0.tsv'
-nodeFilePathOutput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListModularityInferedTrimmedCleanedLvl1.tsv'
-(ontologyContentCleaning(u'en', edgeFilePathInput, nodeFilePathInput, edgeFilePathOutput, nodeFilePathOutput))
