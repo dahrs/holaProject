@@ -51,18 +51,61 @@ def removeStopwords(tokenList, language=u'english'):
 	return list(filter(lambda tok: tok not in to_remove, tokenList))
 
 
-def naiveRegexTokenizer(string, caseSensitive=True, eliminateEnStopwords=False):
+def naiveRegexTokenizer(string, caseSensitive=True, eliminateEnStopwords=False, language=u'english'):
 	'''
 	returns the token list using a very naive regex tokenizer
 	'''
 	plainWords = re.compile(r'(\b\w+\b)', re.UNICODE)
-	tokens = re.findall(plainWords, string)
+	tokens = re.findall(plainWords, string.replace(u'\r', u'').replace(u'\n', u' '))
 	#if we don't want to be case sensitive
 	if caseSensitive != True:
 		tokens = [tok.lower() for tok in tokens]
 	#if we don't want the stopwords
 	if eliminateEnStopwords != False:
-		tokens = removeStopwords(tokens, language='english')
+		tokens = removeStopwords(tokens, language=language)
+	return tokens
+
+
+def naiveStemmer(string, caseSensitive=True, eliminateEnStopwords=False, language=u'english'):
+	'''
+	returns the stemmed token list using nltk
+	where a stem is a word of a sentence converted to its non-changing portions
+	possible stemmer argument options are 'snowball', 'lancaster', 'porter'
+	'''
+	from nltk.tokenize import word_tokenize
+	from nltk.stem.snowball import SnowballStemmer as stemmer
+	#tokenize
+	tokens = word_tokenize(string)
+	#if we don't want to be case sensitive
+	if caseSensitive != True:
+		tokens = [tok.lower() for tok in tokens]
+	#if we don't want the stopwords
+	if eliminateEnStopwords != False:
+		tokens = removeStopwords(tokens, language=language)
+	#get stems
+	stems = [stemmer(language).stem(tok) for tok in tokens]
+	return tokens
+
+
+def naiveEnLemmatizer(string, caseSensitive=True, eliminateEnStopwords=False):
+	'''
+	returns the lemmatized token list using nltk
+	where a lemma is a word of a sentence converted to its dictionnary standard form
+	works only for english text
+	'''
+	from nltk.tokenize import word_tokenize
+	from nltk import WordNetLemmatizer
+	lemmatizer = WordNetLemmatizer()
+	#tokenize
+	tokens = word_tokenize(string)
+	#if we don't want to be case sensitive
+	if caseSensitive != True:
+		tokens = [tok.lower() for tok in tokens]
+	#if we don't want the stopwords
+	if eliminateEnStopwords != False:
+		tokens = removeStopwords(tokens, language=u'english')
+	#get lemmas
+	lemmas = [lemmatizer.lemmatize(tok) for tok in tokens]
 	return tokens
 
 
@@ -266,4 +309,3 @@ def langDictComparison(dictUnk, dictLang):
 		#distance calculation
 		distance+=abs((dictUnk[key]/maxUnk) - dictLang.get(key,0))
 	return distance
-

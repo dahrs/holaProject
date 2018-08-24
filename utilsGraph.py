@@ -312,6 +312,51 @@ def fillBagOfWords(bowSet, jobTitleList, occupationsDf):
 	return bowSet
 
 
+def getJobOfferDescriptionDict(listOfPathToJobOfferFiles=[
+		u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/jobsoffers/jobs_indeed-2016-06-17-noDup.json', 
+		u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/jobsoffers/jobs_indeed-2016-02-25-noDup.json']):
+	'''
+	extracts the jobOffer name and description and returns a dictionary
+	'''
+	jobOfferDict = {}
+	#for each 'jobOffer source path' open json as dict
+	for jobOfferFilePath in listOfPathToJobOfferFiles:
+		jobOfferDictTemp = {}
+		with open(jobOfferFilePath) as jobOfferFile:
+			jsonData = jobOfferFile.readline()
+			while jsonData:
+				jsonDict = json.loads(jsonData)
+				#get the title and description alone
+				jobOfferDictTemp[jsonDict[u'title']] = u'{0} {1}'.format(jobOfferDictTemp.get(jsonDict[u'title'], u''), jsonDict[u'description'].replace(u'\n', u' '))
+				#get next line
+				jsonData = jobOfferFile.readline()
+		jobOfferDict.update(jobOfferDictTemp)
+	return jobOfferDict
+
+
+def addJobOfferDescriptionToBow(jobTitle, jobOfferDict, bowDict={}):
+	'''
+	returns a dict of matching the job title and a description taken from a job offer
+	'''	
+	#best match job offer name and length of stems in common with job title
+	bestMatch = [None, 0, None]
+	jobTitleStems = utilsString.naiveRegexTokenizer(jobTitle, caseSensitive=False, eliminateEnStopwords=True, language=u'english')
+	#search for a match between the job title and the job offer posts
+	for jobOffer in jobOfferDict.keys():
+		jobOfferStems = utilsString.naiveRegexTokenizer(jobOffer, caseSensitive=False, eliminateEnStopwords=True, language=u'english')
+		stemIntersection = set(jobTitleStems).intersection(set(jobOfferStems))
+		#if we have more than 2/3 match between job title and job offer post and if we have a better match than bestMatch, we update bestMatch
+		if len(stemIntersection) > round(len(jobTitleStems)*0.66) and len(stemIntersection) > round(len(jobOfferStems)*0.66) and len(stemIntersection) > bestMatch[1]:
+			bestMatch[0] = jobOffer
+			bestMatch[1] = len(stemIntersection)
+			bestMatch[2] = stemIntersection
+	print(jobTitle, jobTitleStems, 2222222, bestMatch)
+	#extract the description and make a bow
+	if bestMatch[0] != None:
+		description = jobOfferDict[bestMatch[0]]
+	return None
+
+
 def getEscoBowByLevel(escoTree):
 	'''
 	starting at level 0 : the most abstract job title domain,
@@ -365,6 +410,24 @@ def getEscoBowByLevel(escoTree):
 	return bowsDict
 
 
+def addPitchToBow(jobTitle, bowDict={}, jobPitchDict=None):
+	'''
+	add pitch tokens to bow if there is a pitch and if the job title has a pitch
+	'''
+	if jobTitle in jobPitchDict:
+		#pitch
+		if len(jobPitchDict[jobTitle][u'pitch']) != 0:
+			for pitch in jobPitchDict[jobTitle][u'pitch']:
+				for pitchToken in utilsString.naiveRegexTokenizer(pitch, caseSensitive=False, eliminateEnStopwords=True):
+					bowDict[pitchToken] = bowDict.get(pitchToken, 0) + 1
+		#missions
+		if len(jobPitchDict[jobTitle][u'mission']) != 0:
+			for mission in jobPitchDict[jobTitle][u'mission']:
+				for missionToken in utilsString.naiveRegexTokenizer(mission, caseSensitive=False, eliminateEnStopwords=True):
+					bowDict[missionToken] = bowDict.get(missionToken, 0) + 1
+	return bowDict
+
+
 def getOntologyBowByCommunity(nodeDf, columnToInferFrom):
 	'''
 	makes a bag of words composed of the job title names
@@ -372,6 +435,10 @@ def getOntologyBowByCommunity(nodeDf, columnToInferFrom):
 	'''
 	communityBagOfWords = {}
 	communitiesSet = set(nodeDf[columnToInferFrom].tolist())
+
+	#get the dict containing all jobtitles and pitches
+	jobPitchDict = utilsOs.openJsonFileAsDict(u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/jobAndPitch.json')
+
 	for community in communitiesSet:
 		bowDict = {}
 		#get a reduced df where the community column corresponds to the community value
@@ -382,7 +449,9 @@ def getOntologyBowByCommunity(nodeDf, columnToInferFrom):
 			#save te coreference of each token in the community as a proxy of the relevance weight of each token for that specific community
 			for jobToken in utilsString.naiveRegexTokenizer(jobTitle, caseSensitive=False, eliminateEnStopwords=True):
 				bowDict[jobToken] = bowDict.get(jobToken, 0) + 1
-		#SHOULD WE ADD THE LINKEDIN PROFILES PITCH ??????
+			#add the linkedIn profiles pitch to the bow
+			bowDict = addPitchToBow(jobTitle, bowDict, jobPitchDict)
+			
 		#save the bag of words to the dict
 		communityBagOfWords[community] = bowDict
 	return communityBagOfWords
@@ -677,3 +746,8 @@ def modifyConfigAndIndexFiles(pathToTheExportationEnvironment):
 		fileLines = fileLines[:indexDivisor] + [u'\t\t<dd>\n'] + list(colorCommunityDict.values()) + [u'\t\t</dd>\n'] + fileLines[indexDivisor+1:]
 	utilsOs.dumpRawLines(fileLines, u'{0}index.html'.format(pathToTheExportationEnvironment), addNewline=False, rewrite=True)
 
+
+jobOfferDict = getJobOfferDescriptionDict()
+jobTitleList = [u'CEO', u'Bank employee', u'EMEA Supplier Quality Engineer', u'senior staff chemist', u'Senior Loss Adjuster']
+for jobTitle in jobTitleList:
+	addJobOfferDescriptionToBow(jobTitle, jobOfferDict, bowDict={})

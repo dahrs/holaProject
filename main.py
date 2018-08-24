@@ -213,11 +213,13 @@ if __name__ == '__main__':
 	##################################################################################
 	#CALLING FUNCT FROM utilsGraph.py TO INFER THE COMMUNITIES NAMES
 	##################################################################################
-	''' 
+	'''
 	#from the 100 000 sample
 	nodeFile = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListModularityInferedTrimmedCleanedLvl1.tsv'
-	utilsGraph.getCommunityNameInferences(nodeFile, nodeFile)
-	'''
+	output = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/TEST3_nodeListModularityInferedTrimmedCleanedLvl1.tsv'
+	
+	utilsGraph.getCommunityNameInferences(nodeFile, output)
+	''' 
 	'''
 	#from all english FR candidates
 	nodeFile = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListModularityInferedTrimmedCleanedLvl1.tsv'
@@ -258,11 +260,12 @@ if __name__ == '__main__':
 	nodeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListModularityInferedTrimmedLvl1.tsv'
 	print(utilsGraph.ontoQA(edgeFilePath, nodeFilePath))
 	'''
+	'''
 	#Our ontology from all english FR candidates
 	edgeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/edgeListWeightTrimmed.tsv'
 	nodeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListModularityInferedTrimmedLvl1.tsv'
 	print(utilsGraph.ontoQA(edgeFilePath, nodeFilePath))
-	
+	''' 
 	
 
 

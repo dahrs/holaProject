@@ -1,7 +1,8 @@
 #!/usr/bin/python
 #-*- coding:utf-8 -*-
 
-import re, codecs, utilsString, utilsOs
+import re, codecs
+import utilsString, utilsOs
 from nltk import pos_tag
 from nltk.corpus import stopwords
 
@@ -12,6 +13,9 @@ class ruleBasedExtractor():
 	def __init__(self):
 		pass
 
+	##################################################################################
+	#HEURISTIC FILTERS FOR GETTING RELIABLE JOB TITLES
+	##################################################################################
 
 	def reliableFilter1(self, jobAndPitchFilePath):
 		'''
@@ -78,6 +82,44 @@ class ruleBasedExtractor():
 			utilsOs.dumpRawLines(setOfReliableJobs, outputPath, addNewline=True, rewrite=True)
 		return setOfReliableJobs
 
+
+		##################################################################################
+		#EXTRACTS JOB + PITCH FROM THE LINKEDIN CORPUS
+		##################################################################################
+
+		def getJobPitchDict(jobPitchFilePath= u'/u/kessler/LBJ/data/2015-06-17/fr/anglophone/candidats.json'):
+			'''
+			makes a dict containing the job and pitch extracted from the linkedIn profiles
+			and dumps it in a json file
+			'''
+			jobPitchDict = {}
+			with open(jobPitchFilePath) as jobPlusPitch:
+				pitch = None
+				line = jobPlusPitch.readline()
+				while line:
+					jsonLine = utilsOs.convertJsonLineToDict(line)
+					#get the pitch
+					if u'personalBranding_pitch' in jsonLine:
+						pitch = jsonLine[u'personalBranding_pitch'].replace(u'\n', u'   ')
+					#save in dict the pitch and mission to each job function
+					if u'experiences' in jsonLine:
+						for functionDict in jsonLine[u'experiences']:
+							emptyDict = {u'pitch':[], u'mission':[]}
+							#we make sure there is at least an empty dict to that function
+							if u'function' in functionDict:
+								jobPitchDict[functionDict[u'function']] = jobPitchDict.get(functionDict[u'function'], emptyDict)
+								#save the pitch to the dict
+								if pitch != None:
+									#if there is already a pitch for that job fuction we add it to the list
+									jobPitchDict[functionDict[u'function']][u'pitch'].append(pitch)
+								#save the missions to the dict
+								if u'missions' in functionDict:
+									#if there already is a mission for that job fuction we add it to the list
+									jobPitchDict[functionDict[u'function']][u'mission'].append(functionDict[u'missions'].replace(u'\n', u'   '))
+					line = jobPlusPitch.readline()
+					pitch = None
+			utilsOs.dumpDictToJsonFile(jobPitchDict, u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/jobAndPitch.json')
+			return jobPitchDict
 
 
 class jobTitleExtractorZack():
