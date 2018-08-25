@@ -179,18 +179,47 @@ def nodeDfCleaner(nodeDf):
 	return nodeDf.dropna()
 
 
-def modularize(edgeGraph, nodeDf, nameOfModularityColumn=u'Community_Lvl_0'):
+def formatModularityValue(dendroPartitionDict, nodeDf, nameOfModularityColumn, nameOfPreviousModCol):
+	'''
+	modifies the values of the modularity dict so it has the wanted 
+	string format for the modularity column
+	'''
+	if nameOfPreviousModCol not in nodeDf.columns:
+		for key, val in dendroPartitionDict.items():
+			dendroPartitionDict[key] = str(val)
+	else:
+		column = nodeDf[u'Id'].map(dendroPartitionDict)
+		for key, val in list(dendroPartitionDict.items()):
+			#get index of previous (more general) modularity community number
+			try:
+				previousIndex = column[nodeDf[u'Id']==key].index.tolist()[0]
+				#apply changes
+				dendroPartitionDict[key] = u'{0}.{1}'.format(nodeDf[nameOfPreviousModCol][previousIndex], str(val))
+			#if the previous column is empty (it doesn<t exist)
+			except IndexError:
+				del dendroPartitionDict[key]
+				#dendroPartitionDict[key] = str(val)			
+	return dendroPartitionDict
+
+
+def modularize(edgeGraph, nodeDf):
 	'''
 	uses the original code of the louvain algorithm to give modularity to a graph
 	'''
 	#compute the best partition
 	dendrogram = community.generate_dendrogram(edgeGraph, weight='weight')
-	dendroBestPartitionDict = community.partition_at_level(dendrogram, len(dendrogram)-1) #dendroBestPartitionDict = community.best_partition(graph)
-	#add a column to the node data frame so we can add the community values
-	if nameOfModularityColumn not in nodeDf.columns:
-		nodeDf[nameOfModularityColumn] = np.nan	
-	#add the community values to the node data frame
-	nodeDf[nameOfModularityColumn] = nodeDf[u'Id'].map(dendroBestPartitionDict)
+	for indexPartition in list(reversed(range(len(dendrogram)))):
+		dendroPartitionDict = community.partition_at_level(dendrogram, indexPartition) #dendroPartitionDict = community.best_partition(graph)
+		nameOfModularityColumn = u'Community_Lvl_{0}'.format(str(len(dendrogram)-indexPartition-1))
+		#name a possible previous modularity column (needed to format the column values)
+		nameOfPreviousModCol = u'Community_Lvl_{0}'.format(str(len(dendrogram)-indexPartition-1))
+		#add a column to the node data frame so we can add the community values
+		if nameOfModularityColumn not in nodeDf.columns:
+			nodeDf[nameOfModularityColumn] = np.nan	
+		#apply the wanted format to the content of the dict
+		dendroPartitionDict = formatModularityValue(dendroPartitionDict, nodeDf, nameOfModularityColumn, nameOfPreviousModCol)
+		#add the community values to the node data frame
+		nodeDf[nameOfModularityColumn] = nodeDf[u'Id'].map(dendroPartitionDict)
 	#making sure all 'modularity_class' NaN were deleted 
 	return nodeDfCleaner(nodeDf), dendrogram
 
@@ -207,7 +236,7 @@ def modularizeLouvain(edgeFilePath, nodeFilePath, outputFilePath=None):
 	#open the node list as a data frame	
 	nodeDf = pd.read_csv(nodeFilePath, sep=u'\t')
 	#get the louvain modularity algorithm result in the form of a completed node data frame
-	nodeDf, dendrogram = modularize(edgeGraph, nodeDf, nameOfModularityColumn=u'Community_Lvl_0')
+	nodeDf, dendrogram = modularize(edgeGraph, nodeDf)
 	#dumps the dataframe with the modularization data
 	if outputFilePath != None:
 		nodeDf.to_csv(outputFilePath, sep='\t', index=False)
@@ -340,17 +369,16 @@ def addJobOfferDescriptionToBow(jobTitle, jobOfferDict, bowDict={}):
 	'''	
 	#best match job offer name and length of stems in common with job title
 	bestMatch = [None, 0, None]
-	jobTitleStems = utilsString.naiveRegexTokenizer(jobTitle, caseSensitive=False, eliminateEnStopwords=True, language=u'english')
+	jobTitleStems = utilsString.naiveStemmer(jobTitle, caseSensitive=False, eliminateEnStopwords=True, language=u'english')
 	#search for a match between the job title and the job offer posts
 	for jobOffer in jobOfferDict.keys():
-		jobOfferStems = utilsString.naiveRegexTokenizer(jobOffer, caseSensitive=False, eliminateEnStopwords=True, language=u'english')
+		jobOfferStems = utilsString.naiveStemmer(jobOffer, caseSensitive=False, eliminateEnStopwords=True, language=u'english')
 		stemIntersection = set(jobTitleStems).intersection(set(jobOfferStems))
 		#if we have more than 2/3 match between job title and job offer post and if we have a better match than bestMatch, we update bestMatch
 		if len(stemIntersection) > round(len(jobTitleStems)*0.66) and len(stemIntersection) > round(len(jobOfferStems)*0.66) and len(stemIntersection) > bestMatch[1]:
 			bestMatch[0] = jobOffer
 			bestMatch[1] = len(stemIntersection)
 			bestMatch[2] = stemIntersection
-	print(jobTitle, jobTitleStems, 2222222, bestMatch)
 	#extract the description and make a bow
 	if bestMatch[0] != None:
 		description = jobOfferDict[bestMatch[0]]
@@ -475,7 +503,8 @@ def getCommunityNameInferences(nodeFileInput, outputFilePath, columnToInferFrom=
 	#bag of words of the communities in our ontology
 	communityBagOfWords = getOntologyBowByCommunity(nodeDf, columnToInferFrom)
 	#add an empty column
-	nodeDf[u'Infered_Community_Name_Lvl_0'] = np.nan
+	inferenceColumnName = u'Infered_Community_Name_Lvl_{0}'.format(columnToInferFrom.split(u'_')[-1])
+	nodeDf[inferenceColumnName] = np.nan
 	#comparing intersection between esco bow and the communities bow
 	for community, communityBowDict in communityBagOfWords.items():
 		#reset values of best intersection
@@ -504,7 +533,7 @@ def getCommunityNameInferences(nodeFileInput, outputFilePath, columnToInferFrom=
 					bestIntersection[u'name'] = escoDomain
 		#saving the information
 		inferencesDict[community] = bestIntersection
-		nodeDf[u'Infered_Community_Name_Lvl_0'].loc[nodeDf[columnToInferFrom] == community] = str(bestIntersection['name'])
+		nodeDf[inferenceColumnName].loc[nodeDf[columnToInferFrom] == community] = str(bestIntersection['name'])
 	#dump to file
 	nodeDf.to_csv(outputFilePath, sep='\t', index=False)
 	return inferencesDict
@@ -530,19 +559,22 @@ def ontologyContentCleaning(languageOfOntology, edgeFilePathInput, nodeFilePathI
 	for nodeIndex, nodeRow in nodeDf.iterrows():
 		label = nodeRow['Label']
 		#detecting if the label is in english or french
-		if utilsString.englishOrFrench(label) == languageOfOntology:
-			#if the node is not over-specific
-			if len(utilsString.naiveRegexTokenizer(label)) <= 5:
-				#add the node id to the list of correct nodes
-				rightLanguageNodes.append(nodeRow['Id'])
+		try:
+			if utilsString.englishOrFrench(label) == languageOfOntology:
+				#if the node is not over-specific
+				if len(utilsString.naiveRegexTokenizer(label)) <= 5:
+					#add the node id to the list of correct nodes
+					rightLanguageNodes.append(nodeRow['Id'])
+		except TypeError:
+			#print(label, type(label))
+			pass
 	#get the dataframes containing the right nodes
 	cleanedEdgeDf = edgeDf.loc[edgeDf[u'Source'].isin(rightLanguageNodes) & edgeDf[u'Target'].isin(rightLanguageNodes)]
 	cleanedNodeDf = nodeDf.loc[nodeDf[u'Id'].isin(rightLanguageNodes)]
-	#trimm again the graph, after cleaning they might be isolated nodes
-	cleanedEdgeDf, cleanedNodeDf = ontologyStructureCleaning(cleanedEdgeDf, cleanedNodeDf, edgeFilePathOutput=None, nodeFilePathOutput=None)
 	#dumping the data frames
 	if edgeFilePathOutput != None:
 		cleanedEdgeDf.to_csv(edgeFilePathOutput, sep='\t', index=False)
+		cleanedEdgeDf.to_csv(u'{0}NoHeader.tsv'.format(edgeFilePathOutput.split(u'.tsv')[0]), sep='\t', index=False, header=None)
 	if nodeFilePathOutput != None:
 		cleanedNodeDf.to_csv(nodeFilePathOutput, sep='\t', index=False)
 	return cleanedEdgeDf, cleanedNodeDf
@@ -690,7 +722,8 @@ def ontoQA(edgeFilePath, nodeFilePath, verbose=True):
 		try:
 			metricsDict['Conn'][u'CLASS {0}'.format(classId)] = classData['NIREL_nbRelOtherClass']
 		except KeyError:
-			print(classId, classData)
+			#print(classId, classData)
+			pass
 	#Imp(C_i) - class importance
 	metricsDict['Imp'] = {}
 	for classId, classData in classDataDict.items():
@@ -745,9 +778,3 @@ def modifyConfigAndIndexFiles(pathToTheExportationEnvironment):
 				break
 		fileLines = fileLines[:indexDivisor] + [u'\t\t<dd>\n'] + list(colorCommunityDict.values()) + [u'\t\t</dd>\n'] + fileLines[indexDivisor+1:]
 	utilsOs.dumpRawLines(fileLines, u'{0}index.html'.format(pathToTheExportationEnvironment), addNewline=False, rewrite=True)
-
-
-jobOfferDict = getJobOfferDescriptionDict()
-jobTitleList = [u'CEO', u'Bank employee', u'EMEA Supplier Quality Engineer', u'senior staff chemist', u'Senior Loss Adjuster']
-for jobTitle in jobTitleList:
-	addJobOfferDescriptionToBow(jobTitle, jobOfferDict, bowDict={})
