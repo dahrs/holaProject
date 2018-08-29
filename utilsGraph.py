@@ -11,6 +11,30 @@ import utilsOs, utilsString
 
 
 ##################################################################################
+#TOOL FUNCTIONS
+##################################################################################
+
+
+def getDataFrameFromArgs(df1arg, df2arg=None):
+	'''
+	we chech if 'df1arg' and 'df2arg' are string paths or pandas dataframes
+	'''
+	#df1
+	if type(df1arg) != str: # or type(df1arg) != unicode:
+		df1 = df1arg
+	else:
+		df1 = pd.read_csv(df1arg, sep=u'\t')
+	#df2
+	if df2arg == None:
+		return df1
+	elif type(df2arg) != str: # or type(df2arg) != unicode:
+		df2 = df2arg
+	else:
+		df2 = pd.read_csv(df2arg, sep=u'\t')
+	return df1, df2
+
+
+##################################################################################
 #GRAPH FILES MAKER (EDGE_LIST and NODE_LIST) in O(n^2) where n is the nb of skills
 ##################################################################################
 
@@ -131,6 +155,7 @@ def nodeListIdType(pathEdgeListFile, pathNodeFileOutput):
 #GET ADJACENCY
 ##################################################################################
 
+
 def getNodeAdjacency(nodeName, edgeList, bothWays=True): ###########################################################
 	'''
 	given a node, searchs for the adjacent nodes to it
@@ -212,7 +237,7 @@ def modularize(edgeGraph, nodeDf):
 		dendroPartitionDict = community.partition_at_level(dendrogram, indexPartition) #dendroPartitionDict = community.best_partition(graph)
 		nameOfModularityColumn = u'Community_Lvl_{0}'.format(str(len(dendrogram)-indexPartition-1))
 		#name a possible previous modularity column (needed to format the column values)
-		nameOfPreviousModCol = u'Community_Lvl_{0}'.format(str(len(dendrogram)-indexPartition-1))
+		nameOfPreviousModCol = u'Community_Lvl_{0}'.format(str(len(dendrogram)-indexPartition-2))
 		#add a column to the node data frame so we can add the community values
 		if nameOfModularityColumn not in nodeDf.columns:
 			nodeDf[nameOfModularityColumn] = np.nan	
@@ -290,10 +315,7 @@ def getModularityPercentage(nodeFilePathWithModularity, communityColumnHeader=u'
 	'''
 	communityDict = {}
 	resultDict = {}
-	if type(nodeFilePathWithModularity) is not str:
-		nodeDf = nodeFilePathWithModularity
-	else:
-		nodeDf = pd.read_csv(nodeFilePathWithModularity, sep=u'\t')
+	nodeDf = getDataFrameFromArgs(nodeFilePathWithModularity)
 
 	#remaking a community dict
 	for nodeIndex, nodeRow in nodeDf.iterrows():
@@ -485,7 +507,7 @@ def getOntologyBowByCommunity(nodeDf, columnToInferFrom):
 	return communityBagOfWords
 
 
-def getCommunityNameInferences(nodeFileInput, outputFilePath, columnToInferFrom=u'Community_Lvl_0'):
+def getCommunityNameInferences(nodeFileInput, outputFilePath):
 	''' 
 	using a bag of words on jobtitles of the same community and on
 	job titles and descriptions from existing ontologies (ESCO)
@@ -493,47 +515,50 @@ def getCommunityNameInferences(nodeFileInput, outputFilePath, columnToInferFrom=
 	'''
 	inferencesDict = {}
 	#we chech if 'edgeFileInput' and 'nodeFileInput' are string paths or pandas dataframes
-	if type(nodeFileInput) != str: # or type(nodeFileInput) != unicode:
-		nodeDf = nodeFileInput
-	else:
-		nodeDf = pd.read_csv(nodeFileInput, sep=u'\t')
+	nodeDf = getDataFrameFromArgs(nodeFileInput)
 	#bag of words of the esco ontology
 	escoTree = utilsOs.openJsonFileAsDict(u'./jsonJobTaxonomies/escoTree.json')
 	escoTreeBagOfWords = getEscoBowByLevel(escoTree)
-	#bag of words of the communities in our ontology
-	communityBagOfWords = getOntologyBowByCommunity(nodeDf, columnToInferFrom)
-	#add an empty column
-	inferenceColumnName = u'Infered_Community_Name_Lvl_{0}'.format(columnToInferFrom.split(u'_')[-1])
-	nodeDf[inferenceColumnName] = np.nan
-	#comparing intersection between esco bow and the communities bow
-	for community, communityBowDict in communityBagOfWords.items():
-		#reset values of best intersection
-		bestIntersection = {u'result': 0.0, u'set': None, u'name': u'00000000___'}
-		for nb in reversed(range(1, 4)):
-			for escoDomain, escoBow in escoTreeBagOfWords[nb].items():
-				bowIntersectionScore = 0
-				#we intersect the 2 bag of words
-				bowIntersection = set(communityBowDict.keys()).intersection(escoBow)
-				for token in bowIntersection:
-					bowIntersectionScore += communityBowDict[token]
-				#we evaluate if we are at the same level in the esco taxonomy. If we are still on the same level the score 
-				#needed to replace the best intersection is simply the one > than the precedent, 
-				#if we are one level upper, then the needed score is multiplied by a variable (to priorize staying in a 
-				#lower, more specialized, ESCO level)
-				if len(bestIntersection[u'name'].split(u'___')[0]) == len(escoDomain.split(u'___')[0]):
-					multiplier = 1.0
-				else:
-					#multiplier = (4.6 - (nb * 1.2))
-					multiplier = 1.5
-				#if the score is greater, we replace the previous best intersection with the new intersection
-				if bowIntersectionScore > bestIntersection['result']*multiplier or bestIntersection['result'] == 0.0:
-					bestIntersection[u'result'] = bowIntersectionScore
-					bestIntersection[u'set'] = bowIntersection
-					bestIntersection[u'dict'] = communityBowDict
-					bestIntersection[u'name'] = escoDomain
-		#saving the information
-		inferencesDict[community] = bestIntersection
-		nodeDf[inferenceColumnName].loc[nodeDf[columnToInferFrom] == community] = str(bestIntersection['name'])
+	#infer a name for each existing level of communities
+	communityLevel = 0
+	subClasses = set()	
+	while u'Community_Lvl_{0}'.format(str(communityLevel)) in nodeDf.columns:
+		columnToInferFrom = u'Community_Lvl_{0}'.format(str(communityLevel))
+		communityLevel += 1
+		#bag of words of the communities in our ontology
+		communityBagOfWords = getOntologyBowByCommunity(nodeDf, columnToInferFrom)
+		#add an empty column
+		inferenceColumnName = u'Infered_Community_Name_Lvl_{0}'.format(columnToInferFrom.split(u'_')[-1])
+		nodeDf[inferenceColumnName] = np.nan
+		#comparing intersection between esco bow and the communities bow
+		for community, communityBowDict in communityBagOfWords.items():
+			#reset values of best intersection
+			bestIntersection = {u'result': 0.0, u'set': None, u'name': u'00000000___'}
+			for nb in reversed(range(1, 4)):
+				for escoDomain, escoBow in escoTreeBagOfWords[nb].items():
+					bowIntersectionScore = 0
+					#we intersect the 2 bag of words
+					bowIntersection = set(communityBowDict.keys()).intersection(escoBow)
+					for token in bowIntersection:
+						bowIntersectionScore += communityBowDict[token]
+					#we evaluate if we are at the same level in the esco taxonomy. If we are still on the same level the score 
+					#needed to replace the best intersection is simply the one > than the precedent, 
+					#if we are one level upper, then the needed score is multiplied by a variable (to priorize staying in a 
+					#lower, more specialized, ESCO level)
+					if len(bestIntersection[u'name'].split(u'___')[0]) == len(escoDomain.split(u'___')[0]):
+						multiplier = 1.0
+					else:
+						#multiplier = (4.6 - (nb * 1.2))
+						multiplier = 1.5
+					#if the score is greater, we replace the previous best intersection with the new intersection
+					if bowIntersectionScore > bestIntersection['result']*multiplier or bestIntersection['result'] == 0.0:
+						bestIntersection[u'result'] = bowIntersectionScore
+						bestIntersection[u'set'] = bowIntersection
+						bestIntersection[u'dict'] = communityBowDict
+						bestIntersection[u'name'] = escoDomain
+			#saving the information
+			inferencesDict[community] = bestIntersection
+			nodeDf[inferenceColumnName].loc[nodeDf[columnToInferFrom] == community] = str(bestIntersection['name'])
 	#dump to file
 	nodeDf.to_csv(outputFilePath, sep='\t', index=False)
 	return inferencesDict
@@ -543,6 +568,43 @@ def getCommunityNameInferences(nodeFileInput, outputFilePath, columnToInferFrom=
 ##################################################################################
 #ONTOLOGY CLEANING AND TRIMMING
 ##################################################################################
+
+def wasteNodeElimination(edgeFileInput, nodeFileInput):
+	'''
+	Checks if every node in the node file appear in the edge file
+	otherwise it eliminates it
+	Checks if the nodes of every edge is in the node file
+	oteherwise the edge gets eliminated
+	'''
+	edgesToEliminate = []
+	nodesToEliminate = []
+	edgeDf, nodeDf = getDataFrameFromArgs(edgeFileInput, nodeFileInput)
+	#browse edges if its nodes are not in the nodes list, prepare the lists of elements to drop
+	for edgeIndex, edgeRow in (edgeDf.iterrows()):
+		edgeSourceId = edgeRow[u'Source']
+		edgeTargetId = edgeRow[u'Target']
+		sourceNodesOfEdgesDf = nodeDf.loc[nodeDf[u'Id'] == edgeSourceId]
+		targetNodesOfEdgesDf = nodeDf.loc[nodeDf[u'Id'] == edgeTargetId]
+		if len(sourceNodesOfEdgesDf) == 0 or len(targetNodesOfEdgesDf) == 0:
+			edgesToEliminate.append(edgeIndex)
+	#drop the edges
+	for edgeIndex in reversed(edgesToEliminate):
+		edgeDf = edgeDf.drop(edgeDf.index[edgeIndex])
+	#browse nodes if not in edges, prepare the lists of elements to drop
+	for nodeIndex, nodeRow in list(nodeDf.iterrows()):
+		nodeId = nodeRow['Id']
+		edgesOfNodesDf = edgeDf.loc[edgeDf[u'Source'] == nodeId] & edgeDf.loc[edgeDf[u'Target'] == nodeId]
+		if len(edgesOfNodesDf) == 0:
+			nodesToEliminate.append(nodeIndex)
+	#drop the nodes
+	for nodeIndex in reversed(nodesToEliminate):
+		nodeDf = nodeDf.drop(nodeDf.index[nodeIndex])
+	#dumping the data frames to the same file where we opened them
+	if type(edgeFileInput) == str and type(nodeFileInput) == str:
+		edgeDf.to_csv(edgeFileInput, sep='\t', index=False)
+		nodeDf.to_csv(nodeFileInput, sep='\t', index=False)	
+	return edgeDf, nodeDf
+
 
 def ontologyContentCleaning(languageOfOntology, edgeFilePathInput, nodeFilePathInput, edgeFilePathOutput=None, nodeFilePathOutput=None):
 	'''
@@ -615,14 +677,8 @@ def ontologyStructureCleaning(edgeFileInput, nodeFileInput, edgeFilePathOutput=N
 			- all job titles (and skills) whose skills are not connected to any other job titles
 	'edgeFileInput' and 'nodeFileInput' can either be a string/unicode path to the a tsv file or a pandas dataframe
 	'''
-	#we chech if 'edgeFileInput' and 'nodeFileInput' are string paths or pandas dataframes
-	if type(edgeFileInput) != str: # or type(edgeFileInput) != unicode:
-		edgeDf = edgeFileInput
-		nodeDf = nodeFileInput
-	else:
-		edgeDf = pd.read_csv(edgeFileInput, sep=u'\t')
-		nodeDf = pd.read_csv(nodeFileInput, sep=u'\t')
-
+	#get dataframes
+	edgeDf, nodeDf = getDataFrameFromArgs(edgeFileInput, nodeFileInput)
 	#remove communities corresponding to less than 1% of the node
 	communitiesSet = set(nodeDf['Community_Lvl_0'].tolist())
 	copyCommunitiesSet = list(communitiesSet)
@@ -650,6 +706,8 @@ def ontologyStructureCleaning(edgeFileInput, nodeFileInput, edgeFilePathOutput=N
 		edgeDf.to_csv(edgeFilePathOutput, sep='\t', index=False)
 	if nodeFilePathOutput != None:
 		nodeDf.to_csv(nodeFilePathOutput, sep='\t', index=False)
+	#we make sure there are no unconnected nodes
+	wasteNodeElimination(edgeFilePathOutput, nodeFilePathOutput)
 	return edgeDf, nodeDf
 
 
@@ -674,13 +732,26 @@ def ontoQA(edgeFilePath, nodeFilePath, verbose=True):
 	#make a dict for the class related data
 	classes = set(nodeDf['Community_Lvl_0'].tolist())
 	classDataDict = {k:dict(emptyDict) for k in classes}
+	#count the number of subClasses (not counting the main, upper level, classes)
+	nb = 1
+	subClasses = set()
+	while 'Community_Lvl_{0}'.format(str(nb)) in nodeDf.columns:
+		subClasses = subClasses.union(set( nodeDf[ 'Community_Lvl_{0}'.format(str(nb)) ].tolist() ))
+		nb += 1
 
 	#get C, number of classes
 	dataDict['C'] = len(classes)
-	#get P, non-inheritance relationships
-	dataDict['P'] = len(edgeDf)
+	#get P', non-inheritance relationships (relation types) deducing the inexisting schema
+	if 'esco' in edgeFilePath.lower():
+		dataDict['P'] = 15 #hasSkill, conceptType, conceptUri, broaderUri, iscoGroup, preferredLabel, alternativeLabel, description, code, occupationUri, relationType, skillType, skillUri, reuseLevel
+	else:
+		dataDict['P'] = 2 #hasSkill, hasSubclass
+	#get P', non-inheritance relations (instances)
+	dataDict["P'"] = len(edgeDf)
 	#get H, inheritance relationships
-	dataDict['H'] = len(nodeDf)	
+	dataDict['H'] = 1	 #isSubclassOf or broaderUri(in ESCO)
+	#get Hs, number of subclasses
+	dataDict['Hs'] = len(subClasses)	
 	#get att, number of attributes
 	dataDict['att'] = len(edgeDf) + len(nodeDf)
 	#get CI, total number of instances
@@ -711,7 +782,7 @@ def ontoQA(edgeFilePath, nodeFilePath, verbose=True):
 	#RR - relationship richness
 	metricsDict['RR'] = float(dataDict['P']) / float(dataDict['H']+dataDict['P'])
 	#IR - inheritance richness
-	metricsDict['IR'] = float(dataDict['H']) / float(dataDict['C'])
+	metricsDict['IR'] = float(dataDict['Hs']) / float(dataDict['C'])
 	#AR - attribute richness
 	metricsDict['AR'] = float(dataDict['att']) / float(dataDict['C'])
 	#CR - class richness
@@ -737,6 +808,40 @@ def ontoQA(edgeFilePath, nodeFilePath, verbose=True):
 	return metricsDict
 
 
+##################################################################################
+#TOOLS FOR HUMAN ONTOLOGY ANALYSIS
+##################################################################################
+
+def printCommunityInferenceHeaders(nodeFileInput, level=None):
+	'''
+	pretty prints an ASCII table containing the communities 
+	header selection of a particular level of the ontology
+	'''
+	from prettytable import PrettyTable
+	dataDict = {}
+	#get the node dataframe
+	nodeDf = getDataFrameFromArgs(nodeFileInput)
+	#get the data from the node dataframe
+	communityLevel = 0
+	while u'Community_Lvl_{0}'.format(str(communityLevel)) in nodeDf.columns:
+		nameOfCommunityColumn = u'Community_Lvl_{0}'.format(str(communityLevel))
+		#empty dict
+		dataDict[communityLevel] = {}
+		#get the list of community ids for a specific level
+		communityIdsList = list(set(nodeDf[nameOfCommunityColumn].tolist()))
+		#save the data for each community
+		for communityId in communityIdsList:
+			communityNodeDf = nodeDf.loc[nodeDf[nameOfCommunityColumn] == communityId]
+			dataDict[communityLevel][communityId] = {
+			'communityName': communityNodeDf.head(1)['Infered_Community_Name_Lvl_{0}'.format(communityLevel)] , 
+			'percentOfNodeInWholeDf': len(communityNodeDf)/len(nodeDf), 
+			'nbOfNodes': len(communityNodeDf), 
+			'sample': communityNodeDf.head(10)['Label'].tolist()}
+		print(dataDict)
+		communityLevel += 1
+
+
+
 
 ##################################################################################
 #CALIBRATION OF THE SIGMA.JS EXPORTATION OF THE GRAPH
@@ -748,12 +853,20 @@ def modifyConfigAndIndexFiles(pathToTheExportationEnvironment):
 	the folder "network/"), it changes the config.json file and the index.html
 	file so they show the graph the way intended
 	'''
+	from shutil import copyfile
 	#copying config.json file
 	configContent = {"type": "network","version": "1.0","data": "data.json","logo": {"file": "","link": "","text": ""},"text": {"more": "","intro": "","title": ""},"legend": {"edgeLabel": "","colorLabel": "","nodeLabel": ""},"features": {"search": True,"groupSelectorAttribute": True,"hoverBehavior": "default"},"informationPanel": {"groupByEdgeDirection": True,"imageAttribute": False},"sigma": {"drawingProperties": {"defaultEdgeType": "curve","defaultHoverLabelBGColor": "#002147","defaultLabelBGColor": "#ddd","activeFontStyle": "bold","defaultLabelColor": "#000","labelThreshold": 999,"defaultLabelHoverColor": "#fff","fontStyle": "bold","hoverFontStyle": "bold","defaultLabelSize": 14},"graphProperties": {"maxEdgeSize": 2,"minEdgeSize": 2,"minNodeSize": 0.25,"maxNodeSize": 2.5},"mouseProperties": {"maxRatio": 20,"minRatio": 0.75}}}
 	pathConfigJson = u'{0}config.json'.format(pathToTheExportationEnvironment)
 	if utilsOs.theFileExists(pathConfigJson) == True:
 		os.remove(pathConfigJson)
-	utilsOs.dumpDictToJsonFile(configContent, pathConfigJson)  
+	utilsOs.dumpDictToJsonFile(configContent, pathConfigJson) 
+	#copying the logo images
+	srcRali = u'./testsGephi/gephiExportSigma0/rali.png'
+	dstRali = u'./testsGephi/gephiExportSigma0/springLayoutAndModularityPythonLouvain/wholeCleanedModularizedTrimmedInfered/network/images/rali.png'
+	srcUdem = u'./testsGephi/gephiExportSigma0/udem.png'
+	dstUdem = u'./testsGephi/gephiExportSigma0/springLayoutAndModularityPythonLouvain/wholeCleanedModularizedTrimmedInfered/network/images/udem.png'
+	copyfile(srcRali, dstRali)
+	copyfile(srcUdem, dstUdem)
 	#getting the color information from the data file
 	colorCommunityDict = {}
 	dataDict = utilsOs.openJsonFileAsDict(u'{0}data.json'.format(pathToTheExportationEnvironment))
@@ -772,9 +885,26 @@ def modifyConfigAndIndexFiles(pathToTheExportationEnvironment):
 	#modifying the index.html file
 	with open(u'{0}index.html'.format(pathToTheExportationEnvironment)) as indexFile:
 		fileLines = indexFile.readlines()
+		#to add the colors
 		for index, line in enumerate(fileLines):
 			if line == u'\t\t<dt class="colours"></dt>\n':
-				indexDivisor = index + 1
+				indexDivisorCol = index + 1
 				break
-		fileLines = fileLines[:indexDivisor] + [u'\t\t<dd>\n'] + list(colorCommunityDict.values()) + [u'\t\t</dd>\n'] + fileLines[indexDivisor+1:]
+		fileLines = fileLines[:indexDivisorCol] + [u'\t\t<dd>\n'] + list(colorCommunityDict.values()) + [u'\t\t</dd>\n'] + fileLines[indexDivisorCol+1:]
+		#to change the images and urls to rali and udem
+		for index, line in enumerate(fileLines):
+			if line == u'\t<a href="http://www.oii.ox.ac.uk" title="Oxford Internet Institute"><div id="oii"><span>OII</span></div></a>\n':
+				indexDivisorImg = index + 1
+				break
+		fileLines = fileLines[:indexDivisorImg-1] + [u'\t<a href="http://rali.iro.umontreal.ca/rali/en" title="RALI laboratories"><div id="RALI"><span>RALI</span></div></a>\n', 
+		u'\t<a href="http://www.umontreal.ca/en/" title="UdeM"><div id="UdeM"><span>UdeM</span></div></a>\n']  + fileLines[indexDivisorImg+2:]
 	utilsOs.dumpRawLines(fileLines, u'{0}index.html'.format(pathToTheExportationEnvironment), addNewline=False, rewrite=True)
+	#modifying the style.css file to point to the images
+	with open(u'{0}css/style.css'.format(pathToTheExportationEnvironment)) as styleFile:
+		fileLines = styleFile.readlines()
+		fileLines = fileLines + [u'''#UdeM {\nwidth: 198px;\nheight: 81px;\nbackground-image: url('../images/udem.png');\nbackground-repeat: no-repeat;\ndisplay:inline-block;\n}\n\n#UdeM span {\n\tdisplay:none;\n}\n\n#RALI {\nwidth: 318px;\nheight: 75px;\nbackground-image: url('../images/rali.png');\nbackground-repeat: no-repeat;\ndisplay:inline-block;\nmargin-right:10px;\n\n}\n\n#RALI span {\n\tdisplay:none;\n}\n''']
+	utilsOs.dumpRawLines(fileLines, u'{0}css/style.css'.format(pathToTheExportationEnvironment), addNewline=False, rewrite=True)
+
+
+nodeFileInput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListCleanedModularizedTrimmedInfered.tsv'
+printCommunityInferenceHeaders(nodeFileInput, level=None)
