@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #-*- coding:utf-8 -*-
 
-import json, codecs, random, community, shutil, os
+import json, codecs, random, shutil, os
 from tqdm import tqdm
 import pandas as pd
 import numpy as np
@@ -231,6 +231,7 @@ def modularize(edgeGraph, nodeDf):
 	'''
 	uses the original code of the louvain algorithm to give modularity to a graph
 	'''
+	import community #downloaded and installed from https://github.com/taynaud/python-louvain
 	#compute the best partition
 	dendrogram = community.generate_dendrogram(edgeGraph, weight='weight')
 	for indexPartition in list(reversed(range(len(dendrogram)))):
@@ -336,7 +337,7 @@ def getModularityPercentage(nodeFilePathWithModularity, communityColumnHeader=u'
 
 
 ##################################################################################
-#MODULARITY DOMAIN NAME GUESSING
+#MODULARITY DOMAIN NAME GUESSING USING BAG OF WORDS
 ##################################################################################
 
 
@@ -564,6 +565,41 @@ def getCommunityNameInferences(nodeFileInput, outputFilePath):
 	return inferencesDict
 
 
+##################################################################################
+#MODULARITY DOMAIN NAME GUESSING USING WORD EMBEDDINGS
+##################################################################################
+
+
+def avg_sentence_vector(sentence, modelFastText):
+	#make an empty vector
+	num_features = model.get_dimension()
+	featureVec = np.zeros(num_features, dtype="float32")
+	#tokenization
+	words = word_tokenize(sentence)
+	for word in words:
+		#sum of the vector's values
+		featureVec = np.add(featureVec, model.get_word_vector(word))
+	featureVec = np.divide(featureVec, float(max(len(words),1)))
+	return featureVec
+
+
+def cosine_similarity(vec1, vec2):
+	return np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
+
+
+def getWordEmbeddingInference(semanticClassCluster):
+	'''
+	Follows the Patel and Ravichandran algorithm for automatically
+	labelling semantic classes and returns a ranked list of semantic
+	classes names
+	'''
+	#pathToModel = u'/data/rali5/Tmp/alfonsda/DOCTORAT_TAL/004projetOntologie/fastTextModel/crawl-300d-2M.vec'
+	pathToModel = u'/data/rali5/Tmp/alfonsda/DOCTORAT_TAL/004projetOntologie/fastTextModel/wiki-news-300d-1M.vec'
+	model = FastText()
+	model.load_model(pathToModel)
+	###################################################################
+	###################################################################
+
 
 ##################################################################################
 #ONTOLOGY CLEANING AND TRIMMING
@@ -574,7 +610,7 @@ def wasteNodeElimination(edgeFileInput, nodeFileInput):
 	Checks if every node in the node file appear in the edge file
 	otherwise it eliminates it
 	Checks if the nodes of every edge is in the node file
-	oteherwise the edge gets eliminated
+	otherwise the edge gets eliminated
 	'''
 	edgesToEliminate = []
 	nodesToEliminate = []
@@ -745,7 +781,7 @@ def ontoQA(edgeFilePath, nodeFilePath, verbose=True):
 	if 'esco' in edgeFilePath.lower():
 		dataDict['P'] = 15 #hasSkill, conceptType, conceptUri, broaderUri, iscoGroup, preferredLabel, alternativeLabel, description, code, occupationUri, relationType, skillType, skillUri, reuseLevel
 	else:
-		dataDict['P'] = 2 #hasSkill, hasSubclass
+		dataDict['P'] = 11 #in an edge and node List it's 2!!!: hasSkill, hasSubclass #BUT can be grown to 11 by adding if put in a formal ontology form: hasSkill, conceptType, conceptUri, broaderUri, preferredLabel, occupationUri, relationType, skillUri, reuseLevel
 	#get P', non-inheritance relations (instances)
 	dataDict["P'"] = len(edgeDf)
 	#get H, inheritance relationships
@@ -809,10 +845,10 @@ def ontoQA(edgeFilePath, nodeFilePath, verbose=True):
 
 
 ##################################################################################
-#TOOLS FOR HUMAN ONTOLOGY ANALYSIS
+#TOOLS FOR HUMAN ONTOLOGY ANALYSIS AND EVALUATION
 ##################################################################################
 
-def printCommunityInferenceHeaders(nodeFileInput, level=None):
+def printCommunityInferenceHeaders(nodeFileInput):
 	'''
 	pretty prints an ASCII table containing the communities 
 	header selection of a particular level of the ontology
@@ -832,16 +868,135 @@ def printCommunityInferenceHeaders(nodeFileInput, level=None):
 		#save the data for each community
 		for communityId in communityIdsList:
 			communityNodeDf = nodeDf.loc[nodeDf[nameOfCommunityColumn] == communityId]
+			#transform the ratio into string beacause prettytable has trouble with exponential numbers
+			ratio = str(len(communityNodeDf)/len(nodeDf))
+			if 'e-' in ratio:
+				ratio = ratio.split('e-')
+				ratio1 = '0' * (int(ratio[1])-1)
+				ratio2 = ratio[0].replace('.', '')
+				ratio = '0.{0}{1}'.format(ratio1, ratio2)
+			#fill data dict with the data
 			dataDict[communityLevel][communityId] = {
-			'communityName': communityNodeDf.head(1)['Infered_Community_Name_Lvl_{0}'.format(communityLevel)] , 
-			'percentOfNodeInWholeDf': len(communityNodeDf)/len(nodeDf), 
+			'communityName': (communityNodeDf.head(1)['Infered_Community_Name_Lvl_{0}'.format(communityLevel)]).values[0] , 
+			'ratioOfNodeInWholeDf': ratio, 
 			'nbOfNodes': len(communityNodeDf), 
 			'sample': communityNodeDf.head(10)['Label'].tolist()}
-		print(dataDict)
 		communityLevel += 1
+	#print one table per level
+	for levelNb in sorted(dataDict.keys()):
+		levelDataDict = dataDict[levelNb]
+		#use prettytable to show the data in a human readable way
+		table = PrettyTable()
+		table.title = "LEVEL {0}".format(str(levelNb))
+		table.field_names = ['Ratio', 'Infered Name', 'Sample']
+		#insert the data as rows
+		for communityId, data in levelDataDict.items():
+			#cut the community name if it's too long
+			if len(data['communityName']) > 20:
+				segmentedCommunityName = []
+				lastSeg = 0
+				for nbSeg in range((len(data['communityName']) % 20)+2)[1:]:
+					if nbSeg * 20 < len(data['communityName']):
+						seg = nbSeg*20
+					else:
+						seg = len(data['communityName'])
+					segmentedCommunityName.append(data['communityName'][lastSeg:seg])
+					#hold place of last segmentation
+					lastSeg = seg
+				communityName = '\n'.join(segmentedCommunityName)
+			else:
+				communityName = data['communityName']
+			#add the row data to the table
+			table.add_row([data['ratioOfNodeInWholeDf'], communityName, '\n'.join(data['sample'] + [''])])
+		#sort
+		table.sortby = "Ratio"
+		table.reversesort = True
+		#printing
+		print("LEVEL {0}".format(str(levelNb)))
+		print(table)
+
+
+def getSampleForHumanEvaluation(edgeFileInput, nodeFileInput, lengthOfSample=1000, outputEdgeFilePath=None, outputNodeFilePath=None):
+	'''
+	given a finished ontology in the form of an edge list and a node list
+	return and dump a random sample in the form of an extended edge list
+	'''
+	setOfIndexes = set()
+	#get dataframes
+	edgeDf, nodeDf = getDataFrameFromArgs(edgeFileInput, nodeFileInput)
+	#get a random list of indexes
+	while len(setOfIndexes) < lengthOfSample:
+		setOfIndexes.add(random.randint(0, len(edgeDf)))
+	#get a reduced randomly chosen edge dataframe
+	sampleEdgeDf = edgeDf.iloc[list(setOfIndexes)]
+	#get the reduced node dataframe corresponding to the randomly chosen edge dataframe
+	sampleNodeDf = nodeDf.loc[nodeDf[u'Id'].isin(sampleEdgeDf[u'Source'].tolist() + sampleEdgeDf[u'Target'].tolist())]
+	#dumps the dataframes
+	if outputEdgeFilePath != None:
+		sampleEdgeDf.to_csv(outputEdgeFilePath, sep='\t', index=False)
+	if outputNodeFilePath != None:
+		(sampleNodeDf.sort_values(by=['Community_Lvl_1'])).to_csv(outputNodeFilePath, sep='\t', index=False)
+	return sampleEdgeDf, sampleNodeDf.sort_values(by=['Community_Lvl_1'])
+
+
+def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, nameOfEvaluator='David'):
+	'''
+	terminal interface for human annotation
+	3 types of annotation:
+	 - edge relevance (is the skill relevant for that job title?)
+	 - filter evaluation (is the node in the right language? is the node well written? must not show a named entity. must be coherent.)
+	 - community/taxonomy evaluation (Sesame Street test: is this thing just like the others?)
+	3 types of annotation:
+	 - 0 : negative evaluation
+	 - 1 : positive evaluation
+	 - 2 : neutral/doubtful evaluation
+	'''
+	#get dataframe
+	sampleEdgeDf, sampleNodeDf = getDataFrameFromArgs(sampleEdgeFileInput, sampleNodeFileInput)
+	#print instructions
+	print(u'3 types of annotation: 0 = negative eval, 1 = positive eval, 2 = doubtful eval\n')
+	#edge Annotation
+	print(u'EDGE ANNOTATION:\n')
+	#add the columns preparing for the data
+	sampleEdgeDf[u'edgeAnnotation'] = np.nan	
+	for edgeIndex, edgeRow in sampleEdgeDf.iterrows():
+		#print the edge
+		print(u'{0} >>>> {1}'.format(edgeRow[u'Source'], edgeRow[u'Target']))
+		#wait for annotator input
+		annotatorInput = input(u'Annotation: ')
+		#save the annotation
+		sampleEdgeDf[u'edgeAnnotation'][edgeIndex] = int(annotatorInput)
+		#clear the terminal before the next row
+		utilsOs.moveUpAndLeftNLines(2, slowly=False)
+	#dump the edge dataframe
+	sampleEdgeDf.to_csv(u'{0}{1}.tsv'.format(sampleEdgeFileInput.split(u'.tsv')[0], nameOfEvaluator), sep='\t', index=False)
+
+	#print instructions
+	utilsOs.moveUpAndLeftNLines(3, slowly=False)
+	print(u'must be: the right language... well written... not having a named entity... coherent.\n')
+	#node annotation filter evaluation
+	print(u'NODE ANNOTATION (filter evaluation):')
+	print()
+	#add the columns preparing for the data
+	sampleNodeDf[u'nodeAnnotationFilter'] = np.nan	
+	for nodeIndex, nodeRow in sampleNodeDf.iterrows():
+		#print the edge
+		print(nodeRow[u'Label'])
+		#wait for annotator input
+		annotatorInput = input(u'Annotation: ')
+		#save the annotation
+		sampleNodeDf[u'nodeAnnotationFilter'][nodeIndex] = int(annotatorInput)
+		#clear the terminal before the next row
+		utilsOs.moveUpAndLeftNLines(2, slowly=False)
+
+	#node annotation taxonomy evaluation ###########################
+
+	#dump the node dataframe
+	sampleNodeDf.to_csv(u'{0}{1}.tsv'.format(sampleNodeFileInput.split(u'.tsv')[0], nameOfEvaluator), sep='\t', index=False)
 
 
 
+	
 
 ##################################################################################
 #CALIBRATION OF THE SIGMA.JS EXPORTATION OF THE GRAPH
@@ -906,5 +1061,8 @@ def modifyConfigAndIndexFiles(pathToTheExportationEnvironment):
 	utilsOs.dumpRawLines(fileLines, u'{0}css/style.css'.format(pathToTheExportationEnvironment), addNewline=False, rewrite=True)
 
 
-nodeFileInput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListCleanedModularizedTrimmedInfered.tsv'
-printCommunityInferenceHeaders(nodeFileInput, level=None)
+
+
+sampleEdgeFileInput = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/009humanAnnotation/sampleEdge1000ForHumanEval.tsv'
+sampleNodeFileInput = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/009humanAnnotation/sampleNode1000ForHumanEval.tsv'
+humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, nameOfEvaluator='David')

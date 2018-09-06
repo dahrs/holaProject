@@ -336,3 +336,22 @@ def safeFilePath(outputFilePath):
 			fileName = fileName.replace(u'_%s' %(str(nb)), u'_%s' %(str(nb+1)))
 			nb += 1
 	return u'%s%s.%s' %(folderPath, fileName, fileExtension)
+
+
+##################################################################################
+#USER INTERACTION VIA THE TERMINAL
+##################################################################################
+
+def moveUpAndLeftNLines(n, slowly=True):
+	'''
+	Moves up N lines in the terminal 
+	at the starting point of the line
+	so text can be rewritten over (dynamically)
+	(use of carriage return \r and ansi code for up \u001b[#intNumber#A )
+	'''
+	sys.stdout.write("\r") #move to the beguinning of the line
+	sys.stdout.write(u"\u001b[" + str(n) + "A") # Move up n lines
+	sys.stdout.flush()
+	if slowly == True:
+		import time
+		time.sleep(0.4)

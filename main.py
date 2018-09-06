@@ -186,19 +186,22 @@ if __name__ == '__main__':
 	##################################################################################
 	#CALLING FUNCT FROM utilsGraph.py TO INFER THE COMMUNITIES NAMES
 	##################################################################################
-	
+	'''
 	#from the 100 000 sample
 	nodeFile = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListCleanedModularizedTrimmed.tsv'
 	outputNodeFile = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListCleanedModularizedTrimmedInfered.tsv'
 	
 	utilsGraph.getCommunityNameInferences(nodeFile, outputNodeFile)
-	''' '''
-	
+	''' 
+	'''
 	#from all english FR candidates
 	nodeFile = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListCleanedModularizedTrimmed.tsv'
 	outputNodeFile = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListCleanedModularizedTrimmedInfered.tsv'
 	utilsGraph.getCommunityNameInferences(nodeFile, outputNodeFile)
-	''' '''
+
+	#pretty print a table of the inference and a sample of the job titles
+	utilsGraph.printCommunityInferenceHeaders(outputNodeFile)
+	''' 
 
 	
 	##################################################################################
@@ -243,6 +246,16 @@ if __name__ == '__main__':
 	''' 
 	
 
+	##################################################################################
+	#CALLING FUNCT FROM utilsGraph.py TO MAKE THE HUMAN EVALUATION
+	##################################################################################
+	''' 
+	edgeFileInput = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/edgeListWeightCleanedTrimmed.tsv'
+	nodeFileInput = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListCleanedModularizedTrimmedInfered.tsv'
+	outputEdgeFilePath = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/009humanAnnotation/sampleEdge1000ForHumanEval.tsv'
+	outputNodeFilePath = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/009humanAnnotation/sampleNode1000ForHumanEval.tsv'
+	utilsGraph.getSampleForHumanEvaluation(edgeFileInput, nodeFileInput, 1000, outputEdgeFilePath, outputNodeFilePath)
+	''' 
 
 
 
