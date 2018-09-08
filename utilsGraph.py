@@ -951,6 +951,7 @@ def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, nameOfEval
 	 - 1 : positive evaluation
 	 - 2 : neutral/doubtful evaluation
 	'''
+	import datetime
 	#get dataframe
 	sampleEdgeDf, sampleNodeDf = getDataFrameFromArgs(sampleEdgeFileInput, sampleNodeFileInput)
 	#print instructions
@@ -969,14 +970,13 @@ def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, nameOfEval
 		#clear the terminal before the next row
 		utilsOs.moveUpAndLeftNLines(2, slowly=False)
 	#dump the edge dataframe
-	sampleEdgeDf.to_csv(u'{0}{1}.tsv'.format(sampleEdgeFileInput.split(u'.tsv')[0], nameOfEvaluator), sep='\t', index=False)
+	sampleEdgeDf.to_csv(u'{0}{1}{2}.tsv'.format(sampleEdgeFileInput.split(u'.tsv')[0], str(datetime.datetime.now()).replace(u' ', u'+'), nameOfEvaluator), sep='\t', index=False)
 
 	#print instructions
 	utilsOs.moveUpAndLeftNLines(3, slowly=False)
 	print(u'must be: the right language... well written... not having a named entity... coherent.\n')
 	#node annotation filter evaluation
-	print(u'NODE ANNOTATION (filter evaluation):')
-	print()
+	print(u'NODE ANNOTATION (filter evaluation):\n')
 	#add the columns preparing for the data
 	sampleNodeDf[u'nodeAnnotationFilter'] = np.nan	
 	for nodeIndex, nodeRow in sampleNodeDf.iterrows():
@@ -989,10 +989,49 @@ def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, nameOfEval
 		#clear the terminal before the next row
 		utilsOs.moveUpAndLeftNLines(2, slowly=False)
 
-	#node annotation taxonomy evaluation ###########################
+	#print instructions
+	utilsOs.moveUpAndLeftNLines(2, slowly=False)
+	print(u'The colored node must have an evident connexion with the others.\n')
+	#node annotation taxonomy evaluation
+	print(u'NODE ANNOTATION (taxonomy evaluation):\n')
+	#add the columns preparing for the data
+	sampleNodeDf[u'nodeAnnotationTaxo0'] = np.nan	
+	sampleNodeDf[u'nodeAnnotationTaxo1'] = np.nan	
+	for nodeIndex, nodeRow in sampleNodeDf.iterrows():	
+		listOfNodes = (sampleNodeDf.loc[sampleNodeDf[u'Community_Lvl_0'] == nodeRow[u'Community_Lvl_0']])[u'Id'].tolist()
+		#transform the list into a string
+		stringOfNodes = u''
+		for node in listOfNodes:
+			stringOfNodes = u'{0}\t{1}'.format(stringOfNodes, str(node))
+		#coloration
+		stringOfNodes = stringOfNodes.replace(nodeRow[u'Id'], u'\033[1;31m{0}\033[0m'.format(nodeRow[u'Id']))
+		#print the node and its group	
+		print(stringOfNodes)
+		#wait for annotator input
+		annotatorInput = input(u'Annotation: ')
+		#save the annotation
+		sampleNodeDf[u'nodeAnnotationTaxo0'][nodeIndex] = int(annotatorInput)
+		#clear the terminal before the next row
+		utilsOs.moveUpAndLeftNLines(2, slowly=False)
 
+		#do the same for the lvl 1
+		listOfNodes = (sampleNodeDf.loc[sampleNodeDf[u'Community_Lvl_1'] == nodeRow[u'Community_Lvl_1']])[u'Id'].tolist()
+		#transform the list into a string
+		stringOfNodes = u''
+		for node in listOfNodes:
+			stringOfNodes = u'{0}\t{1}'.format(stringOfNodes, str(node))
+		#coloration
+		stringOfNodes = stringOfNodes.replace(nodeRow[u'Id'], u'\033[1;31m{0}\033[0m'.format(nodeRow[u'Id']))
+		#print the node and its group	
+		print(stringOfNodes)
+		#wait for annotator input
+		annotatorInput = input(u'Annotation: ')
+		#save the annotation
+		sampleNodeDf[u'nodeAnnotationTaxo0'][nodeIndex] = int(annotatorInput)
+		#clear the terminal before the next row
+		utilsOs.moveUpAndLeftNLines(2, slowly=False)
 	#dump the node dataframe
-	sampleNodeDf.to_csv(u'{0}{1}.tsv'.format(sampleNodeFileInput.split(u'.tsv')[0], nameOfEvaluator), sep='\t', index=False)
+	sampleNodeDf.to_csv(u'{0}{1}{2}.tsv'.format(sampleNodeFileInput.split(u'.tsv')[0], str(datetime.datetime.now()).replace(u' ', u'+'), nameOfEvaluator), sep='\t', index=False)
 
 
 
