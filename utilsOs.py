@@ -2,7 +2,7 @@
 #-*- coding:utf-8 -*-
 
 
-import os, json, codecs, gzip
+import os, sys, json, codecs, gzip
 
 ##################################################################################
 #FOLDERS
@@ -351,6 +351,8 @@ def moveUpAndLeftNLines(n, slowly=True):
 	'''
 	sys.stdout.write("\r") #move to the beguinning of the line
 	sys.stdout.write(u"\u001b[" + str(n) + "A") # Move up n lines
+	sys.stdout.write(" "*100) #writes a blank string
+	sys.stdout.write("\r") #move to the beguinning of the line
 	sys.stdout.flush()
 	if slowly == True:
 		import time

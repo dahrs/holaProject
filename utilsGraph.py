@@ -951,13 +951,16 @@ def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, nameOfEval
 	 - 1 : positive evaluation
 	 - 2 : neutral/doubtful evaluation
 	'''
+
+	######################problem with bash to be SOLVED
 	import datetime
 	#get dataframe
 	sampleEdgeDf, sampleNodeDf = getDataFrameFromArgs(sampleEdgeFileInput, sampleNodeFileInput)
 	#print instructions
-	print(u'3 types of annotation: 0 = negative eval, 1 = positive eval, 2 = doubtful eval\n')
+	print(u'3 types of annotation: 0 = negative eval, 1 = doubtful eval, 2 = positive eval\n')
+	
 	#edge Annotation
-	print(u'EDGE ANNOTATION:\n')
+	print(u'EDGE RELEVANCE:\n')
 	#add the columns preparing for the data
 	sampleEdgeDf[u'edgeAnnotation'] = np.nan	
 	for edgeIndex, edgeRow in sampleEdgeDf.iterrows():
@@ -965,8 +968,12 @@ def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, nameOfEval
 		print(u'{0} >>>> {1}'.format(edgeRow[u'Source'], edgeRow[u'Target']))
 		#wait for annotator input
 		annotatorInput = input(u'Annotation: ')
+		#make sure the annotation is right
+		while int(annotatorInput) not in [0,1,2]:
+			utilsOs.moveUpAndLeftNLines(1, slowly=False)
+			annotatorInput = input(u'Repeat annotation: ')
 		#save the annotation
-		sampleEdgeDf[u'edgeAnnotation'][edgeIndex] = int(annotatorInput)
+		sampleEdgeDf[u'edgeAnnotation', edgeIndex] = int(annotatorInput)-1
 		#clear the terminal before the next row
 		utilsOs.moveUpAndLeftNLines(2, slowly=False)
 	#dump the edge dataframe
@@ -976,7 +983,7 @@ def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, nameOfEval
 	utilsOs.moveUpAndLeftNLines(3, slowly=False)
 	print(u'must be: the right language... well written... not having a named entity... coherent.\n')
 	#node annotation filter evaluation
-	print(u'NODE ANNOTATION (filter evaluation):\n')
+	print(u'NODE FILTER EVALUATION):\n')
 	#add the columns preparing for the data
 	sampleNodeDf[u'nodeAnnotationFilter'] = np.nan	
 	for nodeIndex, nodeRow in sampleNodeDf.iterrows():
@@ -984,16 +991,20 @@ def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, nameOfEval
 		print(nodeRow[u'Label'])
 		#wait for annotator input
 		annotatorInput = input(u'Annotation: ')
+		#make sure the annotation is right
+		while int(annotatorInput) not in [0,1,2]:
+			utilsOs.moveUpAndLeftNLines(1, slowly=False)
+			annotatorInput = input(u'Repeat annotation: ')
 		#save the annotation
 		sampleNodeDf[u'nodeAnnotationFilter'][nodeIndex] = int(annotatorInput)
 		#clear the terminal before the next row
 		utilsOs.moveUpAndLeftNLines(2, slowly=False)
-
+	
 	#print instructions
 	utilsOs.moveUpAndLeftNLines(2, slowly=False)
 	print(u'The colored node must have an evident connexion with the others.\n')
 	#node annotation taxonomy evaluation
-	print(u'NODE ANNOTATION (taxonomy evaluation):\n')
+	print(u'NODE TAXONOMY EVALUATION:\n')
 	#add the columns preparing for the data
 	sampleNodeDf[u'nodeAnnotationTaxo0'] = np.nan	
 	sampleNodeDf[u'nodeAnnotationTaxo1'] = np.nan	
@@ -1009,6 +1020,10 @@ def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, nameOfEval
 		print(stringOfNodes)
 		#wait for annotator input
 		annotatorInput = input(u'Annotation: ')
+		#make sure the annotation is right
+		while int(annotatorInput) not in [0,1,2]:
+			utilsOs.moveUpAndLeftNLines(1, slowly=False)
+			annotatorInput = input(u'Repeat annotation: ')
 		#save the annotation
 		sampleNodeDf[u'nodeAnnotationTaxo0'][nodeIndex] = int(annotatorInput)
 		#clear the terminal before the next row
