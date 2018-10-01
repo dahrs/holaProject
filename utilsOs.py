@@ -200,15 +200,17 @@ def dumpRawLines(listOfRawLines, filePath, addNewline=True, rewrite=True):
 	return
 
 
-def dumpDictToJsonFile(aDict, pathOutputFile='./dump.json'):
+def dumpDictToJsonFile(aDict, pathOutputFile='./dump.json', overwrite=False):
 	'''
 	save dict content in json file
 	'''
 	import json
-	#to avoid overwriting the name may change
-	pathOutputFile = safeFilePath(pathOutputFile)
+	if overwrite == False:
+		#to avoid overwriting the name may change
+		pathOutputFile = safeFilePath(pathOutputFile)
 	#dumping
 	with codecs.open(pathOutputFile, u'wb', encoding=u'utf8') as dictFile:
+		dictFile.write('')
 		json.dump(aDict, dictFile)
 	return 
 

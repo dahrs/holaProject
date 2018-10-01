@@ -98,14 +98,17 @@ if __name__ == '__main__':
 	pathOutputToEdgeListFile = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeight.tsv'
 	pathOutputToNodeListFile = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListType.tsv'
 	dataFormater.linkedInJobSkillEdgeAndNodeList(pathInputSample, pathOutputToEdgeListFile, pathOutputToNodeListFile, lowercaseItAll=True)
-	
-
+	''' 
+	''' ''' 
 	#from all english FR candidates
 	pathInputSample = u'/u/kessler/LBJ/data/2016-09-15/fr/anglophone/candidats.json'
 	pathOutputToEdgeListFile = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/edgeListWeight.tsv'
 	pathOutputToNodeListFile = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListType.tsv'
 	dataFormater.linkedInJobSkillEdgeAndNodeList(pathInputSample, pathOutputToEdgeListFile, pathOutputToNodeListFile, lowercaseItAll=True)
-	''' 
+	######TO BE UNCOMMENTED####################################
+
+
+	
 
 	##################################################################################
 	#CALLING FUNCT FROM utilsGraph.py TO CLEAN THE GRAPH FILES
@@ -162,38 +165,42 @@ if __name__ == '__main__':
 	#CALLING FUNCT FROM utilsGraph.py TO TRIM THE GRAPH FILES
 	##################################################################################
 	#structure cleaning or trimming
-	'''	
+	'''	'''
 	#from the 100 000 sample
 	edgeFilePathInput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeightCleaned.tsv'
 	nodeFilePathInput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListCleanedModularized.tsv'
 	edgeFilePathOutput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/edgeListWeightCleanedTrimmed.tsv'
 	nodeFilePathOutput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListCleanedModularizedTrimmed.tsv'
 	
-	utilsGraph.ontologyStructureCleaning(edgeFilePathInput, nodeFilePathInput, edgeFilePathOutput, nodeFilePathOutput)
-	''' 
+	corefDictPath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/corefDict.json'
+
+	utilsGraph.ontologyStructureCleaning(edgeFilePathInput, nodeFilePathInput, corefDictPath, edgeFilePathOutput, nodeFilePathOutput)
+	
 		
-	'''
+	''' '''
 	#from all english FR candidates
 	edgeFilePathInput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/edgeListWeightCleaned.tsv'
 	nodeFilePathInput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListCleanedModularized.tsv'
 	edgeFilePathOutput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/edgeListWeightCleanedTrimmed.tsv'
 	nodeFilePathOutput = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListCleanedModularizedTrimmed.tsv'
 	
-	utilsGraph.ontologyStructureCleaning(edgeFilePathInput, nodeFilePathInput, edgeFilePathOutput, nodeFilePathOutput)
-	''' 
+	corefDictPath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/corefDict.json'
+
+	utilsGraph.ontologyStructureCleaning(edgeFilePathInput, nodeFilePathInput, corefDictPath, edgeFilePathOutput, nodeFilePathOutput)
+	
 
 
 	##################################################################################
 	#CALLING FUNCT FROM utilsGraph.py TO INFER THE COMMUNITIES NAMES
 	##################################################################################
-	'''
+	''' '''
 	#from the 100 000 sample
 	nodeFile = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListCleanedModularizedTrimmed.tsv'
 	outputNodeFile = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/nodeListCleanedModularizedTrimmedInfered.tsv'
 	
 	utilsGraph.getCommunityNameInferences(nodeFile, outputNodeFile)
-	''' 
-	'''
+	
+	''' '''
 	#from all english FR candidates
 	nodeFile = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListCleanedModularizedTrimmed.tsv'
 	outputNodeFile = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListCleanedModularizedTrimmedInfered.tsv'
@@ -201,7 +208,7 @@ if __name__ == '__main__':
 
 	#pretty print a table of the inference and a sample of the job titles
 	utilsGraph.printCommunityInferenceHeaders(outputNodeFile)
-	''' 
+	 
 
 	
 	##################################################################################

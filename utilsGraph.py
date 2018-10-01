@@ -45,11 +45,18 @@ def edgeListTemp(pathInput, pathTempFile, lowercaseItAll=False):
 		- jobNode(source)
 		- skillNode(target)
 	It's only a temporary file because we still need to erase doubles, 
-	to make the weight (count coreference of skills) and count how 
-	many times the job titles appeared
+	to make the weight (count coreference of skills) 
+
+	also count all coreferences and dump the resulting dict in a json file so the info 
+	can be accessed later
 	'''
-	#we open a temp file
+	#open a temp file
 	outputTempFile = utilsOs.createEmptyFile(pathTempFile) #don't specify that the headerLine is 'Source \t Target'
+	#make and dump a json dict that keeps track of all types of coreferences (edge coref, node coref, skill, jobtitle, profile, etc.)
+	corefDict = {u'edge':{}, 
+				u'node':{
+					u'jobtitle':{}, 
+					u'skill':{}}}
 
 	with open(pathInput) as jsonFile:
 		#we read the original json file line by line
@@ -70,25 +77,36 @@ def edgeListTemp(pathInput, pathTempFile, lowercaseItAll=False):
 								if lowercaseItAll != False:
 									skill = skill.lower()
 								outputTempFile.write(u'{0}\t{1}\n'.format(jobTitle, skill))
-								#outputTxt.write(u'{0}\t{1}\n'.format(jobTitle, skill))
+								#count skill coreference
+								corefDict[u'node'][u'skill'][u'{0}__t'.format(skill)] = corefDict[u'node'][u'skill'].get(u'{0}__t'.format(skill), 0) + 1
+								#count edge coreference
+								edge = u'{0}__s\t{1}__t'.format(jobtitle, skill)
+								corefDict[u'edge'][edge] = corefDict[u'edge'].get(edge, 0) + 1
+						#count jobtitle coreference
+						corefDict[u'node'][u'jobtitle'][u'{0}__s'.format(jobtitle)] = corefDict[u'node'][u'jobtitle'].get(u'{0}__s'.format(jobtitle), 0) + 1
 			jsonData = jsonFile.readline()
 	#closing the file	
 	outputTempFile.close()
+	#dumping the coreference dictionnary
+	pathCorefDict = u'/'.join(pathInput.split(u'/')[:-1]+[u'corefDict.json'])
+	utilsOs.dumpDictToJsonFile(corefDict, pathOutputFile=pathCorefDict, overwrite=True)
+	return pathCorefDict
 
 
-def edgeListDump(pathTempFile, pathOutput):
+def edgeListDump(pathTempFile, pathOutput, pathCorefDict):
 	'''
 	opens the temp file containing the extracted linkedin data and makes an edge list of (columns):
 		- jobNode(source)
 		- skillNode(target)	
-		- weight(coreference) 
-		- nbOfTimesJobTitleAppeared
+		- weight(skill coreference)
 	
 	[in a further function we might want to add keywords (non stop-words most common tokens for each jobtitle)]
 	'''
 	skillCorefDict = {}
+
 	jobTitleCorefDict = {}
 	lastJobTitle = None
+
 	lineSet = set()
 
 	#open the output file
@@ -100,29 +118,20 @@ def edgeListDump(pathTempFile, pathOutput):
 		while dataLine:
 			dataList = dataLine.replace(u'\n', u'').split(u'\t')
 			if len(dataList) > 1:
-				#count the skills coref
-				skillCorefDict[dataList[1]] = skillCorefDict.get(dataList[1], 0) + 1
-				#count the repetitions of job titles
-				if dataList[0] != lastJobTitle:
-					jobTitleCorefDict[dataList[0]] = jobTitleCorefDict.get(dataList[0], 0) + 1
-					lastJobTitle = dataList[0]
-				#we add the line to the set
-				lineSet.add(dataLine)
+				#get the skills coref
+				corefDict = utilsOs.openJsonFileAsDict(pathCorefDict)
+				skillCoref = corefDict[u'node'][u'skill'][u'{0}__t'.format(dataList[1])]
+				#write the edge list with weight (skill weight)
+				outputTxt.write(u'{0}__s\t{1}__t\t{2}\n'.format(dataList[0], dataList[1], skillCoref))
 			#get to the next line
 			dataLine = tempData.readline()
-	#we browse the data a second time to dump it
-	for dataLine in lineSet:
-		dataList = dataLine.replace(u'\n', u'').split(u'\t')
-		#we write 2 possible edge weights: skill coreference & skill coreference*jobtitle coreference
-		outputTxt.write(u'{0}__s\t{1}__t\t{2}\t{3}\n'.format(dataList[0], dataList[1], skillCorefDict[dataList[1]], skillCorefDict[dataList[1]]*jobTitleCorefDict[dataList[0]]))
-
 	#closing the file	
 	outputTxt.close()
 
 
 def nodeListIdType(pathEdgeListFile, pathNodeFileOutput):
 	'''
-	opens the temp file containing the extracted linkedin data and makes a node list of (columns):
+	opens the edge file containing the extracted linkedin data and makes a node list of (columns):
 		- id(same as label)
 		- label(jobTitle / skill node)	
 		- type(source or target; 2 for source 1 for target) #the job title is always the source, the skill is always the target
@@ -149,6 +158,7 @@ def nodeListIdType(pathEdgeListFile, pathNodeFileOutput):
 		outputTxt.write(u'{0}\t{1}\t{2}\n'.format(jobTitle, jobTitle.replace(u'__s', u''), 2)) #id's '_s' means 'source', 2 means 'source'
 	for skill in skillSet:
 		outputTxt.write(u'{0}\t{1}\t{2}\n'.format(skill, skill.replace(u'__t', u''), 1)) #id's '_t' means 'target', 1 means 'target'
+	outputTxt.close()
 
 
 ##################################################################################
@@ -703,7 +713,37 @@ def remove1DegreeNodes(dictA, dictB):
 	return dictA, dictB
 
 
-def ontologyStructureCleaning(edgeFileInput, nodeFileInput, edgeFilePathOutput=None, nodeFilePathOutput=None):
+def dropNodesAppearingNOrLessTimes(nodeDf, edgeDf, n, corefDictPath):
+	'''
+	drop all nodes appearing n times or less than n times in the ontology
+	using the coreference dict of the whole ontology
+	'''
+	nLessAppearingJobTitlesNodes = set()	
+	nLessAppearingSkillNodes = set()
+
+	corefDict = utilsOs.openJsonFileAsDict(corefDictPath)
+	#get jobTitle set of n appearing nodes
+	for jobTitle, jobTitleCoref in corefDict[u'node'][u'jobtitle'].items():
+		if jobTitleCoref <= n:
+			nLessAppearingJobTitlesNodes.add(jobTitle)
+	#get skill set of n appearing nodes
+	for skill, skillCoref in corefDict[u'node'][u'skill'].items():
+		if skillCoref <= n:
+			nLessAppearingSkillNodes.add(skill)
+	#get df of nodes appearing more than n times
+	nodeDf = nodeDf.loc[~nodeDf[u'Id'].isin( list(nLessAppearingJobTitlesNodes) + list(nLessAppearingSkillNodes) )]
+	#drop nodes that are not present in the ontology at all	
+	nodeDf = nodeDf.loc[nodeDf[u'Id'].isin(list(corefDict[u'node'][u'jobtitle'].keys()) + list(corefDict[u'node'][u'skill'].keys()) )]
+	#get df of edges whose nodes appear more than n times
+	edgeDf = edgeDf.loc[~edgeDf[u'Source'].isin(nLessAppearingJobTitlesNodes) ]
+	edgeDf = edgeDf.loc[~edgeDf[u'Target'].isin(nLessAppearingSkillNodes) ]
+	#drop edges of nodes that are not present in the ontology at all	
+	edgeDf = edgeDf.loc[edgeDf[u'Target'].isin(corefDict[u'node'][u'skill'].keys())]
+	edgeDf = edgeDf.loc[edgeDf[u'Source'].isin(corefDict[u'node'][u'jobtitle'].keys())]
+	return nodeDf, edgeDf
+
+
+def ontologyStructureCleaning(edgeFileInput, nodeFileInput, corefDictPath, edgeFilePathOutput=None, nodeFilePathOutput=None):
 	'''
 	given an ontology (edge list and node list), removes:
 		- all communities corresponding to less than 1% of the node
@@ -711,7 +751,8 @@ def ontologyStructureCleaning(edgeFileInput, nodeFileInput, edgeFilePathOutput=N
 			- all skills connected to only 1 job title
 			- all job titles with only one skill
 			- all job titles (and skills) whose skills are not connected to any other job titles
-	'edgeFileInput' and 'nodeFileInput' can either be a string/unicode path to the a tsv file or a pandas dataframe
+			- all job titles and skills appearing 2 times or less in the whole ontology
+	'edgeFileInput' and 'nodeFileInput' can either be a string/unicode path to a tsv file or a pandas dataframe
 	'''
 	#get dataframes
 	edgeDf, nodeDf = getDataFrameFromArgs(edgeFileInput, nodeFileInput)
@@ -737,6 +778,8 @@ def ontologyStructureCleaning(edgeFileInput, nodeFileInput, edgeFilePathOutput=N
 	#save the trimmed data frames as the new data frames
 	nodeDf = nodeDf.loc[nodeDf[u'Id'].isin( list(jToSkillsDict.keys())+list(sToJobsDict.keys()) )]
 	edgeDf = edgeDf.loc[edgeDf[u'Source'].isin(list(jToSkillsDict.keys())) & edgeDf[u'Target'].isin(list(sToJobsDict.keys()))]
+	#drop the rows whose nodes appear 2 times or less in the whole ontology
+	nodeDf, edgeDf = dropNodesAppearingNOrLessTimes(nodeDf, edgeDf, 2, corefDictPath)
 	#dumping the data frames
 	if edgeFilePathOutput != None:
 		edgeDf.to_csv(edgeFilePathOutput, sep='\t', index=False)
@@ -748,7 +791,7 @@ def ontologyStructureCleaning(edgeFileInput, nodeFileInput, edgeFilePathOutput=N
 
 
 ##################################################################################
-#ONTOLOGY EVALUATION METRICS
+#ONTOLOGY AUTOMATIC EVALUATION METRICS
 ##################################################################################
 
 def ontoQA(edgeFilePath, nodeFilePath, verbose=True):
@@ -1119,4 +1162,4 @@ def modifyConfigAndIndexFiles(pathToTheExportationEnvironment):
 
 sampleEdgeFileInput = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/009humanAnnotation/sampleEdge1000ForHumanEval.tsv'
 sampleNodeFileInput = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/009humanAnnotation/sampleNode1000ForHumanEval.tsv'
-humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, nameOfEvaluator='David')
+################ humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, nameOfEvaluator='David')
