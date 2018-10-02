@@ -290,13 +290,10 @@ def linkedInJobSkillEdgeAndNodeList(pathEdgeFileInput, pathEdgeFileOutput, pathN
 	pathTempFile = u'./temp.txt'
 	
 	#we populate the temp file
-	pathCorefDict = utilsGraph.edgeListTemp(pathEdgeFileInput, pathTempFile, lowercaseItAll)
-	print(pathCorefDict)
-	######TO BE UNCOMMENTED
-	'''
+	pathCorefDict = utilsGraph.edgeListTemp(pathEdgeFileInput, pathTempFile, pathEdgeFileOutput, lowercaseItAll)
 	#we populate the final output file
 	utilsGraph.edgeListDump(pathTempFile, pathEdgeFileOutput, pathCorefDict)
 	#we populate the node list (defining each node as source or target)
-	utilsGraph.nodeListIdType(pathEdgeFileOutput, pathNodeFileOutput) '''
+	utilsGraph.nodeListIdType(pathEdgeFileOutput, pathNodeFileOutput)
 	#delete the temp file
 	utilsOs.deleteTheFile(u'./', u'temp', u'txt')

@@ -25,7 +25,7 @@ def getDataFrameFromArgs(df1arg, df2arg=None):
 	else:
 		df1 = pd.read_csv(df1arg, sep=u'\t')
 	#df2
-	if df2arg == None:
+	if df2arg is None:
 		return df1
 	elif type(df2arg) != str: # or type(df2arg) != unicode:
 		df2 = df2arg
@@ -39,7 +39,7 @@ def getDataFrameFromArgs(df1arg, df2arg=None):
 ##################################################################################
 
 
-def edgeListTemp(pathInput, pathTempFile, lowercaseItAll=False):
+def edgeListTemp(pathInput, pathTempFile, pathOutput, lowercaseItAll=False):
 	'''
 	takes the linkedin data and makes a temporary file that is an edge list of (columns):
 		- jobNode(source)
@@ -88,7 +88,7 @@ def edgeListTemp(pathInput, pathTempFile, lowercaseItAll=False):
 	#closing the file	
 	outputTempFile.close()
 	#dumping the coreference dictionnary
-	pathCorefDict = u'/'.join(pathInput.split(u'/')[:-1]+[u'corefDict.json'])
+	pathCorefDict = u'/'.join(pathOutput.split(u'/')[:-1]+[u'corefDict.json'])
 	utilsOs.dumpDictToJsonFile(corefDict, pathOutputFile=pathCorefDict, overwrite=True)
 	return pathCorefDict
 
@@ -688,7 +688,7 @@ def ontologyContentCleaning(languageOfOntology, edgeFilePathInput, nodeFilePathI
 	return cleanedEdgeDf, cleanedNodeDf
 
 
-def remove1DegreeNodes(dictA, dictB):
+def remove1DegreeNodes(dictA, dictB, aOldSize=0, bOldSize=0):
 	'''
 	recursive function to remove all the less core-connected 
 	nodes from the dicts representing the graph
@@ -708,8 +708,8 @@ def remove1DegreeNodes(dictA, dictB):
 					del dictB[bElem]
 			#delete the dict entry from the job to skills dict
 			del dictA[aKey]
-	if len(dictA) != aOriginalSize and len(dictB) != bOriginalSize:
-		dictB, dictA = remove1DegreeNodes(dictB, dictA)
+	if len(dictA) != aOriginalSize and aOriginalSize != aOldSize and len(dictB) != bOriginalSize and bOriginalSize != bOldSize:
+		dictB, dictA = remove1DegreeNodes(dictB, dictA, bOriginalSize, aOriginalSize)
 	return dictA, dictB
 
 
@@ -740,7 +740,38 @@ def dropNodesAppearingNOrLessTimes(nodeDf, edgeDf, n, corefDictPath):
 	#drop edges of nodes that are not present in the ontology at all	
 	edgeDf = edgeDf.loc[edgeDf[u'Target'].isin(corefDict[u'node'][u'skill'].keys())]
 	edgeDf = edgeDf.loc[edgeDf[u'Source'].isin(corefDict[u'node'][u'jobtitle'].keys())]
-	return nodeDf, edgeDf
+	return edgeDf, nodeDf 
+
+
+def dropNodesOnlyConnectedToNodesAppearingNOrLessTimes(nodeDf, edgeDf, n, corefDictPath):
+	'''
+	drop all nodes appearing n times or less than n times in the ontology
+	using the coreference dict of the whole ontology
+	'''
+	nLessAppearingJobTitlesNodes = set()	
+	nLessAppearingSkillNodes = set()
+	nodesToDrop = set()
+
+	corefDict = utilsOs.openJsonFileAsDict(corefDictPath)
+	#get jobTitle set of n (or less) appearing nodes
+	for jobTitle, jobTitleCoref in corefDict[u'node'][u'jobtitle'].items():
+		if jobTitleCoref <= n:
+			nLessAppearingJobTitlesNodes.add(jobTitle)
+	#get skill set of n (or less) appearing nodes
+	for skill, skillCoref in corefDict[u'node'][u'skill'].items():
+		if skillCoref <= n:
+			nLessAppearingSkillNodes.add(skill)
+	#look for all jobtitles appearing n or less times if ALL their skills also appear n or less times, then we drop them
+	for jobTitle in nLessAppearingJobTitlesNodes: 
+		#we look at the edges of the candidate jobtitle to be dropped
+		candidateEdgeDf = edgeDf.loc[ edgeDf[u'Source'] == jobTitle ] ##########################3
+		candidateSkills = set(candidateEdgeDf[u'Target'].tolist())
+		#if all the skills of the candidate jobtitle appear n times or less, then we drop the jobtitle and the skills
+		if len(candidateSkills) != 0 and len(candidateSkills.intersection(nLessAppearingSkillNodes)) == len(candidateSkills):
+			edgeDf = edgeDf.drop(candidateEdgeDf.index)
+	#drop nodes of already dropped edges	
+	edgeDf, nodeDf = utilsGraph.wasteNodeElimination(edgeDf, nodeDf)
+	return edgeDf, nodeDf
 
 
 def ontologyStructureCleaning(edgeFileInput, nodeFileInput, corefDictPath, edgeFilePathOutput=None, nodeFilePathOutput=None):
@@ -751,7 +782,7 @@ def ontologyStructureCleaning(edgeFileInput, nodeFileInput, corefDictPath, edgeF
 			- all skills connected to only 1 job title
 			- all job titles with only one skill
 			- all job titles (and skills) whose skills are not connected to any other job titles
-			- all job titles and skills appearing 2 times or less in the whole ontology
+			- all job titles and skills appearing n times or less in the whole ontology
 	'edgeFileInput' and 'nodeFileInput' can either be a string/unicode path to a tsv file or a pandas dataframe
 	'''
 	#get dataframes
@@ -773,13 +804,13 @@ def ontologyStructureCleaning(edgeFileInput, nodeFileInput, corefDictPath, edgeF
 	for edgeIndex, edgeRow in edgeDf.iterrows():
 		jToSkillsDict[edgeRow[u'Source']] = list(set(jToSkillsDict.get(edgeRow[u'Source'], list(emptyList)) + [edgeRow[u'Target']]))
 		sToJobsDict[edgeRow[u'Target']] = list(set(sToJobsDict.get(edgeRow[u'Target'], list(emptyList)) + [edgeRow[u'Source']]))
+	#drop the rows whose nodes appear n times or less in the whole ontology
+	edgeDf, nodeDf = dropNodesOnlyConnectedToNodesAppearingNOrLessTimes(nodeDf, edgeDf, 1, corefDictPath)
 	#remove independent and isolated skills and job titles
 	jToSkillsDict, sToJobsDict = remove1DegreeNodes(jToSkillsDict, sToJobsDict)
 	#save the trimmed data frames as the new data frames
 	nodeDf = nodeDf.loc[nodeDf[u'Id'].isin( list(jToSkillsDict.keys())+list(sToJobsDict.keys()) )]
 	edgeDf = edgeDf.loc[edgeDf[u'Source'].isin(list(jToSkillsDict.keys())) & edgeDf[u'Target'].isin(list(sToJobsDict.keys()))]
-	#drop the rows whose nodes appear 2 times or less in the whole ontology
-	nodeDf, edgeDf = dropNodesAppearingNOrLessTimes(nodeDf, edgeDf, 2, corefDictPath)
 	#dumping the data frames
 	if edgeFilePathOutput != None:
 		edgeDf.to_csv(edgeFilePathOutput, sep='\t', index=False)

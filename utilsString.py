@@ -24,6 +24,70 @@ def toUtf8(stringOrUnicode):
 		return stringOrUnicode
 
 
+def fromHexToDec(hexCode):
+	'''
+	transforms a unicode hexadecimal code given in string form
+	into a decimal code as an integral
+	'''
+	if type(hexCode) is int:
+		return hexCode
+	#delete all possible unicode affixes given to the hex code
+	hexCode = hexCode.lower().replace(u' ', u'')
+	for affix in [u'u+', u'u', u'u-']:
+		hexCode = hexCode.replace(affix, u'')
+	return int(hexCode, 16)
+
+
+def unicodeCodeScore(string, countSpaces=False, unicodeBlocksList=[(0, 128)]):
+	'''
+	Returns a normalized score of the proportion of
+	characters between the integer-code block-frontiers 
+	over all the characters of the word.
+	(the element of the list can be a tuple or a list if 
+	we want a start and an end frontier, or it can be a
+	string or an integral if we want to add only one 
+	specific code)
+	e.g., 
+		for an ascii frontier(U+0-U+128) == unicodeBlocksList=[(0, 128)] :
+			'touche' = 1.0 
+			'touché' = 0.833333			
+			'ключ' = 0.0
+		for an ascii frontier (U+0-U+128) + the french loan-character 'é' (U+00E9) == unicodeBlocksList=[(0, 128), [201] :
+			'touche' = 1.0 
+			'touché' = 1.0			
+			'ключ' = 0.0
+		for an cyrilic frontier (U+0400-U+04FF) == unicodeBlocksList=[[1024, 1279], ('0500', '052F'), 1280] :
+			'touche' = 0.0 
+			'touché' = 0.0
+			'ключ' = 1.0
+	'''
+	totalOfAcceptedChars = 0
+	acceptedUnicodeCodes = set()
+	#delete spaces if needed
+	if countSpaces == False:
+		string = string.replace(u' ', u'')
+	#make a list of accepted unicode codes 
+	for frontierElement in unicodeBlocksList:
+		#if the element is a lone code
+		if type(frontierElement) is int or type(frontierElement) is str :
+			#if the code is in hexadecimal, transform to decimal code and add it to the accepted set
+			acceptedUnicodeCodes.add(fromHexToDec(frontierElement))
+		#if the element is only one code
+		elif len(frontierElement) == 1:	
+			#if the code is in hexadecimal, transform to decimal code and add it to the accepted set
+			acceptedUnicodeCodes.add(fromHexToDec(frontierElement[0]))
+		#if the element is 2 codes (start and end)
+		elif len(frontierElement) == 2:	
+			#if the frontiers are in hexadecimal, transform to decimal code and union the set of all intervals between the start and end frontier
+			acceptedUnicodeCodes = acceptedUnicodeCodes.union(set(range(fromHexToDec(frontierElement[0]), fromHexToDec(frontierElement[1])+1)))
+		#if it's bigger than 2, it's not taken into account
+	#verify if the characters of the strings are in the accepted set
+	for char in string:
+		if ord(char) in acceptedUnicodeCodes:
+			totalOfAcceptedChars += 1
+	return float(totalOfAcceptedChars) / float(len(string))
+
+
 ##################################################################################
 #REGEX
 ##################################################################################
@@ -161,12 +225,13 @@ def englishOrFrench(string):
 	#if the string is only made of numbers and non alphabetic characters we return 'unknown'
 	if re.fullmatch(re.compile(r'([0-9]|-|\+|\!|\#|\$|%|&|\'|\*|\?|\.|\^|_|`|\||~|:|@)+'), string) != None:
 		return u'unknown'
-	#if the string has 
-	#presence of french specific diacriticals
-	diacriticals = [u'à', u'â', u'è', u'é', u'ê', u'ë', u'ù', u'û', u'ô', u'î', u'ï', u'ç', u'œ']
-	for char in diacriticals:
-		if char in string:
-			return u'fr'
+	#if more than 30% of the string characters is outside the ascii block and the french block, then it must be another language and we return 'unknown'
+	if unicodeCodeScore(string, countSpaces=False, unicodeBlocksList=[[0, 255]]) < 0.7:
+		return u'unknown'
+	#if the string has a presence of unicode characters of french specific diacritics
+	diacritics = [192, 194, [199, 203], 206, 207, 212, 140, 217, 219, 220, 159, 224, 226, [231, 235], 238, 239, 244, 156, 250, 251, 252, 255]
+	if unicodeCodeScore(string, countSpaces=False, unicodeBlocksList=diacritics) > 0.0:
+		return u'fr'
 	#use langdetect except if it returns something else than "en" or "fr", if the string is too short it's easy to mistake the string for another language
 	try:
 		lang = detect(string)
