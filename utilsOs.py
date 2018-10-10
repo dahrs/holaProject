@@ -351,10 +351,13 @@ def moveUpAndLeftNLines(n, slowly=True):
 	so text can be rewritten over (dynamically)
 	(use of carriage return \r and ansi code for up \u001b[#intNumber#A )
 	'''
-	sys.stdout.write("\r") #move to the beguinning of the line
-	sys.stdout.write(u"\u001b[" + str(n) + "A") # Move up n lines
+	sys.stdout.write("\r") #move to the beguinning of the line	
 	sys.stdout.write(" "*100) #writes a blank string
-	sys.stdout.write("\r") #move to the beguinning of the line
+	sys.stdout.write("\r") #move to the beguinning of the line	
+	for e in range(n):
+		sys.stdout.write(u"\u001b[" + str(1) + "A") # Move up n lines
+		sys.stdout.write(" "*100) #writes a blank string
+		sys.stdout.write("\r") #move to the beguinning of the line
 	sys.stdout.flush()
 	if slowly == True:
 		import time

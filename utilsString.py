@@ -214,6 +214,31 @@ def tokenizeAndExtractSpecificPos(string, listOfPosToReturn, caseSensitive=True,
 	return tokens
 
 
+def indicator2in1(string):
+	'''
+	detects if a string has '/', '\', ',', ':', ';', ' - ' and '&' between words
+	if it does it returns true, otherwise it returns false
+	'''
+	#we make the regex of 2 in 1 substrings
+	twoInOneSubstring = re.compile(r'([\w]{2,}([\s|\t]?)&([\s|\t]?)[\w]{2,})|([\w]+([\s|\t]?)(\\|\/|,|:|;)([\s|\t]?)[\w]+)|([\w]+[\s]+-[\s]*[\w]+)|([\w]+-[\s]+[\w]+)')
+	#if we find at least one substring indicating a 2 in 1, return true
+	if len(re.findall(twoInOneSubstring, string)) != 0:
+		return True
+	return False
+
+
+def indicator3SameLetters(string):
+	'''
+	detects if the string contains a substring composed ot the same 3 characters or more (type of characters limited)
+	'''
+	#we make the regex of 3 same letters
+	threeCharRepetition = re.compile(r'(a){3,}|(b){3,}|(c){3,}|(d){3,}|(e){3,}|(f){3,}|(g){3,}|(h){3,}|(i){3,}|(j){3,}|(k){3,}|(l){3,}|(m){3,}|(n){3,}|(o){3,}|(p){3,}|(q){3,}|(r){3,}|(s){3,}|(t){3,}|(u){3,}|(v){3,}|(w){3,}|(x){3,}|(y){3,}|(z){3,}|(,){3,}|(\.){3,}|(:){3,}|(;){3,}|(\?){3,}|(!){3,}|(\'){3,}|(\"){3,}|(-){3,}|(\+){3,}|(\*){3,}|(\/){3,}|(\\){3,}|(\$){3,}|(%){3,}|(&){3,}|(@){3,}|(#){3,}|(<){3,}|(>){3,}|(\|){3,}')
+	#if we find at least one substring indicating a 2 in 1, return true
+	if len(re.findall(threeCharRepetition, string.lower())) != 0:
+		return True
+	return False
+
+
 ##################################################################################
 #LANGUAGE
 ##################################################################################
@@ -232,6 +257,8 @@ def englishOrFrench(string):
 	diacritics = [192, 194, [199, 203], 206, 207, 212, 140, 217, 219, 220, 159, 224, 226, [231, 235], 238, 239, 244, 156, 250, 251, 252, 255]
 	if unicodeCodeScore(string, countSpaces=False, unicodeBlocksList=diacritics) > 0.0:
 		return u'fr'
+	#putting the string in lowercase improves the language detection functions
+	string = string.lower()
 	#use langdetect except if it returns something else than "en" or "fr", if the string is too short it's easy to mistake the string for another language
 	try:
 		lang = detect(string)

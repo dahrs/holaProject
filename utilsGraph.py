@@ -626,25 +626,13 @@ def wasteNodeElimination(edgeFileInput, nodeFileInput):
 	nodesToEliminate = []
 	edgeDf, nodeDf = getDataFrameFromArgs(edgeFileInput, nodeFileInput)
 	#browse edges if its nodes are not in the nodes list, prepare the lists of elements to drop
-	for edgeIndex, edgeRow in (edgeDf.iterrows()):
-		edgeSourceId = edgeRow[u'Source']
-		edgeTargetId = edgeRow[u'Target']
-		sourceNodesOfEdgesDf = nodeDf.loc[nodeDf[u'Id'] == edgeSourceId]
-		targetNodesOfEdgesDf = nodeDf.loc[nodeDf[u'Id'] == edgeTargetId]
-		if len(sourceNodesOfEdgesDf) == 0 or len(targetNodesOfEdgesDf) == 0:
-			edgesToEliminate.append(edgeIndex)
+	edgesToEliminate = edgeDf.loc[ ~edgeDf[u'Source'].isin(nodeDf[u'Id']) | ~edgeDf[u'Target'].isin(nodeDf[u'Id'])]
 	#drop the edges
-	for edgeIndex in reversed(edgesToEliminate):
-		edgeDf = edgeDf.drop(edgeDf.index[edgeIndex])
-	#browse nodes if not in edges, prepare the lists of elements to drop
-	for nodeIndex, nodeRow in list(nodeDf.iterrows()):
-		nodeId = nodeRow['Id']
-		edgesOfNodesDf = edgeDf.loc[edgeDf[u'Source'] == nodeId] & edgeDf.loc[edgeDf[u'Target'] == nodeId]
-		if len(edgesOfNodesDf) == 0:
-			nodesToEliminate.append(nodeIndex)
+	edgeDf = edgeDf.drop(edgesToEliminate.index)
+	#browse nodes if not in edges, prepare the lists of elements to drop	
+	nodesToEliminate = nodeDf.loc[ ~nodeDf[u'Id'].isin(edgeDf[u'Source']) & ~nodeDf[u'Id'].isin(edgeDf[u'Target'])]
 	#drop the nodes
-	for nodeIndex in reversed(nodesToEliminate):
-		nodeDf = nodeDf.drop(nodeDf.index[nodeIndex])
+	nodeDf = nodeDf.drop(nodesToEliminate.index)
 	#dumping the data frames to the same file where we opened them
 	if type(edgeFileInput) == str and type(nodeFileInput) == str:
 		edgeDf.to_csv(edgeFileInput, sep='\t', index=False)
@@ -658,9 +646,11 @@ def ontologyContentCleaning(languageOfOntology, edgeFilePathInput, nodeFilePathI
 	given an ontology (edge list and node list), removes:
 		- all nodes detected to be in a different language that the language of the ontology
 		- all over-specific nodes (having more than 5 tokens) 
+		- all 2in1 nodes (all nodes having '/', '\', ',', ':', ';', ' - ' and '&' between words)
+		- all nodes having a repetition of the 3 same characters or more (e.g., 'aaa', 'xxxxxx')
 	'''
 	import langdetect
-	rightLanguageNodes = []
+	theRightNodes = set()
 	edgeDf = pd.read_csv(edgeFilePathInput, sep=u'\t')
 	nodeDf = pd.read_csv(nodeFilePathInput, sep=u'\t')
 
@@ -670,15 +660,18 @@ def ontologyContentCleaning(languageOfOntology, edgeFilePathInput, nodeFilePathI
 		try:
 			if utilsString.englishOrFrench(label) == languageOfOntology:
 				#if the node is not over-specific
-				if len(utilsString.naiveRegexTokenizer(label)) <= 5:
-					#add the node id to the list of correct nodes
-					rightLanguageNodes.append(nodeRow['Id'])
+				if len(utilsString.naiveRegexTokenizer(label)) <= 3:
+					#if we detect no 2in1 jobTitles/skills
+					if utilsString.indicator2in1(label) == False:
+						#if we don't detect the 3 same characters in a row
+						if utilsString.indicator3SameLetters(label) == False:
+							#add the node id to the list of correct nodes
+							theRightNodes.add(nodeRow['Id'])
 		except TypeError:
-			#print(label, type(label))
 			pass
 	#get the dataframes containing the right nodes
-	cleanedEdgeDf = edgeDf.loc[edgeDf[u'Source'].isin(rightLanguageNodes) & edgeDf[u'Target'].isin(rightLanguageNodes)]
-	cleanedNodeDf = nodeDf.loc[nodeDf[u'Id'].isin(rightLanguageNodes)]
+	cleanedEdgeDf = edgeDf.loc[edgeDf[u'Source'].isin(theRightNodes) & edgeDf[u'Target'].isin(theRightNodes)]
+	cleanedNodeDf = nodeDf.loc[nodeDf[u'Id'].isin(theRightNodes)]
 	#dumping the data frames
 	if edgeFilePathOutput != None:
 		cleanedEdgeDf.to_csv(edgeFilePathOutput, sep='\t', index=False)
@@ -713,7 +706,7 @@ def remove1DegreeNodes(dictA, dictB, aOldSize=0, bOldSize=0):
 	return dictA, dictB
 
 
-def dropNodesAppearingNOrLessTimes(nodeDf, edgeDf, n, corefDictPath):
+def dropNodesAppearingNOrLessTimes(edgeDf, nodeDf, n, corefDictPath):
 	'''
 	drop all nodes appearing n times or less than n times in the ontology
 	using the coreference dict of the whole ontology
@@ -743,7 +736,7 @@ def dropNodesAppearingNOrLessTimes(nodeDf, edgeDf, n, corefDictPath):
 	return edgeDf, nodeDf 
 
 
-def dropNodesOnlyConnectedToNodesAppearingNOrLessTimes(nodeDf, edgeDf, n, corefDictPath):
+def dropNodesOnlyConnectedToNodesAppearingNOrLessTimes(edgeDf, nodeDf, n, corefDictPath):
 	'''
 	drop all nodes appearing n times or less than n times in the ontology
 	using the coreference dict of the whole ontology
@@ -770,7 +763,7 @@ def dropNodesOnlyConnectedToNodesAppearingNOrLessTimes(nodeDf, edgeDf, n, corefD
 		if len(candidateSkills) != 0 and len(candidateSkills.intersection(nLessAppearingSkillNodes)) == len(candidateSkills):
 			edgeDf = edgeDf.drop(candidateEdgeDf.index)
 	#drop nodes of already dropped edges	
-	edgeDf, nodeDf = utilsGraph.wasteNodeElimination(edgeDf, nodeDf)
+	edgeDf, nodeDf = wasteNodeElimination(edgeDf, nodeDf)
 	return edgeDf, nodeDf
 
 
@@ -805,7 +798,7 @@ def ontologyStructureCleaning(edgeFileInput, nodeFileInput, corefDictPath, edgeF
 		jToSkillsDict[edgeRow[u'Source']] = list(set(jToSkillsDict.get(edgeRow[u'Source'], list(emptyList)) + [edgeRow[u'Target']]))
 		sToJobsDict[edgeRow[u'Target']] = list(set(sToJobsDict.get(edgeRow[u'Target'], list(emptyList)) + [edgeRow[u'Source']]))
 	#drop the rows whose nodes appear n times or less in the whole ontology
-	edgeDf, nodeDf = dropNodesOnlyConnectedToNodesAppearingNOrLessTimes(nodeDf, edgeDf, 1, corefDictPath)
+	edgeDf, nodeDf = dropNodesOnlyConnectedToNodesAppearingNOrLessTimes(edgeDf, nodeDf, 1, corefDictPath)
 	#remove independent and isolated skills and job titles
 	jToSkillsDict, sToJobsDict = remove1DegreeNodes(jToSkillsDict, sToJobsDict)
 	#save the trimmed data frames as the new data frames
@@ -993,7 +986,7 @@ def printCommunityInferenceHeaders(nodeFileInput):
 def getSampleForHumanEvaluation(edgeFileInput, nodeFileInput, lengthOfSample=1000, outputEdgeFilePath=None, outputNodeFilePath=None):
 	'''
 	given a finished ontology in the form of an edge list and a node list
-	return and dump a random sample in the form of an extended edge list
+	return and dump a randomly chosen sample
 	'''
 	setOfIndexes = set()
 	#get dataframes
@@ -1013,7 +1006,104 @@ def getSampleForHumanEvaluation(edgeFileInput, nodeFileInput, lengthOfSample=100
 	return sampleEdgeDf, sampleNodeDf.sort_values(by=['Community_Lvl_1'])
 
 
-def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, nameOfEvaluator='David'):
+def getPrintableStringOfRightNodes(sourceOrTargetNodes, sampleNodeDf, nodeRow, corefDict, typeOfNode, communityColumnName=u'Community_Lvl_0'):
+	'''
+	transforms the node data frame ionto a printable version 
+	of limited number, ordered by score and with the analyzed 
+	node in the middle and in red
+	'''
+	listOfNodesOrderedByValue = []
+	#transform the dataframe into a list of the elements we care about
+	listOfNodes = (sourceOrTargetNodes.loc[sampleNodeDf[communityColumnName] == nodeRow[communityColumnName]])[u'Id'].tolist()
+	#drop the analyzed node and get only the nlargest with greater weight
+	orderedByValue = sorted(corefDict[u'node'][typeOfNode].items(), key=lambda kv: kv[1], reverse=True)
+	for node in orderedByValue:
+		if node[0] in listOfNodes:
+			listOfNodesOrderedByValue.append(node[0])
+	#remove the node we are interested in analyzing because we want to add it later in the middle of the list, in red
+	try:
+		listOfNodesOrderedByValue.remove(nodeRow[u'Id'])
+	except ValueError:
+		pass
+	#if the list is too long, we only take the 5 best scored nodes
+	if len(listOfNodesOrderedByValue) > 5:
+		listOfNodesOrderedByValue = listOfNodesOrderedByValue[:5]
+	#add the node we are analyzing in the middle of the list
+	listOfNodesOrderedByValue = listOfNodesOrderedByValue[:int(len(listOfNodesOrderedByValue)/2.0)] + [nodeRow[u'Id']] + listOfNodesOrderedByValue[int(len(listOfNodesOrderedByValue)/2.0):]
+		
+	#transform the list into a string
+	stringOfNodes = u''
+	for indexNode, node in enumerate(listOfNodesOrderedByValue):
+		#one string per line
+		stringOfNodes = u'{0}\t{1}\n'.format(stringOfNodes, str(node)) if (indexNode+1) != len(listOfNodes) else u'{0}\t{1}'.format(stringOfNodes, str(node))
+	#coloration
+	stringOfNodes = stringOfNodes.replace(nodeRow[u'Id'], u'\033[1;31m{0}\033[0m'.format(nodeRow[u'Id']))
+	return stringOfNodes
+
+
+def savingAnnotatorInput(sampleNodeDf, nodeIndex):
+	'''
+	waits for the annotation and adds it to the data frame
+	'''
+	#wait for annotator input
+	annotatorInput = input(u'Annotation: ')
+	#make sure the annotation is right
+	while True:
+		try:
+			if int(annotatorInput) in [0,1,2]:
+				break
+			else:
+				utilsOs.moveUpAndLeftNLines(1, slowly=False)
+				annotatorInput = input(u'Repeat annotation: ')
+		except ValueError:
+			utilsOs.moveUpAndLeftNLines(1, slowly=False)
+			annotatorInput = input(u'Repeat annotation: ')
+	#save the annotation
+	sampleNodeDf[u'nodeAnnotationTaxo0'][nodeIndex] = int(annotatorInput)
+	#clear the terminal before the next row
+	utilsOs.moveUpAndLeftNLines(8, slowly=False)
+	return sampleNodeDf
+
+
+def taxonomyEval(sampleNodeDf, corefDict):
+	'''
+	makes a taxonomy evaluation by asking the evaluator if
+	the red element of the list seems to belong to the same
+	domain as the others
+	'''
+	#avoid the SettingWithCopy Warning in pandas (https://stackoverflow.com/questions/20625582/how-to-deal-with-settingwithcopywarning-in-pandas) 
+	pd.options.mode.chained_assignment = None
+	#add the columns preparing for the data
+	sampleNodeDf[u'nodeAnnotationTaxo0'] = np.nan	
+	sampleNodeDf[u'nodeAnnotationTaxo1'] = np.nan	
+	for nodeIndex, nodeRow in sampleNodeDf.iterrows():
+		#look what substring does the row label contains,  __s or __t (source or target)
+		if nodeRow.str.contains(u'__s', regex=False)[u'Id'] == True:
+			substring = u'__s'
+			typeOfNode = u'jobtitle'
+		else: 
+			substring = u'__t'
+			typeOfNode = u'skill'
+		#get only rows of the same kind of substring 
+		sourceOrTargetNodes = sampleNodeDf[sampleNodeDf[u'Id'].str.contains(substring, regex=False) == True]
+
+		#level 0 taxonomy
+		stringOfNodes = getPrintableStringOfRightNodes(sourceOrTargetNodes, sampleNodeDf, nodeRow, corefDict, typeOfNode, communityColumnName=u'Community_Lvl_0')
+		#print the node and its group	
+		print(stringOfNodes)
+		#get annotator input
+		sampleNodeDf = savingAnnotatorInput(sampleNodeDf, nodeIndex)
+		
+		#level 1 taxonomy
+		stringOfNodes = getPrintableStringOfRightNodes(sourceOrTargetNodes, sampleNodeDf, nodeRow, corefDict, typeOfNode, communityColumnName=u'Community_Lvl_1')
+		#print the node and its group	
+		print(stringOfNodes)
+		#get annotator input
+		sampleNodeDf = savingAnnotatorInput(sampleNodeDf, nodeIndex)
+	return sampleNodeDf
+
+
+def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, corefDictPath, nameOfEvaluator='David'):
 	'''
 	terminal interface for human annotation
 	3 types of annotation:
@@ -1025,15 +1115,22 @@ def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, nameOfEval
 	 - 1 : positive evaluation
 	 - 2 : neutral/doubtful evaluation
 	'''
-
-	######################problem with bash to be SOLVED
 	import datetime
+	#get coreference dictionary
+	corefDict = utilsOs.openJsonFileAsDict(corefDictPath)
 	#get dataframe
 	sampleEdgeDf, sampleNodeDf = getDataFrameFromArgs(sampleEdgeFileInput, sampleNodeFileInput)
 	#print instructions
 	print(u'3 types of annotation: 0 = negative eval, 1 = doubtful eval, 2 = positive eval\n')
+	#print instructions
+	print(u'The colored node must have an evident connexion with the others.\n')
+	#node annotation taxonomy evaluation 
+	print(u'NODE TAXONOMY EVALUATION:\n')
+	sampleNodeDf = taxonomyEval(sampleNodeDf, corefDict)
+
+	#edge/node Annotation ###################################################
+	#################################make another taxonomy/edge eval based on a 2choice turing test by taking one triplet from the onto and 1 from esco (either the jobtitle is in esco, or the skill is in esco, or just a triplet from the same infered domain)
 	
-	#edge Annotation
 	print(u'EDGE RELEVANCE:\n')
 	#add the columns preparing for the data
 	sampleEdgeDf[u'edgeAnnotation'] = np.nan	
@@ -1053,6 +1150,7 @@ def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, nameOfEval
 	#dump the edge dataframe
 	sampleEdgeDf.to_csv(u'{0}{1}{2}.tsv'.format(sampleEdgeFileInput.split(u'.tsv')[0], str(datetime.datetime.now()).replace(u' ', u'+'), nameOfEvaluator), sep='\t', index=False)
 
+	#node annotation filter evaluation ###################################################
 	#print instructions
 	utilsOs.moveUpAndLeftNLines(3, slowly=False)
 	print(u'must be: the right language... well written... not having a named entity... coherent.\n')
@@ -1074,51 +1172,6 @@ def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, nameOfEval
 		#clear the terminal before the next row
 		utilsOs.moveUpAndLeftNLines(2, slowly=False)
 	
-	#print instructions
-	utilsOs.moveUpAndLeftNLines(2, slowly=False)
-	print(u'The colored node must have an evident connexion with the others.\n')
-	#node annotation taxonomy evaluation
-	print(u'NODE TAXONOMY EVALUATION:\n')
-	#add the columns preparing for the data
-	sampleNodeDf[u'nodeAnnotationTaxo0'] = np.nan	
-	sampleNodeDf[u'nodeAnnotationTaxo1'] = np.nan	
-	for nodeIndex, nodeRow in sampleNodeDf.iterrows():	
-		listOfNodes = (sampleNodeDf.loc[sampleNodeDf[u'Community_Lvl_0'] == nodeRow[u'Community_Lvl_0']])[u'Id'].tolist()
-		#transform the list into a string
-		stringOfNodes = u''
-		for node in listOfNodes:
-			stringOfNodes = u'{0}\t{1}'.format(stringOfNodes, str(node))
-		#coloration
-		stringOfNodes = stringOfNodes.replace(nodeRow[u'Id'], u'\033[1;31m{0}\033[0m'.format(nodeRow[u'Id']))
-		#print the node and its group	
-		print(stringOfNodes)
-		#wait for annotator input
-		annotatorInput = input(u'Annotation: ')
-		#make sure the annotation is right
-		while int(annotatorInput) not in [0,1,2]:
-			utilsOs.moveUpAndLeftNLines(1, slowly=False)
-			annotatorInput = input(u'Repeat annotation: ')
-		#save the annotation
-		sampleNodeDf[u'nodeAnnotationTaxo0'][nodeIndex] = int(annotatorInput)
-		#clear the terminal before the next row
-		utilsOs.moveUpAndLeftNLines(2, slowly=False)
-
-		#do the same for the lvl 1
-		listOfNodes = (sampleNodeDf.loc[sampleNodeDf[u'Community_Lvl_1'] == nodeRow[u'Community_Lvl_1']])[u'Id'].tolist()
-		#transform the list into a string
-		stringOfNodes = u''
-		for node in listOfNodes:
-			stringOfNodes = u'{0}\t{1}'.format(stringOfNodes, str(node))
-		#coloration
-		stringOfNodes = stringOfNodes.replace(nodeRow[u'Id'], u'\033[1;31m{0}\033[0m'.format(nodeRow[u'Id']))
-		#print the node and its group	
-		print(stringOfNodes)
-		#wait for annotator input
-		annotatorInput = input(u'Annotation: ')
-		#save the annotation
-		sampleNodeDf[u'nodeAnnotationTaxo0'][nodeIndex] = int(annotatorInput)
-		#clear the terminal before the next row
-		utilsOs.moveUpAndLeftNLines(2, slowly=False)
 	#dump the node dataframe
 	sampleNodeDf.to_csv(u'{0}{1}{2}.tsv'.format(sampleNodeFileInput.split(u'.tsv')[0], str(datetime.datetime.now()).replace(u' ', u'+'), nameOfEvaluator), sep='\t', index=False)
 
@@ -1137,6 +1190,9 @@ def modifyConfigAndIndexFiles(pathToTheExportationEnvironment):
 	file so they show the graph the way intended
 	'''
 	from shutil import copyfile
+
+	if pathToTheExportationEnvironment[-1] != u'/':
+		pathToTheExportationEnvironment = u'{0}/'.format(pathToTheExportationEnvironment)
 	#copying config.json file
 	configContent = {"type": "network","version": "1.0","data": "data.json","logo": {"file": "","link": "","text": ""},"text": {"more": "","intro": "","title": ""},"legend": {"edgeLabel": "","colorLabel": "","nodeLabel": ""},"features": {"search": True,"groupSelectorAttribute": True,"hoverBehavior": "default"},"informationPanel": {"groupByEdgeDirection": True,"imageAttribute": False},"sigma": {"drawingProperties": {"defaultEdgeType": "curve","defaultHoverLabelBGColor": "#002147","defaultLabelBGColor": "#ddd","activeFontStyle": "bold","defaultLabelColor": "#000","labelThreshold": 999,"defaultLabelHoverColor": "#fff","fontStyle": "bold","hoverFontStyle": "bold","defaultLabelSize": 14},"graphProperties": {"maxEdgeSize": 2,"minEdgeSize": 2,"minNodeSize": 0.25,"maxNodeSize": 2.5},"mouseProperties": {"maxRatio": 20,"minRatio": 0.75}}}
 	pathConfigJson = u'{0}config.json'.format(pathToTheExportationEnvironment)
@@ -1145,9 +1201,9 @@ def modifyConfigAndIndexFiles(pathToTheExportationEnvironment):
 	utilsOs.dumpDictToJsonFile(configContent, pathConfigJson) 
 	#copying the logo images
 	srcRali = u'./testsGephi/gephiExportSigma0/rali.png'
-	dstRali = u'./testsGephi/gephiExportSigma0/springLayoutAndModularityPythonLouvain/wholeCleanedModularizedTrimmedInfered/network/images/rali.png'
+	dstRali = u'{0}images/rali.png'.format(pathToTheExportationEnvironment)
 	srcUdem = u'./testsGephi/gephiExportSigma0/udem.png'
-	dstUdem = u'./testsGephi/gephiExportSigma0/springLayoutAndModularityPythonLouvain/wholeCleanedModularizedTrimmedInfered/network/images/udem.png'
+	dstUdem = u'{0}images/udem.png'.format(pathToTheExportationEnvironment)
 	copyfile(srcRali, dstRali)
 	copyfile(srcUdem, dstUdem)
 	#getting the color information from the data file
@@ -1190,7 +1246,3 @@ def modifyConfigAndIndexFiles(pathToTheExportationEnvironment):
 
 
 
-
-sampleEdgeFileInput = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/009humanAnnotation/sampleEdge1000ForHumanEval.tsv'
-sampleNodeFileInput = '/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/009humanAnnotation/sampleNode1000ForHumanEval.tsv'
-################ humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, nameOfEvaluator='David')
