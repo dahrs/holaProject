@@ -281,6 +281,12 @@ def deleteFileContent(pathToFile, openAnAppendFile=False):
 	return openedFile
 
 
+def countLines(openedFile):
+	for i, l in enumerate(openedFile):
+		pass
+	return i + 1
+
+
 ##################################################################################
 #NAMES AND PATHS
 ##################################################################################

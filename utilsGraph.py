@@ -60,8 +60,7 @@ def edgeListTemp(pathInput, pathTempFile, pathOutput, lowercaseItAll=False):
 
 	with open(pathInput) as jsonFile:
 		#we read the original json file line by line
-		jsonData = jsonFile.readline()
-		while jsonData:
+		for jsonData in tqdm(jsonFile, total=utilsOs.countLines(jsonFile)) :
 			jsonDict = json.loads(jsonData)
 			#if there are experiences
 			if u'experiences' in jsonDict:
@@ -84,7 +83,6 @@ def edgeListTemp(pathInput, pathTempFile, pathOutput, lowercaseItAll=False):
 								corefDict[u'edge'][edge] = corefDict[u'edge'].get(edge, 0) + 1
 						#count jobtitle coreference
 						corefDict[u'node'][u'jobtitle'][u'{0}__s'.format(jobtitle)] = corefDict[u'node'][u'jobtitle'].get(u'{0}__s'.format(jobtitle), 0) + 1
-			jsonData = jsonFile.readline()
 	#closing the file	
 	outputTempFile.close()
 	#dumping the coreference dictionnary
@@ -114,8 +112,7 @@ def edgeListDump(pathTempFile, pathOutput, pathCorefDict):
 	#we browse the data once to get the weight and nbOfTimesJobTitleAppeared data
 
 	with codecs.open(pathTempFile, u'r', encoding=u'utf8') as tempData:
-		dataLine = tempData.readline()
-		while dataLine:
+		for dataLine in tqdm(tempData, total=utilsOs.countLines(tempData)) :
 			dataList = dataLine.replace(u'\n', u'').split(u'\t')
 			if len(dataList) > 1:
 				#get the skills coref
@@ -123,8 +120,6 @@ def edgeListDump(pathTempFile, pathOutput, pathCorefDict):
 				skillCoref = corefDict[u'node'][u'skill'][u'{0}__t'.format(dataList[1])]
 				#write the edge list with weight (skill weight)
 				outputTxt.write(u'{0}__s\t{1}__t\t{2}\n'.format(dataList[0], dataList[1], skillCoref))
-			#get to the next line
-			dataLine = tempData.readline()
 	#closing the file	
 	outputTxt.close()
 
@@ -143,16 +138,13 @@ def nodeListIdType(pathEdgeListFile, pathNodeFileOutput):
 	outputTxt = utilsOs.createEmptyFile(pathNodeFileOutput, headerLine=u'Id\tLabel\tNodeType')
 
 	with codecs.open(pathEdgeListFile, u'r', encoding=u'utf8') as edgeData:
-		dataLine = edgeData.readline()
-		while dataLine:
+		for dataLine in tqdm(edgeData, total=utilsOs.countLines(edgeData)) :
 			dataList = dataLine.replace(u'\n', u'').split(u'\t')
 			if len(dataList) > 1:
 				#add to the jobTitle (source) set
 				jobTitleSet.add(dataList[0])
 				#add to the skill (target) set
 				skillSet.add(dataList[1])
-			#get to the next line
-			dataLine = edgeData.readline()
 	#browse the data sets to dump them
 	for jobTitle in jobTitleSet:
 		outputTxt.write(u'{0}\t{1}\t{2}\n'.format(jobTitle, jobTitle.replace(u'__s', u''), 2)) #id's '_s' means 'source', 2 means 'source'
@@ -1006,7 +998,7 @@ def getSampleForHumanEvaluation(edgeFileInput, nodeFileInput, lengthOfSample=100
 	return sampleEdgeDf, sampleNodeDf.sort_values(by=['Community_Lvl_1'])
 
 
-def getPrintableStringOfRightNodes(sourceOrTargetNodes, sampleNodeDf, nodeRow, corefDict, typeOfNode, communityColumnName=u'Community_Lvl_0'):
+def getPrintableStringOfGoodNodes(sourceOrTargetNodes, sampleNodeDf, nodeRow, corefDict, typeOfNode, communityColumnName=u'Community_Lvl_0'):
 	'''
 	transforms the node data frame ionto a printable version 
 	of limited number, ordered by score and with the analyzed 
@@ -1041,7 +1033,7 @@ def getPrintableStringOfRightNodes(sourceOrTargetNodes, sampleNodeDf, nodeRow, c
 	return stringOfNodes
 
 
-def savingAnnotatorInput(sampleNodeDf, nodeIndex):
+def savingAnnotatorInput(sampleDf, nodeColumnName, objIndex, nbOfLines):
 	'''
 	waits for the annotation and adds it to the data frame
 	'''
@@ -1059,10 +1051,10 @@ def savingAnnotatorInput(sampleNodeDf, nodeIndex):
 			utilsOs.moveUpAndLeftNLines(1, slowly=False)
 			annotatorInput = input(u'Repeat annotation: ')
 	#save the annotation
-	sampleNodeDf[u'nodeAnnotationTaxo0'][nodeIndex] = int(annotatorInput)
+	sampleDf[nodeColumnName][objIndex] = int(annotatorInput)
 	#clear the terminal before the next row
-	utilsOs.moveUpAndLeftNLines(8, slowly=False)
-	return sampleNodeDf
+	utilsOs.moveUpAndLeftNLines(nbOfLines, slowly=False)
+	return sampleDf
 
 
 def taxonomyEval(sampleNodeDf, corefDict):
@@ -1087,21 +1079,79 @@ def taxonomyEval(sampleNodeDf, corefDict):
 		#get only rows of the same kind of substring 
 		sourceOrTargetNodes = sampleNodeDf[sampleNodeDf[u'Id'].str.contains(substring, regex=False) == True]
 
+		#print the name of the infered community level 0
+		print(u'Infered name of the community: {0}'.format(nodeRow[u'Infered_Community_Name_Lvl_0']))
+		print(u'---------------------------------------------------------------------------------')
 		#level 0 taxonomy
-		stringOfNodes = getPrintableStringOfRightNodes(sourceOrTargetNodes, sampleNodeDf, nodeRow, corefDict, typeOfNode, communityColumnName=u'Community_Lvl_0')
+		stringOfNodes = getPrintableStringOfGoodNodes(sourceOrTargetNodes, sampleNodeDf, nodeRow, corefDict, typeOfNode, communityColumnName=u'Community_Lvl_0')
 		#print the node and its group	
 		print(stringOfNodes)
 		#get annotator input
-		sampleNodeDf = savingAnnotatorInput(sampleNodeDf, nodeIndex)
+		sampleNodeDf = savingAnnotatorInput(sampleDf, u'nodeAnnotationTaxo0', nodeIndex, nbOfLines=8) 
 		
+		#print the name of the infered community level 1
+		print(u'Infered name of the community: {0}'.format(nodeRow[u'Infered_Community_Name_Lvl_1']))
+		print(u'---------------------------------------------------------------------------------')
 		#level 1 taxonomy
-		stringOfNodes = getPrintableStringOfRightNodes(sourceOrTargetNodes, sampleNodeDf, nodeRow, corefDict, typeOfNode, communityColumnName=u'Community_Lvl_1')
+		stringOfNodes = getPrintableStringOfGoodNodes(sourceOrTargetNodes, sampleNodeDf, nodeRow, corefDict, typeOfNode, communityColumnName=u'Community_Lvl_1')
 		#print the node and its group	
 		print(stringOfNodes)
 		#get annotator input
-		sampleNodeDf = savingAnnotatorInput(sampleNodeDf, nodeIndex)
+		sampleNodeDf = savingAnnotatorInput(sampleDf, u'nodeAnnotationTaxo1', nodeIndex, nbOfLines=8) 
 	return sampleNodeDf
 
+
+def getPrintableStringOfGoodEdges(sampleEdgeDf, edgeRow, corefDict):
+	'''
+	transforms the edge data frame into a printable version 
+	of limited number, ordered by score and with the analyzed 
+	edge in the middle and in red
+	'''
+	sameSourceEdgesDict = {}
+	#reduce the dataframe into a list containing all edges with the same source as the analyzed edge row
+	for edgeKey, edgeVal in corefDict[u'edge'].items():
+		#only take the edges having the same source as the edge row but not exactly identical to the edge row
+		if edgeKey.split(u'\t')[0] == edgeRow[u'Source'].lower() and edgeKey.split(u'\t')[1] != edgeRow[u'Target'].lower():
+			#asign the coreference value + the inverse length of the edge target
+			#so when we sort it, the first elements of the list will be the more referenced and the shortest edges (we postulate that the shortest target required less processing/thought from the profile user and could be more pertinents)
+			sameSourceEdgesDict[edgeKey.replace(u'\n', u'').replace(u'\t', u' >>>>> ')] = edgeVal + 1.0-float(len(edgeKey.split(u'\t')[1])/float(1000))
+	
+	#sort the edges by coreference and length of the target
+	listOfEdgesOrderedByValue = sorted(sameSourceEdgesDict.keys(), reverse=True, key=lambda k : sameSourceEdgesDict[k])
+	#if the list is too long, we only take the 5 best scored edges
+	if len(listOfEdgesOrderedByValue) > 4:
+		listOfEdgesOrderedByValue = listOfEdgesOrderedByValue[:4]
+	#add the edge we are analyzing in the middle of the list 
+	currentEdge = u'{0} >>>>> {1}'.format(edgeRow[u'Source'].lower(), edgeRow[u'Target'].lower())
+	listOfEdgesOrderedByValue = listOfEdgesOrderedByValue[:int(len(listOfEdgesOrderedByValue)/2.0)] + [currentEdge] + listOfEdgesOrderedByValue[int(len(listOfEdgesOrderedByValue)/2.0):]
+		
+	#transform the list into a string
+	stringOfEdges = u''
+	for indexEdge, edge in enumerate(listOfEdgesOrderedByValue):
+		#one string per line
+		stringOfEdges = u'{0}\t{1}\n'.format(stringOfEdges, str(edge)) if (indexEdge+1) != len(listOfEdgesOrderedByValue) else u'{0}\t{1}'.format(stringOfEdges, str(edge))
+	#coloration
+	stringOfEdges = stringOfEdges.replace(currentEdge, u'\033[1;31m{0}\033[0m'.format(currentEdge))
+	return stringOfEdges
+
+
+def edgeRelevanceEval(sampleEdgeDf, corefDict):
+	'''
+	makes an evaluation of the edge relevance by asking
+	the evaluator if the red edge on the list seems as 
+	relevant as the other edges
+	'''
+	#add the columns preparing for the data
+	sampleEdgeDf[u'edgeRelevanceAnnotation'] = np.nan
+	for edgeIndex, edgeRow in sampleEdgeDf.iterrows():
+		#print the edge
+		stringOfEdges = getPrintableStringOfGoodEdges(sampleEdgeDf, edgeRow, corefDict)
+		print(stringOfEdges)
+		#get annotator input
+		savingAnnotatorInput(sampleEdgeDf, u'edgeRelevanceAnnotation', edgeIndex, nbOfLines=7)
+	#dump the edge dataframe
+	sampleEdgeDf.to_csv(u'{0}{1}{2}.tsv'.format(sampleEdgeFileInput.split(u'.tsv')[0], str(datetime.datetime.now()).replace(u' ', u'+'), nameOfEvaluator), sep='\t', index=False)
+	
 
 def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, corefDictPath, nameOfEvaluator='David'):
 	'''
@@ -1126,30 +1176,19 @@ def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, corefDictP
 	print(u'The colored node must have an evident connexion with the others.\n')
 	#node annotation taxonomy evaluation 
 	print(u'NODE TAXONOMY EVALUATION:\n')
-	sampleNodeDf = taxonomyEval(sampleNodeDf, corefDict)
+	#####sampleNodeDf = taxonomyEval(sampleNodeDf, corefDict)
 
+	#clear the instructions in the terminal before the next kind of annotation
+	utilsOs.moveUpAndLeftNLines(2, slowly=False)
+	#print instructions
+	print(u'The colored edge must be as relevant as the others.\n')
+	#node annotation taxonomy evaluation 
+	print(u'EDGE RELEVANCE EVALUATION:\n')
+	sampleEdgeDf = edgeRelevanceEval(sampleEdgeDf, corefDict)
+	'''
 	#edge/node Annotation ###################################################
 	#################################make another taxonomy/edge eval based on a 2choice turing test by taking one triplet from the onto and 1 from esco (either the jobtitle is in esco, or the skill is in esco, or just a triplet from the same infered domain)
 	
-	print(u'EDGE RELEVANCE:\n')
-	#add the columns preparing for the data
-	sampleEdgeDf[u'edgeAnnotation'] = np.nan	
-	for edgeIndex, edgeRow in sampleEdgeDf.iterrows():
-		#print the edge
-		print(u'{0} >>>> {1}'.format(edgeRow[u'Source'], edgeRow[u'Target']))
-		#wait for annotator input
-		annotatorInput = input(u'Annotation: ')
-		#make sure the annotation is right
-		while int(annotatorInput) not in [0,1,2]:
-			utilsOs.moveUpAndLeftNLines(1, slowly=False)
-			annotatorInput = input(u'Repeat annotation: ')
-		#save the annotation
-		sampleEdgeDf[u'edgeAnnotation', edgeIndex] = int(annotatorInput)-1
-		#clear the terminal before the next row
-		utilsOs.moveUpAndLeftNLines(2, slowly=False)
-	#dump the edge dataframe
-	sampleEdgeDf.to_csv(u'{0}{1}{2}.tsv'.format(sampleEdgeFileInput.split(u'.tsv')[0], str(datetime.datetime.now()).replace(u' ', u'+'), nameOfEvaluator), sep='\t', index=False)
-
 	#node annotation filter evaluation ###################################################
 	#print instructions
 	utilsOs.moveUpAndLeftNLines(3, slowly=False)
@@ -1174,9 +1213,7 @@ def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, corefDictP
 	
 	#dump the node dataframe
 	sampleNodeDf.to_csv(u'{0}{1}{2}.tsv'.format(sampleNodeFileInput.split(u'.tsv')[0], str(datetime.datetime.now()).replace(u' ', u'+'), nameOfEvaluator), sep='\t', index=False)
-
-
-
+	'''
 	
 
 ##################################################################################

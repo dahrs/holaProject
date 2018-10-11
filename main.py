@@ -99,13 +99,6 @@ def mainActionsOnto(listOfActions, sampleData=False,
 	#CALLING FUNCT FROM dataFormater.py TO MAKE THE LINKEDIN JOB-SKILL EDGE LIST AND NODE LIST
 	##################################################################################
 	if 2 in listOfActions:
-		#from the 100 000 sample with doubles
-		pathInputSample = u'{0}sample100milFunctions/sample.json'.format(environment)
-		pathOutputToEdgeListFile = u'{0}sample100milFunctions/edgeListWeight.tsv'.format(environment)
-		pathOutputToNodeListFile = u'{0}sample100milFunctions/nodeListType.tsv'.format(environment)
-		dataFormater.linkedInJobSkillEdgeAndNodeList(pathInputSample, pathOutputToEdgeListFile, pathOutputToNodeListFile, lowercaseItAll=True)
-		
-		#from all english FR candidates
 		pathInputSample = linkedInData
 		pathOutputToEdgeListFile = u'{0}edgeListWeight.tsv'.format(environment)
 		pathOutputToNodeListFile = u'{0}nodeListType.tsv'.format(environment)
