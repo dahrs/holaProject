@@ -1033,16 +1033,18 @@ def getPrintableStringOfGoodNodes(sourceOrTargetNodes, sampleNodeDf, nodeRow, co
 	return stringOfNodes
 
 
-def savingAnnotatorInput(sampleDf, nodeColumnName, objIndex, nbOfLines):
+def savingAnnotatorInput(sampleDf, nodeColumnName, objIndex, nbOfLines, listOfAnswers=[0,1,2]):
 	'''
 	waits for the annotation and adds it to the data frame
 	'''
+	#avoid the SettingWithCopy Warning in pandas (https://stackoverflow.com/questions/20625582/how-to-deal-with-settingwithcopywarning-in-pandas) 
+	pd.options.mode.chained_assignment = None
 	#wait for annotator input
 	annotatorInput = input(u'Annotation: ')
 	#make sure the annotation is right
 	while True:
 		try:
-			if int(annotatorInput) in [0,1,2]:
+			if int(annotatorInput) in listOfAnswers:
 				break
 			else:
 				utilsOs.moveUpAndLeftNLines(1, slowly=False)
@@ -1050,8 +1052,12 @@ def savingAnnotatorInput(sampleDf, nodeColumnName, objIndex, nbOfLines):
 		except ValueError:
 			utilsOs.moveUpAndLeftNLines(1, slowly=False)
 			annotatorInput = input(u'Repeat annotation: ')
-	#save the annotation
-	sampleDf[nodeColumnName][objIndex] = int(annotatorInput)
+	#save the annotation as int if we only have 3 possibilities: -1, 0, 1
+	if len(listOfAnswers) == 3:
+		sampleDf[nodeColumnName][objIndex] = int(annotatorInput) - 1
+	#save as a float if we have more than 3 options
+	else:		
+		sampleDf[nodeColumnName][objIndex] = (float(annotatorInput)/10.0) - 1
 	#clear the terminal before the next row
 	utilsOs.moveUpAndLeftNLines(nbOfLines, slowly=False)
 	return sampleDf
@@ -1080,24 +1086,28 @@ def taxonomyEval(sampleNodeDf, corefDict):
 		sourceOrTargetNodes = sampleNodeDf[sampleNodeDf[u'Id'].str.contains(substring, regex=False) == True]
 
 		#print the name of the infered community level 0
-		print(u'Infered name of the community: {0}'.format(nodeRow[u'Infered_Community_Name_Lvl_0']))
+		print(u'Infered name of the community Lvl-0: {0}'.format(nodeRow[u'Infered_Community_Name_Lvl_0']))
 		print(u'---------------------------------------------------------------------------------')
 		#level 0 taxonomy
 		stringOfNodes = getPrintableStringOfGoodNodes(sourceOrTargetNodes, sampleNodeDf, nodeRow, corefDict, typeOfNode, communityColumnName=u'Community_Lvl_0')
 		#print the node and its group	
 		print(stringOfNodes)
 		#get annotator input
-		sampleNodeDf = savingAnnotatorInput(sampleDf, u'nodeAnnotationTaxo0', nodeIndex, nbOfLines=8) 
+		sampleNodeDf = savingAnnotatorInput(sampleNodeDf, u'nodeAnnotationTaxo0', nodeIndex, nbOfLines=len(stringOfNodes.split(u'\n'))+3) 
 		
 		#print the name of the infered community level 1
-		print(u'Infered name of the community: {0}'.format(nodeRow[u'Infered_Community_Name_Lvl_1']))
+		print(u'Infered name of the community Lvl-1: {0}'.format(nodeRow[u'Infered_Community_Name_Lvl_1']))
 		print(u'---------------------------------------------------------------------------------')
 		#level 1 taxonomy
 		stringOfNodes = getPrintableStringOfGoodNodes(sourceOrTargetNodes, sampleNodeDf, nodeRow, corefDict, typeOfNode, communityColumnName=u'Community_Lvl_1')
+		#reorder the nodes in case the level1 sleection is exactly like the one from level 0
+		listOfNodes = stringOfNodes.split(u'\n')
+		listOfNodes.remove(u'')
+		stringOfNodes = u'\n'.join(list(set(listOfNodes))+[u''])
 		#print the node and its group	
 		print(stringOfNodes)
 		#get annotator input
-		sampleNodeDf = savingAnnotatorInput(sampleDf, u'nodeAnnotationTaxo1', nodeIndex, nbOfLines=8) 
+		sampleNodeDf = savingAnnotatorInput(sampleNodeDf, u'nodeAnnotationTaxo1', nodeIndex, nbOfLines=len(stringOfNodes.split(u'\n'))+3, listOfAnswers=[0,1,2]) 
 	return sampleNodeDf
 
 
@@ -1148,10 +1158,26 @@ def edgeRelevanceEval(sampleEdgeDf, corefDict):
 		stringOfEdges = getPrintableStringOfGoodEdges(sampleEdgeDf, edgeRow, corefDict)
 		print(stringOfEdges)
 		#get annotator input
-		savingAnnotatorInput(sampleEdgeDf, u'edgeRelevanceAnnotation', edgeIndex, nbOfLines=7)
+		savingAnnotatorInput(sampleEdgeDf, u'edgeRelevanceAnnotation', edgeIndex, nbOfLines=len(stringOfEdges.split(u'\n'))+1, listOfAnswers=[0,1,2])
 	#dump the edge dataframe
 	sampleEdgeDf.to_csv(u'{0}{1}{2}.tsv'.format(sampleEdgeFileInput.split(u'.tsv')[0], str(datetime.datetime.now()).replace(u' ', u'+'), nameOfEvaluator), sep='\t', index=False)
 	
+
+def filterEval(sampleNodeDf, corefDict):
+	'''
+	makes an evaluation of the quality of the filter by
+	asking the annotator to specify if there is an error
+	in the node and what kind of error it is
+	'''
+	#add the columns preparing for the data
+	sampleNodeDf[u'nodeAnnotationFilter'] = np.nan	
+	for nodeIndex, nodeRow in sampleNodeDf.iterrows():
+		#print the node
+		print(nodeRow[u'Label'])
+		#get and save the annotator input
+		savingAnnotatorInput(sampleNodeDf, u'nodeAnnotationFilter', nodeIndex, 2, listOfAnswers=[0,1,2,3,4,5,6])
+	return sampleNodeDf
+
 
 def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, corefDictPath, nameOfEvaluator='David'):
 	'''
@@ -1161,7 +1187,7 @@ def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, corefDictP
 	 - filter evaluation (is the node in the right language? is the node well written? must not show a named entity. must be coherent.)
 	 - community/taxonomy evaluation (Sesame Street test: is this thing just like the others?)
 	3 types of annotation:
-	 - 0 : negative evaluation
+	 - 0 : negative evaluation (plus other possible answers)
 	 - 1 : positive evaluation
 	 - 2 : neutral/doubtful evaluation
 	'''
@@ -1169,50 +1195,49 @@ def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, corefDictP
 	#get coreference dictionary
 	corefDict = utilsOs.openJsonFileAsDict(corefDictPath)
 	#get dataframe
-	sampleEdgeDf, sampleNodeDf = getDataFrameFromArgs(sampleEdgeFileInput, sampleNodeFileInput)
+	######################DEL UTILSGRAPH###########################################################################################
+	sampleEdgeDf, sampleNodeDf = utilsGraph.getDataFrameFromArgs(sampleEdgeFileInput, sampleNodeFileInput)
 	#print instructions
 	print(u'3 types of annotation: 0 = negative eval, 1 = doubtful eval, 2 = positive eval\n')
 	#print instructions
 	print(u'The colored node must have an evident connexion with the others.\n')
 	#node annotation taxonomy evaluation 
 	print(u'NODE TAXONOMY EVALUATION:\n')
-	#####sampleNodeDf = taxonomyEval(sampleNodeDf, corefDict)
-
+	sampleNodeDf = taxonomyEval(sampleNodeDf, corefDict)
 	#clear the instructions in the terminal before the next kind of annotation
 	utilsOs.moveUpAndLeftNLines(2, slowly=False)
+
+	#dump the node dataframe
+	sampleNodeDf.to_csv(u'{0}{1}{2}.tsv'.format(sampleNodeFileInput.split(u'.tsv')[0], str(datetime.datetime.now()).replace(u' ', u'+'), nameOfEvaluator), sep='\t', index=False)
+	
 	#print instructions
 	print(u'The colored edge must be as relevant as the others.\n')
 	#node annotation taxonomy evaluation 
 	print(u'EDGE RELEVANCE EVALUATION:\n')
 	sampleEdgeDf = edgeRelevanceEval(sampleEdgeDf, corefDict)
-	'''
-	#edge/node Annotation ###################################################
-	#################################make another taxonomy/edge eval based on a 2choice turing test by taking one triplet from the onto and 1 from esco (either the jobtitle is in esco, or the skill is in esco, or just a triplet from the same infered domain)
+	#clear the instructions in the terminal before the next kind of annotation
+	utilsOs.moveUpAndLeftNLines(2, slowly=False)
+
+	#dump the node dataframe
+	sampleEdgeDf.to_csv(u'{0}{1}{2}.tsv'.format(sampleEdgeFileInput.split(u'.tsv')[0], str(datetime.datetime.now()).replace(u' ', u'+'), nameOfEvaluator), sep='\t', index=False)
 	
-	#node annotation filter evaluation ###################################################
+	#node annotation filter evaluation 
 	#print instructions
-	utilsOs.moveUpAndLeftNLines(3, slowly=False)
-	print(u'must be: the right language... well written... not having a named entity... coherent.\n')
+	utilsOs.moveUpAndLeftNLines(4, slowly=False)
+	print(u'7 types of annotation: \n0 = general/other negative eval, \n1 = doubtful eval, \n2 = positive eval, \n3 = negative eval - in a foreign language, \n4 = negative eval - incoherent/non-understandable, \n5 = negative eval - has a named entity, \n6 = negative eval - erreurs orth/gramm\n')
+	#print(u'must be: the right language... coherent... not having a named entity... well written.\n')
 	#node annotation filter evaluation
 	print(u'NODE FILTER EVALUATION):\n')
-	#add the columns preparing for the data
-	sampleNodeDf[u'nodeAnnotationFilter'] = np.nan	
-	for nodeIndex, nodeRow in sampleNodeDf.iterrows():
-		#print the edge
-		print(nodeRow[u'Label'])
-		#wait for annotator input
-		annotatorInput = input(u'Annotation: ')
-		#make sure the annotation is right
-		while int(annotatorInput) not in [0,1,2]:
-			utilsOs.moveUpAndLeftNLines(1, slowly=False)
-			annotatorInput = input(u'Repeat annotation: ')
-		#save the annotation
-		sampleNodeDf[u'nodeAnnotationFilter'][nodeIndex] = int(annotatorInput)
-		#clear the terminal before the next row
-		utilsOs.moveUpAndLeftNLines(2, slowly=False)
+	sampleNodeDf = filterEval(sampleNodeDf, corefDict)
+	#clear the instructions in the terminal
+	utilsOs.moveUpAndLeftNLines(11, slowly=False)
 	
 	#dump the node dataframe
 	sampleNodeDf.to_csv(u'{0}{1}{2}.tsv'.format(sampleNodeFileInput.split(u'.tsv')[0], str(datetime.datetime.now()).replace(u' ', u'+'), nameOfEvaluator), sep='\t', index=False)
+	
+	'''
+	#edge/node Annotation ###################################################
+	#################################make another taxonomy/edge eval based on a 2choice turing test by taking one triplet from the onto and 1 from esco (either the jobtitle is in esco, or the skill is in esco, or just a triplet from the same infered domain)
 	'''
 	
 
