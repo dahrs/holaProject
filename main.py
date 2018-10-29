@@ -132,7 +132,7 @@ def mainActionsOnto(listOfActions, sampleData=False,
 	##################################################################################
 	#CALLING FUNCT FROM utilsGraph.py TO TRIM THE GRAPH FILES
 	##################################################################################
-	#structure cleaning or trimming
+	#structure cleaning or trimming of isolated and hapax nodes
 	if 5 in listOfActions:
 		edgeFilePathInput = u'{0}edgeListWeightCleaned.tsv'.format(environment)
 		nodeFilePathInput = u'{0}nodeListCleanedModularized.tsv'.format(environment)
@@ -158,7 +158,7 @@ def mainActionsOnto(listOfActions, sampleData=False,
 	#CALLING FUNCT FROM utilsGraph.py TO TWEAK THE CONFIG.JSON AND INDEX.HTML GRAPH FILES
 	##################################################################################
 	if 7 in listOfActions:
-		pathToGraphExportEnvironment = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/testsGephi/gephiExportSigma0/springLayoutAndModularityPythonLouvain/wholeCleanedModularizedMoreTrimmedInfered/network/'
+		pathToGraphExportEnvironment = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/testsGephi/gephiExportSigma0/springLayoutAndModularityPythonLouvain/wholeReCleanedModularizedMoreTrimmedInfered/network/'
 		utilsGraph.modifyConfigAndIndexFiles(pathToGraphExportEnvironment)
 
 	##################################################################################
@@ -188,7 +188,7 @@ def mainActionsOnto(listOfActions, sampleData=False,
 	if 9.1 in listOfActions:
 		utilsGraph.getSampleForHumanEvaluation(edgeFileInput, nodeFileInput, 1000, outputEdgeFilePath, outputNodeFilePath)
 	#launch the evaluation interface
-	if 9.2 in listOfActions
+	if 9.2 in listOfActions:
 		utilsGraph.humanAnnotatorInterface(outputEdgeFilePath, outputNodeFilePath, corefDictPath, nameOfEvaluator='David')
 
 
@@ -198,7 +198,7 @@ testing
 """
 if __name__ == '__main__': 
 	
-	mainActionsOnto([9.2], 
+	mainActionsOnto([7], 
 		sampleData=False, 
 		linkedInData=u'/u/kessler/LBJ/data/2016-09-15/fr/anglophone/candidats.json',
 		environment=u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/')

@@ -1,11 +1,82 @@
 #!/usr/bin/python
 #-*- coding:utf-8 -*-
 
+import utilsOs
+from nltk.metrics import distance
+from tqdm import tqdm
 
 
 ##################################################################################
 #RAW DATA
 ##################################################################################
+
+def analyseNodeListStrDistance(nodeListPath, outputPath=None):
+	'''
+	analyses the nodes in the node list and returns the stats 
+	concerning the similarities between node string labels
+	'''
+	from utilsGraph import getDataFrameFromArgs
+	import multiprocessing as mp
+
+	pool = mp.Pool(processes=4) 
+	nodeSimilarsDict = {1:{}, 2:{}, 3:{}}
+	nodeSetJobTitles = set()
+	nodeSetSkills = set()
+	#put the node Labels in a set
+	with open(nodeListPath) as nodeFile:
+		nodeData = nodeFile.readline()
+		while nodeData:
+			#get the data for each row
+			nodeDataList = nodeData.split(u'\t')
+			#we make sure we are not in the header
+			if nodeDataList[0] != u'Id':
+				#save the node id/label in a set
+				if u'__s' in nodeDataList[0]:
+					nodeSetJobTitles.add(nodeDataList[1])
+				elif u'__t' in nodeDataList[0]:
+					nodeSetSkills.add(nodeDataList[1])
+			#get next line
+			nodeData = nodeFile.readline()
+
+	#get the number and list of N-similar nodes for each Job title node
+	jobtitleResults = [pool.apply_async(getElemSimilarByEditDistanceOfN, args=(original, nodeSetJobTitles, nodeSimilarsDict, True, u'{0}__s'.format(original))) for original in nodeSetJobTitles]
+	#get the number and list of N-similar nodes for each skill node
+	skillResults = [pool.apply_async(getElemSimilarByEditDistanceOfN, args=(original, nodeSetSkills, nodeSimilarsDict, True, u'{0}__t'.format(original))) for original in nodeSetSkills]
+	
+	#merge all the obtained dict together
+	def merge_two_dicts(x, y):
+		w = x.copy()
+		for nb in range(1,4):
+			z = w[nb].copy() # start with x's keys and values
+			z.update(y[nb]) # modifies z with y's keys and values & returns None
+			w[nb] = z
+		return w
+	#prepare the objects containing the results
+	dictResults = {1:{}, 2:{}, 3:{}}
+	for dictToBeAdded in tqdm(jobtitleResults+skillResults):
+		dictResults = merge_two_dicts(dictResults, dictToBeAdded.get())
+
+	#dump into a json file
+	if outputPath != None:
+		utilsOs.dumpDictToJsonFile(dictResults, outputPath, overwrite=True)
+	#get the summary of the results
+	countResultStrDistanceDict(dictResults)
+	return dictResults
+
+
+def countResultStrDistanceDict(dictResults):
+	'''
+	counts the results in the str distance dict
+	'''
+	if type(dictResults) is str:
+		dictResults = utilsOs.openJsonFileAsDict(dictResults)
+	for keyNb, neighDict in dictResults.items():
+		print(u'Edition distance of {0}:'.format(keyNb))
+		print(u'\tNb of nodes with neighbours of distance {0}: {1}'.format(keyNb, str(len(neighDict))) )
+		totalNeigh = 0
+		for nodeKey, neighboursList in neighDict.items():
+			totalNeigh += len(neighboursList)
+		print(u'\t\tMean nb of neighbours: {0}'.format(float(totalNeigh)/float(len(neighDict))))
 
 
 ##################################################################################
@@ -25,6 +96,44 @@ def tokenDistribution(listOfStrings):
 			value[1].append(line)
 			distribDict[len(tokens)] = value
 	return distribDict
+
+
+def getElemSimilarByEditDistanceOfN(original, similarCandidatesList, nodeSimilarsDict={1:{}, 2:{}, 3:{}}, lowerCase=True, dictKey=None):
+	'''
+	returns the list of elements having n or less distance score (excluding 0)
+	the n max distance is given by the keys of the dict
+	(the function is not N exclusive but n or less)
+	Uses levenshtein distance (but could be augmented with other distances)
+	'''
+	dictKeys = sorted(nodeSimilarsDict.keys(), reverse=True)
+	if dictKey == None:
+		dictKey = original
+	#we look at each candidate
+	for candidate in tqdm(similarCandidatesList):
+		#lowerCase the candidate and original
+		if lowerCase == True:
+			compareCandidate = str(candidate).lower()
+			compareOriginal = str(original).lower()
+		#if we maintain the uppercase
+		else:
+			compareCandidate = str(candidate)
+		#if the distance is inferior to n and different from 0
+		levenshteinDistance = distance.edit_distance(compareOriginal, compareCandidate)
+		if levenshteinDistance <= dictKeys[0] and levenshteinDistance != 0:
+			#add the candidate to all the corresponding sets
+			for nMax in dictKeys:
+				#add the candidate to each set where it's smaller than the nmax
+				if levenshteinDistance <= nMax:
+					#add the original jobtitle to the dict if it's not there
+					try:
+						#add the data to the dict
+						nodeSimilarsDict[nMax][dictKey].append(candidate)
+					except KeyError:
+						#populate the slot with empty list
+						nodeSimilarsDict[nMax][dictKey] = list()
+						#add the data to the dict
+						nodeSimilarsDict[nMax][dictKey].append(candidate)
+	return nodeSimilarsDict
 
 
 ##################################################################################
@@ -258,3 +367,34 @@ def vennDiagram(listDataDict={'Set1': [], 'Set2': [], 'Set3': [], 'Se t1': [], '
 	'''
 	plt.show()
 	return None
+
+
+'''
+nodeListPath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListCleanedModularizedTrimmedInfered.tsv'
+outputPath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/oldOnes/nSimilarDict.json'
+
+analyseNodeListStrDistance(nodeListPath, outputPath)
+
+
+
+
+listOfStrings = []
+with open('/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/001ontologies/ESCO/v1.0.2/edgeAndNodeList/ESCOnodeList.tsv') as openfile:
+	nodeData = openfile.readline()
+	while nodeData:
+		#get the data for each row
+		nodeDataList = nodeData.split(u'\t')
+		#we make sure we are not in the header
+		if nodeDataList[0] != u'Id':
+			#save the node id/label in a set
+			listOfStrings.append(nodeDataList[1])
+		#get next line
+		nodeData = openfile.readline()
+dicto = (tokenDistribution(listOfStrings))
+
+print(11111111, len(listOfStrings))
+for key, val in dicto.items():
+	print(key, val[0], '%', float(val[0])/(float(len(listOfStrings))/100.0))
+
+
+'''

@@ -239,6 +239,45 @@ def indicator3SameLetters(string):
 	return False
 
 
+def isItGibberish(string, gibberishTreshold=0.49, exoticCharSensitive=False):
+	'''
+	Detect if the string is composed of mostly gibberish (non-alphanumerical symbols)
+	and repetition of the same letter.
+	it returns true if the gibberish treshold is surpassed, false otherwise
+	if exoticCharSensitive is False, it will treat non-latin-based characters as gibberish too
+	'''
+	nonGibberishCharsList = []
+	latinExtChars = set( list(range(48, 58)) + list(range(65, 91)) + list(range(97, 123)) + list(range(192, 215)) + list(range(216, 247)) + list(range(248, 384)) + list(range(536, 540)))
+	symbolsChars = set( list(range(0, 48)) + list(range(58, 65)) + list(range(91, 97)) + list(range(123, 192)) + [215, 247, 884, 885, 894, 903] )
+	#detect if there is a repetition of the same 3 letters
+	if indicator3SameLetters(string) == True:
+		return True
+	string = string.replace(u' ', u'')
+	#treat non-latin-based characters as gibberish too
+	if exoticCharSensitive == False:
+		#detect accepted characters, append non-acepted to list
+		for char in string:
+			if ord(char) in latinExtChars:
+				nonGibberishCharsList.append(char)	
+	#treat non-latin-based characters as an alphabet
+	else:
+		#detect non accepted characters
+		for char in string:
+			if ord(char) not in symbolsChars:
+				nonGibberishCharsList.append(char)
+	#calculate the ratio of non-gibberish in the string
+	nonGibberishRatio = float(len(nonGibberishCharsList))/float(len(string))
+	if (1.0-nonGibberishRatio) >= gibberishTreshold:
+		#for very small labels, symbols are not that uncommon, so we do not apply the same rigor
+		if len(string) <= 4:
+			if (1.0-nonGibberishRatio) == 0.0:
+				return True
+			return False
+		return True
+	return False
+		
+	
+
 ##################################################################################
 #LANGUAGE
 ##################################################################################

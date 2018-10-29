@@ -639,7 +639,9 @@ def ontologyContentCleaning(languageOfOntology, edgeFilePathInput, nodeFilePathI
 		- all nodes detected to be in a different language that the language of the ontology
 		- all over-specific nodes (having more than 5 tokens) 
 		- all 2in1 nodes (all nodes having '/', '\', ',', ':', ';', ' - ' and '&' between words)
-		- all nodes having a repetition of the 3 same characters or more (e.g., 'aaa', 'xxxxxx')
+		- all nodes having a giberish : 
+				- repetition of the 3 same characters or more (e.g., 'aaa', 'xxxxxx')
+				- a great number of non alphanumerical symbols (e.g., '!#&*&^%$#', 'adr--+)
 	'''
 	import langdetect
 	theRightNodes = set()
@@ -652,11 +654,11 @@ def ontologyContentCleaning(languageOfOntology, edgeFilePathInput, nodeFilePathI
 		try:
 			if utilsString.englishOrFrench(label) == languageOfOntology:
 				#if the node is not over-specific
-				if len(utilsString.naiveRegexTokenizer(label)) <= 3:
+				if len(utilsString.naiveRegexTokenizer(label, eliminateEnStopwords=True)) <= 5:
 					#if we detect no 2in1 jobTitles/skills
 					if utilsString.indicator2in1(label) == False:
-						#if we don't detect the 3 same characters in a row
-						if utilsString.indicator3SameLetters(label) == False:
+						#if we don't detect gibberish in a row
+						if utilsString.isItGibberish(label, gibberishTreshold=0.49, exoticCharSensitive=False) == False:
 							#add the node id to the list of correct nodes
 							theRightNodes.add(nodeRow['Id'])
 		except TypeError:
@@ -841,7 +843,7 @@ def ontoQA(edgeFilePath, nodeFilePath, verbose=True):
 		dataDict['P'] = 15 #hasSkill, conceptType, conceptUri, broaderUri, iscoGroup, preferredLabel, alternativeLabel, description, code, occupationUri, relationType, skillType, skillUri, reuseLevel
 	else:
 		dataDict['P'] = 11 #in an edge and node List it's 2!!!: hasSkill, hasSubclass #BUT can be grown to 11 by adding if put in a formal ontology form: hasSkill, conceptType, conceptUri, broaderUri, preferredLabel, occupationUri, relationType, skillUri, reuseLevel
-	#get P', non-inheritance relations (instances)
+	#get P' (P prime), non-inheritance relations (instances)
 	dataDict["P'"] = len(edgeDf)
 	#get H, inheritance relationships
 	dataDict['H'] = 1	 #isSubclassOf or broaderUri(in ESCO)
@@ -1000,7 +1002,7 @@ def getSampleForHumanEvaluation(edgeFileInput, nodeFileInput, lengthOfSample=100
 
 def getPrintableStringOfGoodNodes(sourceOrTargetNodes, sampleNodeDf, nodeRow, corefDict, typeOfNode, communityColumnName=u'Community_Lvl_0'):
 	'''
-	transforms the node data frame ionto a printable version 
+	transforms the node data frame onto a printable version 
 	of limited number, ordered by score and with the analyzed 
 	node in the middle and in red
 	'''
@@ -1028,6 +1030,39 @@ def getPrintableStringOfGoodNodes(sourceOrTargetNodes, sampleNodeDf, nodeRow, co
 	for indexNode, node in enumerate(listOfNodesOrderedByValue):
 		#one string per line
 		stringOfNodes = u'{0}\t{1}\n'.format(stringOfNodes, str(node)) if (indexNode+1) != len(listOfNodes) else u'{0}\t{1}'.format(stringOfNodes, str(node))
+	#coloration
+	stringOfNodes = stringOfNodes.replace(nodeRow[u'Id'], u'\033[1;31m{0}\033[0m'.format(nodeRow[u'Id']))
+	return stringOfNodes
+
+
+def getPrintableStringOfGoodInferenceNodes(nodeRow, escoNodeDf, inferedDomain):
+	'''
+	transforms the node data frame onto a printable version 
+	of limited number, ordered by score and with the analyzed 
+	node in the middle and in red
+	'''
+	#transform the ESCO dataframe into a list of the nodes belonging to the infered domain
+	for nb in reversed(range(4)):
+		if len( (escoNodeDf[u'Community_Lvl_{0}'.format(nb)])[0] ) == len(str(inferedDomain)):
+			break
+	#get the ESCO nodes belonging to the infered domain
+	listOfNodesInEsco = (escoNodeDf.loc[escoNodeDf[u'Community_Lvl_{0}'.format(nb)] == str(inferedDomain)])[u'Label'].tolist()
+	#remove the node we are interested in analyzing because we want to add it later in the middle of the list, in red
+	try:
+		listOfNodesInEsco.remove(nodeRow[u'Label'].lower())
+	except ValueError:
+		pass
+	#if the list is too long, we only take the 5 best scored nodes
+	if len(listOfNodesInEsco) > 5:
+		listOfNodesInEsco = listOfNodesInEsco[:5]
+	#add the node we are analyzing in the middle of the list
+	listOfNodesInEsco = listOfNodesInEsco[:int(len(listOfNodesInEsco)/2.0)] + [nodeRow[u'Id']] + listOfNodesInEsco[int(len(listOfNodesInEsco)/2.0):]
+		
+	#transform the list into a string
+	stringOfNodes = u''
+	for indexNode, node in enumerate(listOfNodesInEsco):
+		#one string per line
+		stringOfNodes = u'{0}\t{1}\n'.format(stringOfNodes, str(node)) if (indexNode+1) != len(listOfNodesInEsco) else u'{0}\t{1}'.format(stringOfNodes, str(node))
 	#coloration
 	stringOfNodes = stringOfNodes.replace(nodeRow[u'Id'], u'\033[1;31m{0}\033[0m'.format(nodeRow[u'Id']))
 	return stringOfNodes
@@ -1158,9 +1193,8 @@ def edgeRelevanceEval(sampleEdgeDf, corefDict):
 		stringOfEdges = getPrintableStringOfGoodEdges(sampleEdgeDf, edgeRow, corefDict)
 		print(stringOfEdges)
 		#get annotator input
-		savingAnnotatorInput(sampleEdgeDf, u'edgeRelevanceAnnotation', edgeIndex, nbOfLines=len(stringOfEdges.split(u'\n'))+1, listOfAnswers=[0,1,2])
-	#dump the edge dataframe
-	sampleEdgeDf.to_csv(u'{0}{1}{2}.tsv'.format(sampleEdgeFileInput.split(u'.tsv')[0], str(datetime.datetime.now()).replace(u' ', u'+'), nameOfEvaluator), sep='\t', index=False)
+		sampleEdgeDf = savingAnnotatorInput(sampleEdgeDf, u'edgeRelevanceAnnotation', edgeIndex, nbOfLines=len(stringOfEdges.split(u'\n'))+1, listOfAnswers=[0,1,2])
+	return sampleEdgeDf
 	
 
 def filterEval(sampleNodeDf, corefDict):
@@ -1175,11 +1209,75 @@ def filterEval(sampleNodeDf, corefDict):
 		#print the node
 		print(nodeRow[u'Label'])
 		#get and save the annotator input
-		savingAnnotatorInput(sampleNodeDf, u'nodeAnnotationFilter', nodeIndex, 2, listOfAnswers=[0,1,2,3,4,5,6])
+		sampleNodeDf = savingAnnotatorInput(sampleNodeDf, u'nodeAnnotationFilter', nodeIndex, 2, listOfAnswers=[0,1,2,3,4,5,6])
 	return sampleNodeDf
 
 
-def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, corefDictPath, nameOfEvaluator='David'):
+def inferenceEval(sampleNodeDf, corefDict):
+	'''
+	makes an evaluation of the infered name for the domain in
+	each taxonomy level by comparing a given node with a sample
+	of the ESCO nodes contained in the ESCO domain infered
+	e.g, 
+	- given node: Quantitative Analyst Intern__s
+	- ESCO domain infered for given node: 311___Physical and engineering science technicians
+	- sample of ESCO nodes: 
+		metallurgical technician, 
+		resilient floor layer,
+		foreign exchange trader,
+		marine engineering technician,
+		domestic energy assessor.
+	'''
+	#avoid the SettingWithCopy Warning in pandas (https://stackoverflow.com/questions/20625582/how-to-deal-with-settingwithcopywarning-in-pandas) 
+	pd.options.mode.chained_assignment = None
+	#add the columns preparing for the data
+	sampleNodeDf[u'nodeAnnotationInfer0'] = np.nan	
+	sampleNodeDf[u'nodeAnnotationInfer1'] = np.nan	
+	#ESCO paths
+	edgeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/001ontologies/ESCO/v1.0.2/edgeAndNodeList/ESCOedgeList.tsv'
+	nodeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/001ontologies/ESCO/v1.0.2/edgeAndNodeList/ESCOnodeList.tsv'
+	#open the ESCO edge list as a data frame	
+	escoEdgeDf = pd.read_csv(edgeFilePath, sep=u'\t')
+	#open the ESCO node list as a data frame	
+	escoNodeDf = pd.read_csv(nodeFilePath, sep=u'\t')
+	#lowercase the label column data
+	sampleNodeDf['Label'] = sampleNodeDf['Label'].str.lower()
+	#limit the node dataframe to the nodes that we can find in the ESCO ontology
+	mergedNodeDf = pd.merge(sampleNodeDf, escoNodeDf, how=u'inner', on=[u'Label'])
+	sampleNodeDf = sampleNodeDf.loc[sampleNodeDf[u'Id'].isin(mergedNodeDf[u'Id_x'])]
+	#use only the rows with source nodes (__s), since target nodes do not have a domain code
+	sourceNodes = sampleNodeDf[sampleNodeDf[u'Id'].str.contains(u'__s', regex=False) == True]
+
+	for nodeIndex, nodeRow in sourceNodes.iterrows():
+		#get the esco domain number that was infered for this particular row
+		inferedDomain = int(nodeRow[u'Infered_Community_Name_Lvl_0'].split(u'___')[0])
+
+		#print the name of the infered community level 0
+		print(u'Infered name of the community Lvl-0: {0}'.format(nodeRow[u'Infered_Community_Name_Lvl_0']))
+		print(u'---------------------------------------------------------------------------------')
+		#level 0 taxonomy
+		stringOfNodes = getPrintableStringOfGoodInferenceNodes(nodeRow, escoNodeDf, inferedDomain)
+		#print the node and its group	
+		print(stringOfNodes)
+		#get annotator input
+		sampleNodeDf = savingAnnotatorInput(sampleNodeDf, u'nodeAnnotationInfer0', nodeIndex, nbOfLines=len(stringOfNodes.split(u'\n'))+3) 
+		
+		#print the name of the infered community level 1
+		print(u'Infered name of the community Lvl-1: {0}'.format(nodeRow[u'Infered_Community_Name_Lvl_1']))
+		print(u'---------------------------------------------------------------------------------')
+		#level 1 taxonomy
+		stringOfNodes = getPrintableStringOfGoodInferenceNodes(nodeRow, escoNodeDf, inferedDomain)
+		#reorder the nodes in case the level1 sleection is exactly like the one from level 0
+		listOfNodes = stringOfNodes.split(u'\n')
+		stringOfNodes = u'\n'.join(list(set(listOfNodes)))
+		#print the node and its group	
+		print(stringOfNodes)
+		#get annotator input
+		sampleNodeDf = savingAnnotatorInput(sampleNodeDf, u'nodeAnnotationInfer1', nodeIndex, nbOfLines=len(stringOfNodes.split(u'\n'))+3, listOfAnswers=[0,1,2]) 
+	return sampleNodeDf
+
+
+def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, corefDictPath, nameOfEvaluator='David', listOfEvaluationsToBeLaunched=[0,1,2,3]):
 	'''
 	terminal interface for human annotation
 	3 types of annotation:
@@ -1195,50 +1293,63 @@ def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, corefDictP
 	#get coreference dictionary
 	corefDict = utilsOs.openJsonFileAsDict(corefDictPath)
 	#get dataframe
-	######################DEL UTILSGRAPH###########################################################################################
-	sampleEdgeDf, sampleNodeDf = utilsGraph.getDataFrameFromArgs(sampleEdgeFileInput, sampleNodeFileInput)
-	#print instructions
-	print(u'3 types of annotation: 0 = negative eval, 1 = doubtful eval, 2 = positive eval\n')
-	#print instructions
-	print(u'The colored node must have an evident connexion with the others.\n')
-	#node annotation taxonomy evaluation 
-	print(u'NODE TAXONOMY EVALUATION:\n')
-	sampleNodeDf = taxonomyEval(sampleNodeDf, corefDict)
-	#clear the instructions in the terminal before the next kind of annotation
-	utilsOs.moveUpAndLeftNLines(2, slowly=False)
+	sampleEdgeDf, sampleNodeDf = getDataFrameFromArgs(sampleEdgeFileInput, sampleNodeFileInput)
 
-	#dump the node dataframe
-	sampleNodeDf.to_csv(u'{0}{1}{2}.tsv'.format(sampleNodeFileInput.split(u'.tsv')[0], str(datetime.datetime.now()).replace(u' ', u'+'), nameOfEvaluator), sep='\t', index=False)
-	
-	#print instructions
-	print(u'The colored edge must be as relevant as the others.\n')
-	#node annotation taxonomy evaluation 
-	print(u'EDGE RELEVANCE EVALUATION:\n')
-	sampleEdgeDf = edgeRelevanceEval(sampleEdgeDf, corefDict)
-	#clear the instructions in the terminal before the next kind of annotation
-	utilsOs.moveUpAndLeftNLines(2, slowly=False)
+	#node annotation relevance evaluation 
+	if 0 in listOfEvaluationsToBeLaunched:
+		#print instructions
+		print(u'3 types of annotation: 0 = negative eval, 1 = doubtful eval, 2 = positive eval\n')
+		#print instructions
+		print(u'The colored edge must be relevant. The non-colored edges are meant as an indication of what relevant nodes should look like.\n')
+		#launching the annotation interface (in terminal)
+		print(u'EDGE RELEVANCE EVALUATION:\n')
+		sampleEdgeDf = edgeRelevanceEval(sampleEdgeDf, corefDict)
+		#clear the instructions in the terminal before the next kind of annotation
+		utilsOs.moveUpAndLeftNLines(6, slowly=False)
 
-	#dump the node dataframe
-	sampleEdgeDf.to_csv(u'{0}{1}{2}.tsv'.format(sampleEdgeFileInput.split(u'.tsv')[0], str(datetime.datetime.now()).replace(u' ', u'+'), nameOfEvaluator), sep='\t', index=False)
-	
+		#dump the edge dataframe
+		sampleEdgeDf.to_csv(u'{0}{1}{2}.tsv'.format(sampleEdgeFileInput.split(u'.tsv')[0], str(datetime.datetime.now()).replace(u' ', u'+'), nameOfEvaluator), sep='\t', index=False)
+		
 	#node annotation filter evaluation 
-	#print instructions
-	utilsOs.moveUpAndLeftNLines(4, slowly=False)
-	print(u'7 types of annotation: \n0 = general/other negative eval, \n1 = doubtful eval, \n2 = positive eval, \n3 = negative eval - in a foreign language, \n4 = negative eval - incoherent/non-understandable, \n5 = negative eval - has a named entity, \n6 = negative eval - erreurs orth/gramm\n')
-	#print(u'must be: the right language... coherent... not having a named entity... well written.\n')
-	#node annotation filter evaluation
-	print(u'NODE FILTER EVALUATION):\n')
-	sampleNodeDf = filterEval(sampleNodeDf, corefDict)
-	#clear the instructions in the terminal
-	utilsOs.moveUpAndLeftNLines(11, slowly=False)
+	if 1 in listOfEvaluationsToBeLaunched:
+		#print instructions
+		print(u'7 types of annotation: \n0 = general/other negative eval, \n1 = doubtful eval, \n2 = positive eval, \n3 = negative eval - in a foreign language, \n4 = negative eval - incoherent/non-understandable, \n5 = negative eval - has a named entity, \n6 = negative eval - erreurs orth/gramm\n')
+		#print(u'must be: the right language... coherent... not having a named entity... well written.\n')
+		#launching the annotation interface (in terminal)
+		print(u'NODE FILTER EVALUATION):\n')
+		sampleNodeDf = filterEval(sampleNodeDf, corefDict)
+		#clear the instructions in the terminal
+		utilsOs.moveUpAndLeftNLines(11, slowly=False)
+		
+		#dump the node dataframe
+		sampleNodeDf.to_csv(u'{0}{1}{2}.tsv'.format(sampleNodeFileInput.split(u'.tsv')[0], str(datetime.datetime.now()).replace(u' ', u'+'), nameOfEvaluator), sep='\t', index=False)
 	
-	#dump the node dataframe
-	sampleNodeDf.to_csv(u'{0}{1}{2}.tsv'.format(sampleNodeFileInput.split(u'.tsv')[0], str(datetime.datetime.now()).replace(u' ', u'+'), nameOfEvaluator), sep='\t', index=False)
-	
-	'''
-	#edge/node Annotation ###################################################
-	#################################make another taxonomy/edge eval based on a 2choice turing test by taking one triplet from the onto and 1 from esco (either the jobtitle is in esco, or the skill is in esco, or just a triplet from the same infered domain)
-	'''
+	#node annotation taxonomy evaluation
+	if 2 in listOfEvaluationsToBeLaunched:
+		#print instructions
+		print(u'3 types of annotation: 0 = negative eval, 1 = doubtful eval, 2 = positive eval\n')
+		#print instructions
+		print(u'The colored node must have an evident connexion with the others.\n')
+		#launching the annotation interface (in terminal)
+		print(u'NODE TAXONOMY EVALUATION:\n')
+		sampleNodeDf = taxonomyEval(sampleNodeDf, corefDict)
+		#clear the instructions in the terminal before the next kind of annotation
+		utilsOs.moveUpAndLeftNLines(6, slowly=False)
+
+		#dump the node dataframe
+		sampleNodeDf.to_csv(u'{0}{1}{2}.tsv'.format(sampleNodeFileInput.split(u'.tsv')[0], str(datetime.datetime.now()).replace(u' ', u'+'), nameOfEvaluator), sep='\t', index=False)
+
+	#node annotation taxonomic name-inference evaluation
+	if 3 in listOfEvaluationsToBeLaunched:
+		#print instructions
+		print(u'3 types of annotation: 0 = negative eval, 1 = doubtful eval, 2 = positive eval\n')
+		#print instructions
+		print(u'The colored node must belong to the same domain as the non-corlored nodes.\n')
+		#launching the annotation interface (in terminal)
+		print(u'NODE TAXONOMIC INFERENCE EVALUATION:\n')
+		sampleNodeDf = inferenceEval(sampleNodeDf, corefDict)
+		#clear the instructions in the terminal before the next kind of annotation
+		utilsOs.moveUpAndLeftNLines(6, slowly=False)
 	
 
 ##################################################################################
