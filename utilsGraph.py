@@ -1295,7 +1295,7 @@ def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, corefDictP
 	#get dataframe
 	sampleEdgeDf, sampleNodeDf = getDataFrameFromArgs(sampleEdgeFileInput, sampleNodeFileInput)
 
-	#node annotation relevance evaluation 
+	#edge annotation relevance evaluation 
 	if 0 in listOfEvaluationsToBeLaunched:
 		#print instructions
 		print(u'3 types of annotation: 0 = negative eval, 1 = doubtful eval, 2 = positive eval\n')
@@ -1344,13 +1344,16 @@ def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, corefDictP
 		#print instructions
 		print(u'3 types of annotation: 0 = negative eval, 1 = doubtful eval, 2 = positive eval\n')
 		#print instructions
-		print(u'The colored node must belong to the same domain as the non-corlored nodes.\n')
+		print(u'The colored node must belong to the same domain as the non-colored nodes.\n')
 		#launching the annotation interface (in terminal)
 		print(u'NODE TAXONOMIC INFERENCE EVALUATION:\n')
 		sampleNodeDf = inferenceEval(sampleNodeDf, corefDict)
 		#clear the instructions in the terminal before the next kind of annotation
 		utilsOs.moveUpAndLeftNLines(6, slowly=False)
 	
+		#dump the node dataframe
+		sampleNodeDf.to_csv(u'{0}{1}{2}.tsv'.format(sampleNodeFileInput.split(u'.tsv')[0], str(datetime.datetime.now()).replace(u' ', u'+'), nameOfEvaluator), sep='\t', index=False)
+
 
 ##################################################################################
 #CALIBRATION OF THE SIGMA.JS EXPORTATION OF THE GRAPH

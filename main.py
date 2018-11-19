@@ -158,7 +158,7 @@ def mainActionsOnto(listOfActions, sampleData=False,
 	#CALLING FUNCT FROM utilsGraph.py TO TWEAK THE CONFIG.JSON AND INDEX.HTML GRAPH FILES
 	##################################################################################
 	if 7 in listOfActions:
-		pathToGraphExportEnvironment = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/testsGephi/gephiExportSigma0/springLayoutAndModularityPythonLouvain/wholeReCleanedModularizedMoreTrimmedInfered/network/'
+		pathToGraphExportEnvironment = u'./testsGephi/gephiExportSigma0/springLayoutAndModularityPythonLouvain/wholeReCleanedModularizedMoreTrimmedInfered/network/'
 		utilsGraph.modifyConfigAndIndexFiles(pathToGraphExportEnvironment)
 
 	##################################################################################
@@ -166,8 +166,8 @@ def mainActionsOnto(listOfActions, sampleData=False,
 	##################################################################################
 	if 8 in listOfActions:
 		#ESCO
-		edgeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/001ontologies/ESCO/v1.0.2/edgeAndNodeList/ESCOedgeList.tsv'
-		nodeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/001ontologies/ESCO/v1.0.2/edgeAndNodeList/ESCOnodeList.tsv'
+		edgeFilePath = u'./001ontologies/ESCO/v1.0.2/edgeAndNodeList/ESCOedgeList.tsv'
+		nodeFilePath = u'./001ontologies/ESCO/v1.0.2/edgeAndNodeList/ESCOnodeList.tsv'
 		utilsGraph.ontoQA(edgeFilePath, nodeFilePath, verbose=True)
 		 
 		#Our ontology from all english FR candidates
@@ -180,8 +180,8 @@ def mainActionsOnto(listOfActions, sampleData=False,
 	##################################################################################
 	edgeFileInput = u'{0}edgeListWeightCleanedTrimmed.tsv'.format(environment)
 	nodeFileInput = u'{0}nodeListCleanedModularizedTrimmedInfered.tsv'.format(environment)
-	outputEdgeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/009humanAnnotation/sampleEdge1000ForHumanEval.tsv'
-	outputNodeFilePath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/009humanAnnotation/sampleNode1000ForHumanEval.tsv'
+	outputEdgeFilePath = u'./009humanAnnotation/sampleEdge1000ForHumanEval.tsv'
+	outputNodeFilePath = u'./009humanAnnotation/sampleNode1000ForHumanEval.tsv'
 	corefDictPath = u'{0}corefDict.json'.format(environment)
 
 	#make the sample file
@@ -189,7 +189,7 @@ def mainActionsOnto(listOfActions, sampleData=False,
 		utilsGraph.getSampleForHumanEvaluation(edgeFileInput, nodeFileInput, 1000, outputEdgeFilePath, outputNodeFilePath)
 	#launch the evaluation interface
 	if 9.2 in listOfActions:
-		utilsGraph.humanAnnotatorInterface(outputEdgeFilePath, outputNodeFilePath, corefDictPath, nameOfEvaluator='David')
+		utilsGraph.humanAnnotatorInterface(outputEdgeFilePath, outputNodeFilePath, corefDictPath, nameOfEvaluator='David', listOfEvaluationsToBeLaunched=[0,1,2,3])
 
 
 
@@ -198,10 +198,10 @@ testing
 """
 if __name__ == '__main__': 
 	
-	mainActionsOnto([7], 
+	mainActionsOnto([9.2], 
 		sampleData=False, 
 		linkedInData=u'/u/kessler/LBJ/data/2016-09-15/fr/anglophone/candidats.json',
-		environment=u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/')
+		environment=u'./002data/candidats/2016-09-15/fr/anglophone/')
 
 
 	##################################################################################
