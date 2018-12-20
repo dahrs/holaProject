@@ -137,6 +137,49 @@ def getElemSimilarByEditDistanceOfN(original, similarCandidatesList, nodeSimilar
 
 
 ##################################################################################
+#DATAFRAME
+##################################################################################
+
+
+def dataframesIntersection(tsvFile1Path, tsvFile2Path, listOfIntersectingColumnNames, outputFilePath=None, lowerCase=True):
+	'''
+	returns the exact intersection between 2 dataframes and some statistical data
+	in dict form: 
+		- size of intersection
+		- size of df1
+		- ratio of intersection according to df1
+		- size of df2
+		- ratio of intersection according to df2
+	'''
+	import pandas as pd
+	from utilsGraph import getDataFrameFromArgs
+	#get the dataframes
+	df1, df2 = getDataFrameFromArgs(tsvFile1Path, tsvFile2Path)
+	#get their size
+	sizeDf1 = len(df1)
+	sizeDf2 = len(df2)
+	#make sur the name of the column of columns to intersect are in a list
+	if listOfIntersectingColumnNames is str:
+		listOfIntersectingColumnNames = [listOfIntersectingColumnNames]
+	#lowercase the values in the intersectable columns before the intersection
+	for columnName in listOfIntersectingColumnNames:
+		df1[columnName] = df1[columnName].str.lower()		
+		df2[columnName] = df2[columnName].str.lower()
+	#drop the possible doubles we might have created after lowercasing
+	df2[u'Id'] = df2[u'Id'].str.lower()#############
+	df1 = df1.drop_duplicates()
+	df2 = df2.drop_duplicates()
+	#make the intersection
+	intersectDf = pd.merge(df1, df2, how='inner', on=listOfIntersectingColumnNames)
+	#dump
+	if outputFilePath != None:
+		intersectDf.to_csv(outputFilePath, sep='\t', index=False)
+	return intersectDf, {u'intersection size': len(intersectDf), u'df1 size': sizeDf1, u'intersect-df1 ratio': float(len(intersectDf))/float(sizeDf1), u'df2 size': sizeDf2, u'intersect-df2 ration': float(len(intersectDf))/float(sizeDf2)}
+
+
+
+
+##################################################################################
 #DIAGRAMS
 ##################################################################################
 
@@ -367,34 +410,3 @@ def vennDiagram(listDataDict={'Set1': [], 'Set2': [], 'Set3': [], 'Se t1': [], '
 	'''
 	plt.show()
 	return None
-
-
-'''
-nodeListPath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/nodeListCleanedModularizedTrimmedInfered.tsv'
-outputPath = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/oldOnes/nSimilarDict.json'
-
-analyseNodeListStrDistance(nodeListPath, outputPath)
-
-
-
-
-listOfStrings = []
-with open('/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/001ontologies/ESCO/v1.0.2/edgeAndNodeList/ESCOnodeList.tsv') as openfile:
-	nodeData = openfile.readline()
-	while nodeData:
-		#get the data for each row
-		nodeDataList = nodeData.split(u'\t')
-		#we make sure we are not in the header
-		if nodeDataList[0] != u'Id':
-			#save the node id/label in a set
-			listOfStrings.append(nodeDataList[1])
-		#get next line
-		nodeData = openfile.readline()
-dicto = (tokenDistribution(listOfStrings))
-
-print(11111111, len(listOfStrings))
-for key, val in dicto.items():
-	print(key, val[0], '%', float(val[0])/(float(len(listOfStrings))/100.0))
-
-
-'''

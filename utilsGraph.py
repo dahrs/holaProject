@@ -45,14 +45,14 @@ def edgeListTemp(pathInput, pathTempFile, pathOutput, lowercaseItAll=False):
 		- jobNode(source)
 		- skillNode(target)
 	It's only a temporary file because we still need to erase doubles, 
-	to make the weight (count coreference of skills) 
+	to make the weight (count frequency of skills) 
 
-	also count all coreferences and dump the resulting dict in a json file so the info 
+	also count all frequency and dump the resulting dict in a json file so the info 
 	can be accessed later
 	'''
 	#open a temp file
 	outputTempFile = utilsOs.createEmptyFile(pathTempFile) #don't specify that the headerLine is 'Source \t Target'
-	#make and dump a json dict that keeps track of all types of coreferences (edge coref, node coref, skill, jobtitle, profile, etc.)
+	#make and dump a json dict that keeps track of all types of frequency (edge coref, node coref, skill, jobtitle, profile, etc.)
 	corefDict = {u'edge':{}, 
 				u'node':{
 					u'jobtitle':{}, 
@@ -76,16 +76,16 @@ def edgeListTemp(pathInput, pathTempFile, pathOutput, lowercaseItAll=False):
 								if lowercaseItAll != False:
 									skill = skill.lower()
 								outputTempFile.write(u'{0}\t{1}\n'.format(jobTitle, skill))
-								#count skill coreference
+								#count skill frequency
 								corefDict[u'node'][u'skill'][u'{0}__t'.format(skill)] = corefDict[u'node'][u'skill'].get(u'{0}__t'.format(skill), 0) + 1
-								#count edge coreference
+								#count edge frequency
 								edge = u'{0}__s\t{1}__t'.format(jobtitle, skill)
 								corefDict[u'edge'][edge] = corefDict[u'edge'].get(edge, 0) + 1
-						#count jobtitle coreference
+						#count jobtitle frequency
 						corefDict[u'node'][u'jobtitle'][u'{0}__s'.format(jobtitle)] = corefDict[u'node'][u'jobtitle'].get(u'{0}__s'.format(jobtitle), 0) + 1
 	#closing the file	
 	outputTempFile.close()
-	#dumping the coreference dictionnary
+	#dumping the frequency dictionnary
 	pathCorefDict = u'/'.join(pathOutput.split(u'/')[:-1]+[u'corefDict.json'])
 	utilsOs.dumpDictToJsonFile(corefDict, pathOutputFile=pathCorefDict, overwrite=True)
 	return pathCorefDict
@@ -96,7 +96,7 @@ def edgeListDump(pathTempFile, pathOutput, pathCorefDict):
 	opens the temp file containing the extracted linkedin data and makes an edge list of (columns):
 		- jobNode(source)
 		- skillNode(target)	
-		- weight(skill coreference)
+		- weight(skill frequency)
 	
 	[in a further function we might want to add keywords (non stop-words most common tokens for each jobtitle)]
 	'''
@@ -499,7 +499,7 @@ def getOntologyBowByCommunity(nodeDf, columnToInferFrom):
 		#make the bag of words set
 		jobTitleList = communityDf['Label'].tolist()
 		for jobTitle in jobTitleList:
-			#save te coreference of each token in the community as a proxy of the relevance weight of each token for that specific community
+			#save the frequency of each token in the community as a proxy of the relevance weight of each token for that specific community
 			for jobToken in utilsString.naiveRegexTokenizer(jobTitle, caseSensitive=False, eliminateEnStopwords=True):
 				bowDict[jobToken] = bowDict.get(jobToken, 0) + 1
 			#add the linkedIn profiles pitch to the bow
@@ -639,7 +639,7 @@ def ontologyContentCleaning(languageOfOntology, edgeFilePathInput, nodeFilePathI
 		- all nodes detected to be in a different language that the language of the ontology
 		- all over-specific nodes (having more than 5 tokens) 
 		- all 2in1 nodes (all nodes having '/', '\', ',', ':', ';', ' - ' and '&' between words)
-		- all nodes having a giberish : 
+		- all nodes containing giberish : 
 				- repetition of the 3 same characters or more (e.g., 'aaa', 'xxxxxx')
 				- a great number of non alphanumerical symbols (e.g., '!#&*&^%$#', 'adr--+)
 	'''
@@ -703,7 +703,7 @@ def remove1DegreeNodes(dictA, dictB, aOldSize=0, bOldSize=0):
 def dropNodesAppearingNOrLessTimes(edgeDf, nodeDf, n, corefDictPath):
 	'''
 	drop all nodes appearing n times or less than n times in the ontology
-	using the coreference dict of the whole ontology
+	using the frequency dict of the whole ontology
 	'''
 	nLessAppearingJobTitlesNodes = set()	
 	nLessAppearingSkillNodes = set()
@@ -733,7 +733,7 @@ def dropNodesAppearingNOrLessTimes(edgeDf, nodeDf, n, corefDictPath):
 def dropNodesOnlyConnectedToNodesAppearingNOrLessTimes(edgeDf, nodeDf, n, corefDictPath):
 	'''
 	drop all nodes appearing n times or less than n times in the ontology
-	using the coreference dict of the whole ontology
+	using the frequency dict of the whole ontology
 	'''
 	nLessAppearingJobTitlesNodes = set()	
 	nLessAppearingSkillNodes = set()
@@ -774,6 +774,9 @@ def ontologyStructureCleaning(edgeFileInput, nodeFileInput, corefDictPath, edgeF
 	'''
 	#get dataframes
 	edgeDf, nodeDf = getDataFrameFromArgs(edgeFileInput, nodeFileInput)
+
+	print(111111, 'RAWPostContentFilter node', len(nodeDf), 'edge', len(edgeDf))#######
+
 	#remove communities corresponding to less than 1% of the node
 	communitiesSet = set(nodeDf['Community_Lvl_0'].tolist())
 	copyCommunitiesSet = list(communitiesSet)
@@ -793,18 +796,20 @@ def ontologyStructureCleaning(edgeFileInput, nodeFileInput, corefDictPath, edgeF
 		sToJobsDict[edgeRow[u'Target']] = list(set(sToJobsDict.get(edgeRow[u'Target'], list(emptyList)) + [edgeRow[u'Source']]))
 	#drop the rows whose nodes appear n times or less in the whole ontology
 	edgeDf, nodeDf = dropNodesOnlyConnectedToNodesAppearingNOrLessTimes(edgeDf, nodeDf, 1, corefDictPath)
+	print(222222, 'remove nodes appearing only once node:', len(nodeDf), 'edge ', len(edgeDf))###################
 	#remove independent and isolated skills and job titles
 	jToSkillsDict, sToJobsDict = remove1DegreeNodes(jToSkillsDict, sToJobsDict)
 	#save the trimmed data frames as the new data frames
 	nodeDf = nodeDf.loc[nodeDf[u'Id'].isin( list(jToSkillsDict.keys())+list(sToJobsDict.keys()) )]
 	edgeDf = edgeDf.loc[edgeDf[u'Source'].isin(list(jToSkillsDict.keys())) & edgeDf[u'Target'].isin(list(sToJobsDict.keys()))]
+	print(333333333333, 'remove isolated trees nodes ', len(nodeDf), 'edge', len(edgeDf))###################
 	#dumping the data frames
 	if edgeFilePathOutput != None:
 		edgeDf.to_csv(edgeFilePathOutput, sep='\t', index=False)
 	if nodeFilePathOutput != None:
 		nodeDf.to_csv(nodeFilePathOutput, sep='\t', index=False)
 	#we make sure there are no unconnected nodes
-	wasteNodeElimination(edgeFilePathOutput, nodeFilePathOutput)
+	wasteNodeElimination(edgeDf, nodeDf)
 	return edgeDf, nodeDf
 
 
@@ -840,9 +845,11 @@ def ontoQA(edgeFilePath, nodeFilePath, verbose=True):
 	dataDict['C'] = len(classes)
 	#get P', non-inheritance relationships (relation types) deducing the inexisting schema
 	if 'esco' in edgeFilePath.lower():
-		dataDict['P'] = 15 #hasSkill, conceptType, conceptUri, broaderUri, iscoGroup, preferredLabel, alternativeLabel, description, code, occupationUri, relationType, skillType, skillUri, reuseLevel
+		escoRelationships = ['hasSkill', 'conceptType', 'conceptUri', 'broaderUri', 'iscoGroup', 'preferredLabel', 'alternativeLabel', 'description', 'occupationUri', 'relationType', 'skillType', 'skillUri', 'reuseLevel']
+		dataDict['P'] = len(escoRelationships) #has 13 relationships
 	else:
-		dataDict['P'] = 11 #in an edge and node List it's 2!!!: hasSkill, hasSubclass #BUT can be grown to 11 by adding if put in a formal ontology form: hasSkill, conceptType, conceptUri, broaderUri, preferredLabel, occupationUri, relationType, skillUri, reuseLevel
+		ourRelationships = ['hasSkill', 'conceptType', 'conceptUri', 'broaderUri', 'communityGroupId', 'preferredLabel', 'occupationUri', 'relationType', 'skillUri', 'reuseLevel']#formal ontology form
+		dataDict['P'] = len(ourRelationships) 
 	#get P' (P prime), non-inheritance relations (instances)
 	dataDict["P'"] = len(edgeDf)
 	#get H, inheritance relationships
@@ -1076,6 +1083,9 @@ def savingAnnotatorInput(sampleDf, nodeColumnName, objIndex, nbOfLines, listOfAn
 	pd.options.mode.chained_assignment = None
 	#wait for annotator input
 	annotatorInput = input(u'Annotation: ')
+	#if we wish to stop and return the data frame to be dumpted (even if incomplete)
+	if annotatorInput in [u'stop', u'Stop', u'STOP', u'-s']:
+		return sampleDf, True
 	#make sure the annotation is right
 	while True:
 		try:
@@ -1084,9 +1094,15 @@ def savingAnnotatorInput(sampleDf, nodeColumnName, objIndex, nbOfLines, listOfAn
 			else:
 				utilsOs.moveUpAndLeftNLines(1, slowly=False)
 				annotatorInput = input(u'Repeat annotation: ')
+				#if we wish to stop and return the data frame to be dumpted (even if incomplete)
+				if annotatorInput in [u'stop', u'Stop', u'STOP', u'-s']:
+					return sampleDf, True
 		except ValueError:
 			utilsOs.moveUpAndLeftNLines(1, slowly=False)
 			annotatorInput = input(u'Repeat annotation: ')
+			#if we wish to stop and return the data frame to be dumpted (even if incomplete)
+			if annotatorInput in [u'stop', u'Stop', u'STOP', u'-s']:
+				return sampleDf, True
 	#save the annotation as int if we only have 3 possibilities: -1, 0, 1
 	if len(listOfAnswers) == 3:
 		sampleDf[nodeColumnName][objIndex] = int(annotatorInput) - 1
@@ -1095,55 +1111,7 @@ def savingAnnotatorInput(sampleDf, nodeColumnName, objIndex, nbOfLines, listOfAn
 		sampleDf[nodeColumnName][objIndex] = (float(annotatorInput)/10.0) - 1
 	#clear the terminal before the next row
 	utilsOs.moveUpAndLeftNLines(nbOfLines, slowly=False)
-	return sampleDf
-
-
-def taxonomyEval(sampleNodeDf, corefDict):
-	'''
-	makes a taxonomy evaluation by asking the evaluator if
-	the red element of the list seems to belong to the same
-	domain as the others
-	'''
-	#avoid the SettingWithCopy Warning in pandas (https://stackoverflow.com/questions/20625582/how-to-deal-with-settingwithcopywarning-in-pandas) 
-	pd.options.mode.chained_assignment = None
-	#add the columns preparing for the data
-	sampleNodeDf[u'nodeAnnotationTaxo0'] = np.nan	
-	sampleNodeDf[u'nodeAnnotationTaxo1'] = np.nan	
-	for nodeIndex, nodeRow in sampleNodeDf.iterrows():
-		#look what substring does the row label contains,  __s or __t (source or target)
-		if nodeRow.str.contains(u'__s', regex=False)[u'Id'] == True:
-			substring = u'__s'
-			typeOfNode = u'jobtitle'
-		else: 
-			substring = u'__t'
-			typeOfNode = u'skill'
-		#get only rows of the same kind of substring 
-		sourceOrTargetNodes = sampleNodeDf[sampleNodeDf[u'Id'].str.contains(substring, regex=False) == True]
-
-		#print the name of the infered community level 0
-		print(u'Infered name of the community Lvl-0: {0}'.format(nodeRow[u'Infered_Community_Name_Lvl_0']))
-		print(u'---------------------------------------------------------------------------------')
-		#level 0 taxonomy
-		stringOfNodes = getPrintableStringOfGoodNodes(sourceOrTargetNodes, sampleNodeDf, nodeRow, corefDict, typeOfNode, communityColumnName=u'Community_Lvl_0')
-		#print the node and its group	
-		print(stringOfNodes)
-		#get annotator input
-		sampleNodeDf = savingAnnotatorInput(sampleNodeDf, u'nodeAnnotationTaxo0', nodeIndex, nbOfLines=len(stringOfNodes.split(u'\n'))+3) 
-		
-		#print the name of the infered community level 1
-		print(u'Infered name of the community Lvl-1: {0}'.format(nodeRow[u'Infered_Community_Name_Lvl_1']))
-		print(u'---------------------------------------------------------------------------------')
-		#level 1 taxonomy
-		stringOfNodes = getPrintableStringOfGoodNodes(sourceOrTargetNodes, sampleNodeDf, nodeRow, corefDict, typeOfNode, communityColumnName=u'Community_Lvl_1')
-		#reorder the nodes in case the level1 sleection is exactly like the one from level 0
-		listOfNodes = stringOfNodes.split(u'\n')
-		listOfNodes.remove(u'')
-		stringOfNodes = u'\n'.join(list(set(listOfNodes))+[u''])
-		#print the node and its group	
-		print(stringOfNodes)
-		#get annotator input
-		sampleNodeDf = savingAnnotatorInput(sampleNodeDf, u'nodeAnnotationTaxo1', nodeIndex, nbOfLines=len(stringOfNodes.split(u'\n'))+3, listOfAnswers=[0,1,2]) 
-	return sampleNodeDf
+	return sampleDf, False
 
 
 def getPrintableStringOfGoodEdges(sampleEdgeDf, edgeRow, corefDict):
@@ -1157,11 +1125,11 @@ def getPrintableStringOfGoodEdges(sampleEdgeDf, edgeRow, corefDict):
 	for edgeKey, edgeVal in corefDict[u'edge'].items():
 		#only take the edges having the same source as the edge row but not exactly identical to the edge row
 		if edgeKey.split(u'\t')[0] == edgeRow[u'Source'].lower() and edgeKey.split(u'\t')[1] != edgeRow[u'Target'].lower():
-			#asign the coreference value + the inverse length of the edge target
+			#asign the frequency value + the inverse length of the edge target
 			#so when we sort it, the first elements of the list will be the more referenced and the shortest edges (we postulate that the shortest target required less processing/thought from the profile user and could be more pertinents)
 			sameSourceEdgesDict[edgeKey.replace(u'\n', u'').replace(u'\t', u' >>>>> ')] = edgeVal + 1.0-float(len(edgeKey.split(u'\t')[1])/float(1000))
 	
-	#sort the edges by coreference and length of the target
+	#sort the edges by frequency and length of the target
 	listOfEdgesOrderedByValue = sorted(sameSourceEdgesDict.keys(), reverse=True, key=lambda k : sameSourceEdgesDict[k])
 	#if the list is too long, we only take the 5 best scored edges
 	if len(listOfEdgesOrderedByValue) > 4:
@@ -1180,20 +1148,26 @@ def getPrintableStringOfGoodEdges(sampleEdgeDf, edgeRow, corefDict):
 	return stringOfEdges
 
 
-def edgeRelevanceEval(sampleEdgeDf, corefDict):
+def edgeUsefulnessEval(sampleEdgeDf, corefDict):
 	'''
-	makes an evaluation of the edge relevance by asking
-	the evaluator if the red edge on the list seems as 
-	relevant as the other edges
+	makes an evaluation of the edge usefulness by asking
+	the evaluator if the red edge on the list seems useful
+	for the occupation (at least as much as the other edges)
+
+	(Used to be named relevance evaluation)
 	'''
 	#add the columns preparing for the data
-	sampleEdgeDf[u'edgeRelevanceAnnotation'] = np.nan
+	sampleEdgeDf[u'edgeUsefulnessAnnotation'] = np.nan
 	for edgeIndex, edgeRow in sampleEdgeDf.iterrows():
+		print('-----edge Nb {0}/{1}'.format(edgeIndex, len(sampleEdgeDf)))
 		#print the edge
 		stringOfEdges = getPrintableStringOfGoodEdges(sampleEdgeDf, edgeRow, corefDict)
 		print(stringOfEdges)
 		#get annotator input
-		sampleEdgeDf = savingAnnotatorInput(sampleEdgeDf, u'edgeRelevanceAnnotation', edgeIndex, nbOfLines=len(stringOfEdges.split(u'\n'))+1, listOfAnswers=[0,1,2])
+		sampleEdgeDf, stop = savingAnnotatorInput(sampleEdgeDf, u'edgeUsefulnessAnnotation', edgeIndex, nbOfLines=len(stringOfEdges.split(u'\n'))+2, listOfAnswers=[0,1,2])
+		#if the user asks to stop, then we stop where we were and we dumpt the data frame
+		if stop == True:
+			break
 	return sampleEdgeDf
 	
 
@@ -1205,11 +1179,70 @@ def filterEval(sampleNodeDf, corefDict):
 	'''
 	#add the columns preparing for the data
 	sampleNodeDf[u'nodeAnnotationFilter'] = np.nan	
-	for nodeIndex, nodeRow in sampleNodeDf.iterrows():
+	for nodeIndex, nodeRow in sampleNodeDf.iterrows():		
+		print('-----node Nb {0}/{1}'.format(nodeIndex, len(sampleNodeDf)))
 		#print the node
 		print(nodeRow[u'Label'])
 		#get and save the annotator input
-		sampleNodeDf = savingAnnotatorInput(sampleNodeDf, u'nodeAnnotationFilter', nodeIndex, 2, listOfAnswers=[0,1,2,3,4,5,6])
+		sampleNodeDf, stop = savingAnnotatorInput(sampleNodeDf, u'nodeAnnotationFilter', nodeIndex, nbOfLines=3, listOfAnswers=[0,1,2,3,4,5,6])
+		#if the user asks to stop, then we stop where we were and we dumpt the data frame
+		if stop == True:
+			break
+	return sampleNodeDf
+
+
+def taxonomyEval(sampleNodeDf, corefDict):
+	'''
+	makes a taxonomy evaluation by asking the evaluator if
+	the red element of the list seems to belong to the same
+	domain as the others
+	'''
+	#avoid the SettingWithCopy Warning in pandas (https://stackoverflow.com/questions/20625582/how-to-deal-with-settingwithcopywarning-in-pandas) 
+	pd.options.mode.chained_assignment = None
+	#add the columns preparing for the data
+	sampleNodeDf[u'nodeAnnotationTaxo0'] = np.nan	
+	sampleNodeDf[u'nodeAnnotationTaxo1'] = np.nan	
+	for nodeIndex, nodeRow in sampleNodeDf.iterrows():
+		print('-----node Nb {0}/{1}'.format(nodeIndex, len(sampleNodeDf)))
+		#look what substring does the row label contains,  __s or __t (source or target)
+		if nodeRow.str.contains(u'__s', regex=False)[u'Id'] == True:
+			substring = u'__s'
+			typeOfNode = u'jobtitle'
+		else: 
+			substring = u'__t'
+			typeOfNode = u'skill'
+		#get only rows of the same kind of substring 
+		sourceOrTargetNodes = sampleNodeDf[sampleNodeDf[u'Id'].str.contains(substring, regex=False) == True]
+
+		#print the name of the infered community level 0
+		print(u'Infered name of the community Lvl-0: {0}'.format(nodeRow[u'Infered_Community_Name_Lvl_0']))
+		print(u'---------------------------------------------------------------------------------')
+		#level 0 taxonomy
+		stringOfNodes = getPrintableStringOfGoodNodes(sourceOrTargetNodes, sampleNodeDf, nodeRow, corefDict, typeOfNode, communityColumnName=u'Community_Lvl_0')
+		#print the node and its group	
+		print(stringOfNodes)
+		#get annotator input
+		sampleNodeDf, stop = savingAnnotatorInput(sampleNodeDf, u'nodeAnnotationTaxo0', nodeIndex, nbOfLines=len(stringOfNodes.split(u'\n'))+3) 
+		#if the user asks to stop, then we stop where we were and we dumpt the data frame
+		if stop == True:
+			break
+
+		#print the name of the infered community level 1
+		print(u'Infered name of the community Lvl-1: {0}'.format(nodeRow[u'Infered_Community_Name_Lvl_1']))
+		print(u'---------------------------------------------------------------------------------')
+		#level 1 taxonomy
+		stringOfNodes = getPrintableStringOfGoodNodes(sourceOrTargetNodes, sampleNodeDf, nodeRow, corefDict, typeOfNode, communityColumnName=u'Community_Lvl_1')
+		#reorder the nodes in case the level1 sleection is exactly like the one from level 0
+		listOfNodes = stringOfNodes.split(u'\n')
+		listOfNodes.remove(u'')
+		stringOfNodes = u'\n'.join(list(set(listOfNodes))+[u''])
+		#print the node and its group	
+		print(stringOfNodes)
+		#get annotator input
+		sampleNodeDf, stop = savingAnnotatorInput(sampleNodeDf, u'nodeAnnotationTaxo1', nodeIndex, nbOfLines=len(stringOfNodes.split(u'\n'))+4, listOfAnswers=[0,1,2]) 
+		#if the user asks to stop, then we stop where we were and we dumpt the data frame
+		if stop == True:
+			break
 	return sampleNodeDf
 
 
@@ -1248,7 +1281,8 @@ def inferenceEval(sampleNodeDf, corefDict):
 	#use only the rows with source nodes (__s), since target nodes do not have a domain code
 	sourceNodes = sampleNodeDf[sampleNodeDf[u'Id'].str.contains(u'__s', regex=False) == True]
 
-	for nodeIndex, nodeRow in sourceNodes.iterrows():
+	for indexSourceNode, (nodeIndex, nodeRow) in enumerate(sourceNodes.iterrows()):
+		print('-----node Nb {0}/{1}  (index of node: {2})'.format(indexSourceNode, len(sourceNodes), nodeIndex))
 		#get the esco domain number that was infered for this particular row
 		inferedDomain = int(nodeRow[u'Infered_Community_Name_Lvl_0'].split(u'___')[0])
 
@@ -1260,8 +1294,11 @@ def inferenceEval(sampleNodeDf, corefDict):
 		#print the node and its group	
 		print(stringOfNodes)
 		#get annotator input
-		sampleNodeDf = savingAnnotatorInput(sampleNodeDf, u'nodeAnnotationInfer0', nodeIndex, nbOfLines=len(stringOfNodes.split(u'\n'))+3) 
-		
+		sampleNodeDf, stop = savingAnnotatorInput(sampleNodeDf, u'nodeAnnotationInfer0', nodeIndex, nbOfLines=len(stringOfNodes.split(u'\n'))+3) 
+		#if the user asks to stop, then we stop where we were and we dumpt the data frame
+		if stop == True:
+			break
+
 		#print the name of the infered community level 1
 		print(u'Infered name of the community Lvl-1: {0}'.format(nodeRow[u'Infered_Community_Name_Lvl_1']))
 		print(u'---------------------------------------------------------------------------------')
@@ -1273,7 +1310,10 @@ def inferenceEval(sampleNodeDf, corefDict):
 		#print the node and its group	
 		print(stringOfNodes)
 		#get annotator input
-		sampleNodeDf = savingAnnotatorInput(sampleNodeDf, u'nodeAnnotationInfer1', nodeIndex, nbOfLines=len(stringOfNodes.split(u'\n'))+3, listOfAnswers=[0,1,2]) 
+		sampleNodeDf, stop = savingAnnotatorInput(sampleNodeDf, u'nodeAnnotationInfer1', nodeIndex, nbOfLines=len(stringOfNodes.split(u'\n'))+4, listOfAnswers=[0,1,2]) 
+		#if the user asks to stop, then we stop where we were and we dumpt the data frame
+		if stop == True:
+			break
 	return sampleNodeDf
 
 
@@ -1290,7 +1330,7 @@ def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, corefDictP
 	 - 2 : neutral/doubtful evaluation
 	'''
 	import datetime
-	#get coreference dictionary
+	#get frequency dictionary
 	corefDict = utilsOs.openJsonFileAsDict(corefDictPath)
 	#get dataframe
 	sampleEdgeDf, sampleNodeDf = getDataFrameFromArgs(sampleEdgeFileInput, sampleNodeFileInput)
@@ -1300,12 +1340,12 @@ def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, corefDictP
 		#print instructions
 		print(u'3 types of annotation: 0 = negative eval, 1 = doubtful eval, 2 = positive eval\n')
 		#print instructions
-		print(u'The colored edge must be relevant. The non-colored edges are meant as an indication of what relevant nodes should look like.\n')
+		print(u'The colored edge must be useful. The non-colored edges are meant as an indication of what relevant nodes (most probably) look like.\n')
 		#launching the annotation interface (in terminal)
-		print(u'EDGE RELEVANCE EVALUATION:\n')
-		sampleEdgeDf = edgeRelevanceEval(sampleEdgeDf, corefDict)
+		print(u'EDGE USEFULNESS EVALUATION:\n')
+		sampleEdgeDf = edgeUsefulnessEval(sampleEdgeDf, corefDict)
 		#clear the instructions in the terminal before the next kind of annotation
-		utilsOs.moveUpAndLeftNLines(6, slowly=False)
+		utilsOs.moveUpAndLeftNLines(7, slowly=False)
 
 		#dump the edge dataframe
 		sampleEdgeDf.to_csv(u'{0}{1}{2}.tsv'.format(sampleEdgeFileInput.split(u'.tsv')[0], str(datetime.datetime.now()).replace(u' ', u'+'), nameOfEvaluator), sep='\t', index=False)
@@ -1319,7 +1359,7 @@ def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, corefDictP
 		print(u'NODE FILTER EVALUATION):\n')
 		sampleNodeDf = filterEval(sampleNodeDf, corefDict)
 		#clear the instructions in the terminal
-		utilsOs.moveUpAndLeftNLines(11, slowly=False)
+		utilsOs.moveUpAndLeftNLines(12, slowly=False)
 		
 		#dump the node dataframe
 		sampleNodeDf.to_csv(u'{0}{1}{2}.tsv'.format(sampleNodeFileInput.split(u'.tsv')[0], str(datetime.datetime.now()).replace(u' ', u'+'), nameOfEvaluator), sep='\t', index=False)
@@ -1334,7 +1374,7 @@ def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, corefDictP
 		print(u'NODE TAXONOMY EVALUATION:\n')
 		sampleNodeDf = taxonomyEval(sampleNodeDf, corefDict)
 		#clear the instructions in the terminal before the next kind of annotation
-		utilsOs.moveUpAndLeftNLines(6, slowly=False)
+		utilsOs.moveUpAndLeftNLines(7, slowly=False)
 
 		#dump the node dataframe
 		sampleNodeDf.to_csv(u'{0}{1}{2}.tsv'.format(sampleNodeFileInput.split(u'.tsv')[0], str(datetime.datetime.now()).replace(u' ', u'+'), nameOfEvaluator), sep='\t', index=False)
@@ -1349,7 +1389,7 @@ def humanAnnotatorInterface(sampleEdgeFileInput, sampleNodeFileInput, corefDictP
 		print(u'NODE TAXONOMIC INFERENCE EVALUATION:\n')
 		sampleNodeDf = inferenceEval(sampleNodeDf, corefDict)
 		#clear the instructions in the terminal before the next kind of annotation
-		utilsOs.moveUpAndLeftNLines(6, slowly=False)
+		utilsOs.moveUpAndLeftNLines(7, slowly=False)
 	
 		#dump the node dataframe
 		sampleNodeDf.to_csv(u'{0}{1}{2}.tsv'.format(sampleNodeFileInput.split(u'.tsv')[0], str(datetime.datetime.now()).replace(u' ', u'+'), nameOfEvaluator), sep='\t', index=False)

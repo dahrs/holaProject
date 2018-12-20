@@ -8,8 +8,8 @@ import utilsOs, utilsStats, utilsString, utilsGraph
 
 
 def mainActionsOnto(listOfActions, sampleData=False, 
-	linkedInData=u'/u/kessler/LBJ/data/2016-09-15/fr/anglophone/candidats.json',
-	environment=u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/'):
+	linkedInData=u'./linkedIn.json',
+	environment=u'./'):
 	'''
 	Launches the different actions to make, process and analyse the 
 	automatically learned ontology of jobtitles and skills.
@@ -80,7 +80,6 @@ def mainActionsOnto(listOfActions, sampleData=False,
 		escoSet = dataFormater.makeJobSetFromOnto(True, esco)
 		
 		#we load the linkedin job titles as a set
-		#linkedInPathInput = u'/u/kessler/LBJ/data/2016-09-15/fr/anglophone/candidats.json'
 		linkedInPathOutput = environment
 		#linkedInSet = dataFormater.makeJobSetFromLinkedIn(linkedInPathInput, lowercaseItAll=True, pathOutput=linkedInPathOutput)
 		linkedInPathInput = u'{0}sample7millionFunctions/listOfJobs.linkedIn'.format(environment)
@@ -190,51 +189,3 @@ def mainActionsOnto(listOfActions, sampleData=False,
 	#launch the evaluation interface
 	if 9.2 in listOfActions:
 		utilsGraph.humanAnnotatorInterface(outputEdgeFilePath, outputNodeFilePath, corefDictPath, nameOfEvaluator='David', listOfEvaluationsToBeLaunched=[0,1,2,3])
-
-
-
-"""
-testing
-"""
-if __name__ == '__main__': 
-	
-	mainActionsOnto([9.2], 
-		sampleData=False, 
-		linkedInData=u'/u/kessler/LBJ/data/2016-09-15/fr/anglophone/candidats.json',
-		environment=u'./002data/candidats/2016-09-15/fr/anglophone/')
-
-
-	##################################################################################
-	#CALLING FUNCT FROM extractor.py TO MAKE REALIABLE JOB TITLES
-	##################################################################################
-	'''
-	#make file of reliable job titles using rule-based code
-	(extractor.ruleBasedExtractor().getReliableJobTitles(u'./002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/job+pitch.tsv', lang=u'en', outputPath=u'./002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/reliableJobTitles.txt'))
-	
-	#make file of reliable job titles using Zack Soliman's code
-	extractor.jobTitleExtractorZack().getJobsZackExtracted('./002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/jobTitles.txt', outputPath='./002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/zackReliableJobs.txt')
-	''' 
-
-
-	##################################################################################
-	#CALLING FUNCT FROM stats.py TO MAKE STATS ON THE PROJECT
-	##################################################################################
-
-	'''
-	#linked in sample 100 000
-	pathToFile = u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/sample100milFunctions/jobTitles.txt'
-	lineList = utilsOs.readAllLinesFromFile(pathToFile, noNewLineChar=True, asStringNotUnicode=False)
-	distribDict = utilsStats.tokenDistribution(lineList)
-	print('LINKED IN')
-	for k, v in distribDict.items():
-		print('de longueur tok :', k, '  il y a :', v[0])
-
-	#esco distribution
-	esco = utilsOs.openJsonFileAsDict(u'./jsonJobTaxonomies/escoTree.json')
-	escoSet = dataFormater.dfsExtractor(esco, set(), lowercaseItAll=True)
-	distribDict = utilsStats.tokenDistribution(escoSet)
-	print('ESCO')
-	for k, v in distribDict.items():
-		print('de longueur tok :', k, '  il y a :', v[0])
-	'''
-
