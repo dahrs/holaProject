@@ -18,9 +18,9 @@ def mainActionsOnto(listOfActions, sampleData=False,
 	The list of actions must include only ints and floats representing
 	the function we want to call:
 		- 0 : make the language ressources
-		- 1 : make the linkedIn job sets and dicts
-			- 1.1 : make the ontologies job sets and dicts
-		- 2 : make the linkedIn job-skill edge and node list
+		- 1 : FOR SAMPLE DATA SET make the linkedIn job sets and dicts for a sample of N job titles
+			- 1.1 : FOR SAMPLE DATA SET make the ontologies job sets and dicts out of our own set and external ontologies and taxonomies ESCO, ISCO, SOC, HRM
+		- 2 : make the linkedIn job-skill edge and node list from linkedIn data set
 		- 3 : clean the graph files (edge and node lists)
 		- 4 : modularize the graph files (edge and node lists) into communities
 		- 5 : trim the graph files (edge and node lists)
@@ -83,7 +83,7 @@ def mainActionsOnto(listOfActions, sampleData=False,
 		linkedInPathOutput = environment
 		#linkedInSet = dataFormater.makeJobSetFromLinkedIn(linkedInPathInput, lowercaseItAll=True, pathOutput=linkedInPathOutput)
 		linkedInPathInput = u'{0}sample7millionFunctions/listOfJobs.linkedIn'.format(environment)
-		linkedInSet = dataFormater.loadJobSetFromFile(linkedInPathInput, n=1000000)
+		linkedInSet = dataFormater.loadJobSetFromFile(linkedInPathInput, float('inf'))
 
 		#we print the results so we can make very superficial stats
 		print('hache ', len(grandHacheSet))
@@ -101,6 +101,7 @@ def mainActionsOnto(listOfActions, sampleData=False,
 		pathInputSample = linkedInData
 		pathOutputToEdgeListFile = u'{0}edgeListWeight.tsv'.format(environment)
 		pathOutputToNodeListFile = u'{0}nodeListType.tsv'.format(environment)
+		#makes an edge and node list with the reliable profiles (having ONLY one job title)
 		dataFormater.linkedInJobSkillEdgeAndNodeList(pathInputSample, pathOutputToEdgeListFile, pathOutputToNodeListFile, lowercaseItAll=True)
 
 	##################################################################################
@@ -157,7 +158,7 @@ def mainActionsOnto(listOfActions, sampleData=False,
 	#CALLING FUNCT FROM utilsGraph.py TO TWEAK THE CONFIG.JSON AND INDEX.HTML GRAPH FILES
 	##################################################################################
 	if 7 in listOfActions:
-		pathToGraphExportEnvironment = u'./testsGephi/gephiExportSigma0/springLayoutAndModularityPythonLouvain/wholeReCleanedModularizedMoreTrimmedInfered/network/'
+		pathToGraphExportEnvironment = u'./testsGephi/gephiExportSigma0/springLayoutAndModularityPythonLouvain/wholeReCleanedModularizedMoreTrimmedInfered3Levels/level2/network/'
 		utilsGraph.modifyConfigAndIndexFiles(pathToGraphExportEnvironment)
 
 	##################################################################################
@@ -189,3 +190,6 @@ def mainActionsOnto(listOfActions, sampleData=False,
 	#launch the evaluation interface
 	if 9.2 in listOfActions:
 		utilsGraph.humanAnnotatorInterface(outputEdgeFilePath, outputNodeFilePath, corefDictPath, nameOfEvaluator='David', listOfEvaluationsToBeLaunched=[0,1,2,3])
+
+
+mainActionsOnto([7])

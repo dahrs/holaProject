@@ -200,6 +200,14 @@ def dumpRawLines(listOfRawLines, filePath, addNewline=True, rewrite=True):
 	return
 
 
+def appendOneLineToExistingFile(line, filePath, addNewline=True):
+	'''opens a file and appends a line'''
+	with codecs.open(filePath, 'a', encoding='utf8') as openFile:
+		if addNewline == True:
+			line = u'{0}\n'.format(line)
+		openFile.write(line)
+
+
 def dumpDictToJsonFile(aDict, pathOutputFile='./dump.json', overwrite=False):
 	'''
 	save dict content in json file

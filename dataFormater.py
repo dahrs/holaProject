@@ -189,7 +189,7 @@ def dfsExtractor(tree, setNodes, lowercaseItAll=False):
 
 def makeSampleFileHavingNJobTitles(pathInput, pathOutput, n=1000000, addJobDescription=False):
 	'''
-	takes the real linkedIn data and makes a samble containing how
+	takes the real linkedIn data and makes a sample containing how
 	many profiles necesary to achieve N functions (jobtitles)
 	'''
 	dictJobTitlesData = {}
@@ -284,12 +284,10 @@ def linkedInJobSkillEdgeAndNodeList(pathEdgeFileInput, pathEdgeFileOutput, pathN
 		- skillNode(target)	
 		- weight(coreference) 
 		- nbOfTimesJobTitleAppeared
-	
-	[in a further function we might want to add keywords (non stop-words most common tokens for each jobtitle)]
 	'''
 	pathTempFile = u'./temp.txt'
 	
-	#we populate the temp file
+	#we populate the temp file with reliable profiles (having ONLY one job title)
 	pathCorefDict = utilsGraph.edgeListTemp(pathEdgeFileInput, pathTempFile, pathEdgeFileOutput, lowercaseItAll)
 	#we populate the final output file
 	utilsGraph.edgeListDump(pathTempFile, pathEdgeFileOutput, pathCorefDict)

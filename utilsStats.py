@@ -18,7 +18,7 @@ def analyseNodeListStrDistance(nodeListPath, outputPath=None):
 	from utilsGraph import getDataFrameFromArgs
 	import multiprocessing as mp
 
-	pool = mp.Pool(processes=4) 
+	pool = mp.Pool(processes=7) 
 	nodeSimilarsDict = {1:{}, 2:{}, 3:{}}
 	nodeSetJobTitles = set()
 	nodeSetSkills = set()
@@ -53,8 +53,10 @@ def analyseNodeListStrDistance(nodeListPath, outputPath=None):
 		return w
 	#prepare the objects containing the results
 	dictResults = {1:{}, 2:{}, 3:{}}
-	for dictToBeAdded in tqdm(jobtitleResults+skillResults):
+	for index, dictToBeAdded in enumerate(jobtitleResults+skillResults):
 		dictResults = merge_two_dicts(dictResults, dictToBeAdded.get())
+		if index % 50 == 0:
+			print(index, '/', len(jobtitleResults+skillResults))
 
 	#dump into a json file
 	if outputPath != None:
@@ -162,13 +164,14 @@ def dataframesIntersection(tsvFile1Path, tsvFile2Path, listOfIntersectingColumnN
 	if listOfIntersectingColumnNames is str:
 		listOfIntersectingColumnNames = [listOfIntersectingColumnNames]
 	#lowercase the values in the intersectable columns before the intersection
-	for columnName in listOfIntersectingColumnNames:
-		df1[columnName] = df1[columnName].str.lower()		
-		df2[columnName] = df2[columnName].str.lower()
+	if lowerCase == True:
+		for columnName in listOfIntersectingColumnNames:
+			df1[columnName] = df1[columnName].str.lower()		
+			df2[columnName] = df2[columnName].str.lower()
 	#drop the possible doubles we might have created after lowercasing
-	df2[u'Id'] = df2[u'Id'].str.lower()#############
-	df1 = df1.drop_duplicates()
-	df2 = df2.drop_duplicates()
+	for columnName in listOfIntersectingColumnNames:
+		df1 = df1.drop_duplicates(subset=columnName)
+		df2 = df2.drop_duplicates(subset=columnName)
 	#make the intersection
 	intersectDf = pd.merge(df1, df2, how='inner', on=listOfIntersectingColumnNames)
 	#dump
@@ -232,7 +235,7 @@ def plotDictAsBarChart(dictOfData, xLabel, yLabel, barWidth=0.85, rgbColor=[0.1,
 				label = u'%s. %s' %(str(indexKey), dataKey),
 				color=(rgbColor[redIndex], rgbColor[greenIndex], rgbColor[blueIndex]),
 				align='center')	
-		#horizontal bars
+		#horizontal barsclear
 		else:
 			plt.barh(indexKey, valueOfDict, barWidth,
 				label = u'%s. %s' %(str(indexKey), dataKey),
@@ -410,3 +413,9 @@ def vennDiagram(listDataDict={'Set1': [], 'Set2': [], 'Set3': [], 'Se t1': [], '
 	'''
 	plt.show()
 	return None
+
+nodeListPath = u'./002data/candidats/2016-09-15/fr/anglophone/nodeListType.tsv'
+outputPath = u'./oldOnes/tempDistNodesBeforeFilter.json'
+#analyseNodeListStrDistance(nodeListPath, outputPath)
+
+analyseNodeListStrDistance(u'./002data/candidats/2016-09-15/fr/anglophone/nodeListType.tsv', outputPath=u'/002data/candidats/2016-09-15/fr/anglophone/oldOnes/beforeCleanEditDist.json')

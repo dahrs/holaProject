@@ -44,6 +44,7 @@ def edgeListTemp(pathInput, pathTempFile, pathOutput, lowercaseItAll=False):
 	takes the linkedin data and makes a temporary file that is an edge list of (columns):
 		- jobNode(source)
 		- skillNode(target)
+	It only keeps the data from reliable profiles (having one job title)
 	It's only a temporary file because we still need to erase doubles, 
 	to make the weight (count frequency of skills) 
 
@@ -845,15 +846,22 @@ def ontoQA(edgeFilePath, nodeFilePath, verbose=True):
 	dataDict['C'] = len(classes)
 	#get P', non-inheritance relationships (relation types) deducing the inexisting schema
 	if 'esco' in edgeFilePath.lower():
-		escoRelationships = ['hasSkill', 'conceptType', 'conceptUri', 'broaderUri', 'iscoGroup', 'preferredLabel', 'alternativeLabel', 'description', 'occupationUri', 'relationType', 'skillType', 'skillUri', 'reuseLevel']
-		dataDict['P'] = len(escoRelationships) #has 13 relationships
+		escoRelationships = ['hasSkill', 'conceptType', 'conceptUri', 'iscoGroup', 'preferredLabel', 'alternativeLabel', 'description', 'occupationUri', 'relationType', 'skillType', 'skillUri', 'reuseLevel']
+		dataDict['P'] = len(escoRelationships) #has 12 relationships
+	if 'rome' in edgeFilePath.lower():
+		romeRelationships = ['ogr code(skill id)', 'name(skill label)', 'rome profession card code(job title id)', 'rome profession card name(job title label)', 'rome profession short name', 'professional area name', 'main professional area name', 'ref type code', 'ref type name', 'item table name', 'ref table name', 'section position', 'item position', 'prioritization code', 'rome prof card code dest', 'rome profession name dest', 'change type code', 'change type name', 'activity name', 'activity type name', 'activity item type code', 'activity item type name', 'status code', 'rome profession section name', 'skill type name', 'working env name', 'working env section name', 'profession sheet code', 'node code', 'node name', 'node type name']
+		dataDict['P'] = len((set(romeRelationships))) #has 31 relationships
+		#it also has 4 relationships that are empty in the ontology but that are defined in the schema: 'group header code', 'print activity name', 'group header name', 'rome profession name'
 	else:
 		ourRelationships = ['hasSkill', 'conceptType', 'conceptUri', 'broaderUri', 'communityGroupId', 'preferredLabel', 'occupationUri', 'relationType', 'skillUri', 'reuseLevel']#formal ontology form
-		dataDict['P'] = len(ourRelationships) 
+		dataDict['P'] = len(ourRelationships) #has  10 relationships
 	#get P' (P prime), non-inheritance relations (instances)
 	dataDict["P'"] = len(edgeDf)
 	#get H, inheritance relationships
-	dataDict['H'] = 1	 #isSubclassOf or broaderUri(in ESCO)
+	if 'rome' not in edgeFilePath.lower():
+		dataDict['H'] = 1	 #isSubclassOf or broaderUri(in ESCO)
+	else:
+		dataDict['H'] = 13	#rome has 13:  'maj riasec code(skill taxonomy)', 'min riasec code(skill taxonomy)', 'professional area code', 'main professional area code', 'ref category code', 'subsection code', 'section code', 'activity type code', 'skill type code',  'working env section code', 'parent code', 'related item ogr code', 'node type code'
 	#get Hs, number of subclasses
 	dataDict['Hs'] = len(subClasses)	
 	#get att, number of attributes
@@ -884,7 +892,11 @@ def ontoQA(edgeFilePath, nodeFilePath, verbose=True):
 
 	#calculating the ONTOQA METRICS:
 	#RR - relationship richness
-	metricsDict['RR'] = float(dataDict['P']) / float(dataDict['H']+dataDict['P'])
+	if 'rome' not in edgeFilePath.lower():
+		metricsDict['RR'] = float(dataDict['P']) / float(dataDict['H']+dataDict['P'])
+	#rome has 4 relationships unused in the ontology but defined in the schema
+	else:
+		metricsDict['RR'] = float(dataDict['P']) / float(dataDict['H']+dataDict['P']+4)
 	#IR - inheritance richness
 	metricsDict['IR'] = float(dataDict['Hs']) / float(dataDict['C'])
 	#AR - attribute richness
@@ -1410,7 +1422,7 @@ def modifyConfigAndIndexFiles(pathToTheExportationEnvironment):
 	if pathToTheExportationEnvironment[-1] != u'/':
 		pathToTheExportationEnvironment = u'{0}/'.format(pathToTheExportationEnvironment)
 	#copying config.json file
-	configContent = {"type": "network","version": "1.0","data": "data.json","logo": {"file": "","link": "","text": ""},"text": {"more": "","intro": "","title": ""},"legend": {"edgeLabel": "","colorLabel": "","nodeLabel": ""},"features": {"search": True,"groupSelectorAttribute": True,"hoverBehavior": "default"},"informationPanel": {"groupByEdgeDirection": True,"imageAttribute": False},"sigma": {"drawingProperties": {"defaultEdgeType": "curve","defaultHoverLabelBGColor": "#002147","defaultLabelBGColor": "#ddd","activeFontStyle": "bold","defaultLabelColor": "#000","labelThreshold": 999,"defaultLabelHoverColor": "#fff","fontStyle": "bold","hoverFontStyle": "bold","defaultLabelSize": 14},"graphProperties": {"maxEdgeSize": 2,"minEdgeSize": 2,"minNodeSize": 0.25,"maxNodeSize": 2.5},"mouseProperties": {"maxRatio": 20,"minRatio": 0.75}}}
+	configContent = {"type": "network","version": "1.0","data": "data.json","logo": {"file": "","link": "","text": ""},"text": {"title": "HOLA: Human-ressource Ontology Learned Automatically","intro": "The job title nodes are represented with big dots and skill nodes are represented with small dots. The broad communities are represented by color and a broad label based on ESCO has been infered.", "more": ""},"legend": {"edgeLabel": "","colorLabel": "","nodeLabel": ""},"features": {"search": True,"groupSelectorAttribute": True,"hoverBehavior": "default"},"informationPanel": {"groupByEdgeDirection": True,"imageAttribute": False},"sigma": {"drawingProperties": {"defaultEdgeType": "curve","defaultHoverLabelBGColor": "#002147","defaultLabelBGColor": "#ddd","activeFontStyle": "bold","defaultLabelColor": "#000","labelThreshold": 999,"defaultLabelHoverColor": "#fff","fontStyle": "bold","hoverFontStyle": "bold","defaultLabelSize": 14},"graphProperties": {"maxEdgeSize": 2,"minEdgeSize": 2,"minNodeSize": 0.25,"maxNodeSize": 2.5},"mouseProperties": {"maxRatio": 20,"minRatio": 0.75}}}
 	pathConfigJson = u'{0}config.json'.format(pathToTheExportationEnvironment)
 	if utilsOs.theFileExists(pathConfigJson) == True:
 		os.remove(pathConfigJson)
@@ -1459,6 +1471,5 @@ def modifyConfigAndIndexFiles(pathToTheExportationEnvironment):
 		fileLines = styleFile.readlines()
 		fileLines = fileLines + [u'''#UdeM {\nwidth: 198px;\nheight: 81px;\nbackground-image: url('../images/udem.png');\nbackground-repeat: no-repeat;\ndisplay:inline-block;\n}\n\n#UdeM span {\n\tdisplay:none;\n}\n\n#RALI {\nwidth: 318px;\nheight: 75px;\nbackground-image: url('../images/rali.png');\nbackground-repeat: no-repeat;\ndisplay:inline-block;\nmargin-right:10px;\n\n}\n\n#RALI span {\n\tdisplay:none;\n}\n''']
 	utilsOs.dumpRawLines(fileLines, u'{0}css/style.css'.format(pathToTheExportationEnvironment), addNewline=False, rewrite=True)
-
 
 
