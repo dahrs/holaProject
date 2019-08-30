@@ -8,8 +8,8 @@ import utilsOs, utilsStats, utilsString, utilsGraph
 
 
 def mainActionsOnto(listOfActions, sampleData=False, 
-	linkedInData=u'./linkedIn.json',
-	environment=u'./'):
+	linkedInData=u'/u/kessler/LBJ/data/2016-09-15/fr/anglophone/candidats.json',
+	environment=u'/u/alfonsda/Documents/DOCTORAT_TAL/004projetOntologie/002data/candidats/2016-09-15/fr/anglophone/'):
 	'''
 	Launches the different actions to make, process and analyse the 
 	automatically learned ontology of jobtitles and skills.
